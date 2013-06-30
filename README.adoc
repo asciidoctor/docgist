@@ -1,0 +1,10 @@
+== DocGist ==
+
+DocGist is a tool that renders AsciiDoc documents fetched from public GitHub gists.
+The rendering is performed using the https://github.com/asciidoctor/asciidoctor.js[asciidoctor.js] library.
+
+The single addition to common AsciiDoc syntax is that links to image files will render the image and not the link, in case the link and the link text are identical.
+This happens in a post-processing step after AsciiDoctor has been executed.
+
+See it live at http://docgist.nawroth.se/
+ 
