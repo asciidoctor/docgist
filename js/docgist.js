@@ -40,7 +40,7 @@ $( document ).ready( function()
       }
       else
       {
-        errorMessage( gist, 'The gist id is malformed.' );
+        errorMessage( 'The gist id is malformed.', gist );
       }
     }
   } );
@@ -66,7 +66,16 @@ function renderPage()
       var doc = file.content;
       $( '#gist-link' ).attr( 'href', data.html_url );
       $content.empty();
-      var generatedHtml = Opal.Asciidoctor.$render( doc, ASCIIDOCTOR_OPTIONS );
+      var generatedHtml = undefined;
+      try
+      {
+        var generatedHtml = Opal.Asciidoctor.$render( doc, ASCIIDOCTOR_OPTIONS );
+      }
+      catch ( e )
+      {
+        errorMessage( e.name + ':' + '<p>' + e.message + '</p>' );
+        return;
+      }
       $content.html( generatedHtml );
       // transform image links to images
       $( 'a[href]', $content ).each( function()
@@ -86,13 +95,22 @@ function renderPage()
     'dataType' : 'json',
     'error' : function( xhr, status, error )
     {
-      errorMessage( gist, error );
+      errorMessage( error.gist );
     }
   } );
 }
 
-function errorMessage( gist, message )
+function errorMessage( message, gist )
 {
-  $content.html( '<div class="alert alert-block alert-error"><h4>Error</h4>Somethng went wrong fetching the gist "'
-      + gist + '":<p>' + message + '</p></div>' );
+  var messageText;
+  if ( gist )
+  {
+    messageText = 'Somethng went wrong fetching the gist "' + gist + '":<p>' + message + '</p>';
+  }
+  else
+  {
+    messageText = '<p>' + message + '</p>';
+  }
+
+  $content.html( '<div class="alert alert-block alert-error"><h4>Error</h4>' + messageText + '</div>' );
 }
