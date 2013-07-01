@@ -1,15 +1,15 @@
 <html>
 
-<script src="js/opal.js"></script>
-<script src="js/asciidoctor.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-<script src="js/jquery.ba-hashchange.min.js"></script>
-<script src="js/docgist.js"></script>
 
 <!-- Bootstrap -->
 <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
 <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
 <link href="http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet">
+
+<script src="js/opal.js"></script>
+<script src="js/asciidoctor.js"></script>
+<script src="js/docgist.js"></script>
 
 <style>
 #content {
@@ -17,24 +17,24 @@
   max-width: 60em;
 }
 #gist-id {
-  width: 13em;
+  width: 20em;
 }
 </style>
 
 <body>
   <div class="navbar">
     <div class="navbar-inner">
-      <a class="brand" href="http://docgist.nawroth.se/">
+      <a class="brand" href="./">
         <i class="icon-edit-sign"></i> DocGist
       </a>
-      <a class="btn btn-small btn-success" id="gist-link" href="" target="_blank" style="">
-        <i class="icon-github"></i> Page Source @ GitHub
+      <a class="btn btn-success" id="gist-link" href="" target="_blank" style="">
+        <i class="icon-github"></i> Page Source
       </a>
-      <a class="btn btn-small" href="https://github.com/nawroth/docgist" target="_blank">
+      <a class="btn" href="https://github.com/nawroth/docgist" target="_blank">
         <i class="icon-code-fork"></i> Project Home
       </a>
       <form class="navbar-form pull-right">
-        <input type="text" class="span2" id="gist-id" placeholder="Gist id">
+        <input type="text" class="span2" id="gist-id" placeholder="Gist URL or id">
       </form>
     </div>
   </div>

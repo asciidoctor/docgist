@@ -1,44 +1,70 @@
+'use strict';
+
 var ASCIIDOCTOR_OPTIONS = Opal.hash2( [ 'attributes' ], {
   'attributes' : [ 'notitle!' ]
 } );
-var DEFAULT_HASH = '#5897167';
+var DEFAULT_GIST = '5897167';
 var $IMG = $( '<img>' );
+var VALID_GIST = /^[0-9a-f]{5,32}$/;
 
-$( window ).hashchange( renderPage );
+var $content = undefined;
+var $gistId = undefined;
 
 $( document ).ready( function()
 {
+  $content = $( '#content' );
+  $gistId = $( '#gist-id' );
+
   renderPage();
-  $( '#gist-id' ).keydown( function( event )
+  $gistId.keydown( function( event )
   {
     var $target = $( event.target );
     if ( event.which === 13 || event.which === 9 )
     {
       event.preventDefault();
       $target.blur();
-      window.history.pushState( {}, '', '#' + $.trim( $target.val() ) );
-      renderPage();
+      var gist = $.trim( $target.val() );
+      if ( gist.indexOf( '/' ) !== -1 )
+      {
+        var pos = gist.lastIndexOf( '/' );
+        gist = gist.substr( pos + 1 );
+      }
+      if ( gist.charAt( 0 ) === '?' )
+      {
+        // for the case a DocGist URL was pasted by mistake!
+        gist = gist.substr( 1 );
+      }
+      if ( VALID_GIST.test( gist ) )
+      {
+        window.location.assign( '?' + gist );
+      }
+      else
+      {
+        errorMessage( gist, 'The gist id is malformed.' );
+      }
     }
   } );
 } );
 
 function renderPage()
 {
-  if ( window.location.hash.length < 2 )
+  var gist = window.location.search;
+  if ( gist.length < 2 )
   {
-    window.history.pushState( {}, "", DEFAULT_HASH );
+    gist = DEFAULT_GIST;
   }
-  var gist = window.location.hash.substr( 1 );
-  // TODO: filter out anchor references from gist ids (which are hexadecimal)
+  else
+  {
+    gist = gist.substr( 1 );
+  }
   var url = 'https://api.github.com/gists/' + gist;
   $.ajax( {
-    url : url,
-    success : function( data )
+    'url' : url,
+    'success' : function( data )
     {
       var file = data.files[Object.keys( data.files )[0]];
       var doc = file.content;
       $( '#gist-link' ).attr( 'href', data.html_url );
-      $content = $( '#content' );
       $content.empty();
       var generatedHtml = Opal.Asciidoctor.$render( doc, ASCIIDOCTOR_OPTIONS );
       $content.html( generatedHtml );
@@ -55,7 +81,18 @@ function renderPage()
           }
         }
       } );
+      $gistId.val( '' );
     },
-    dataType : "json"
+    'dataType' : 'json',
+    'error' : function( xhr, status, error )
+    {
+      errorMessage( gist, error );
+    }
   } );
+}
+
+function errorMessage( gist, message )
+{
+  $content.html( '<div class="alert alert-block alert-error"><h4>Error</h4>Somethng went wrong fetching the gist "'
+      + gist + '":<p>' + message + '</p></div>' );
 }
