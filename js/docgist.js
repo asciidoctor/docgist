@@ -58,6 +58,11 @@ function renderPage()
   {
     gist = gist.substr( 1 );
   }
+  if ( !VALID_GIST.test( gist ) )
+  {
+    errorMessage( 'The gist id is malformed.', gist );
+    return;
+  }
   var url = 'https://api.github.com/gists/' + gist;
   $.ajax( {
     'url' : url,
@@ -96,7 +101,7 @@ function renderPage()
     'dataType' : 'json',
     'error' : function( xhr, status, error )
     {
-      errorMessage( error.gist );
+      errorMessage( error, gist );
     }
   } );
 }
