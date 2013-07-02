@@ -16,6 +16,7 @@ $( document ).ready( function()
   $gistId = $( '#gist-id' );
 
   renderPage();
+
   $gistId.keydown( function( event )
   {
     var $target = $( event.target );
@@ -69,7 +70,7 @@ function renderPage()
       var generatedHtml = undefined;
       try
       {
-        var generatedHtml = Opal.Asciidoctor.$render( doc, ASCIIDOCTOR_OPTIONS );
+        generatedHtml = Opal.Asciidoctor.$render( doc, ASCIIDOCTOR_OPTIONS );
       }
       catch ( e )
       {
