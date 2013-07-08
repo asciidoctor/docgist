@@ -1,0 +1,24 @@
+= DocGist Example =
+
+DocGist is a tool that renders AsciiDoc documents fetched from GitHub gists.
+The rendering is performed in the browser using the https://github.com/asciidoctor/asciidoctor.js[asciidoctor.js] library.
+
+== How To Use ==
+
+* Create/locate a gist on GitHub.
+** Write text using AsciiDoc syntax in it.
+** Save the gist.
+* Enter the URL (or id) of the gist in the form on top of this page and hit Enter on your keyboard.
+* The page is rendered.
+* Share the URL with others so they can read the page.
+
+== Random ==
+
+You can view the source Gist of this page by clicking on the green button in the navbar.
+
+How about some UML? This image is included by using `image::http://yuml.me/c9ce39b0.png[]`.
+
+image::http://yuml.me/c9ce39b0.png[]
+
+Note that inline images are not supported yet.
+
