@@ -6,7 +6,7 @@ function DocGist( $ )
     'attributes' : [ 'notitle!' ]
   } );
   var VALID_GIST = /^[0-9a-f]{5,32}$/;
-  //var DEFAULT_SOURCE = '-example';
+  var DROPBOX_BASE_URL = 'https://dl.dropboxusercontent.com/u/';
   var DEFAULT_SOURCE = '5897167';
 
   var LOCAL_DOCUMENT_SOURCE_ROOT = 'https://github.com/nawroth/docgist/tree/master/gists/';
@@ -21,6 +21,7 @@ function DocGist( $ )
     $gistId = $( '#gist-id' );
 
     renderPage();
+    share();
     $gistId.keydown( readSourceId );
   } );
 
@@ -36,10 +37,21 @@ function DocGist( $ )
       id = id.substr( 1 );
     }
     var fetcher = fetchGithubGist;
-    if ( id.length > 1 && id.charAt( 0 ) === '-' )
+    if ( id.length > 8 && id.substr( 0, 8 ) === 'dropbox-' )
     {
-      fetcher = fetchLocalDocument;
-      id = id.substr( 1 );
+      fetcher = fetchDropboxFile;
+      id = id.substr( 8 );
+    }
+    else if ( !VALID_GIST.test( id ) )
+    {
+      if ( id.indexOf( '%3A%2F%2F' ) !== -1 )
+      {
+        fetcher = fetchAnyUrl;
+      }
+      else
+      {
+        fetcher = fetchLocalSnippet;
+      }
     }
     fetcher( id, renderContent, function( message )
     {
@@ -91,7 +103,41 @@ function DocGist( $ )
     } );
   }
 
-  function fetchLocalDocument( id, success, error )
+  function fetchDropboxFile( id, success, error )
+  {
+    var url = DROPBOX_BASE_URL + decodeURIComponent( id );
+    $.ajax( {
+      'url' : url,
+      'success' : function( data )
+      {
+        success( data, url );
+      },
+      'dataType' : 'text',
+      'error' : function( xhr, status, errorMessage )
+      {
+        error( errorMessage );
+      }
+    } );
+  }
+
+  function fetchAnyUrl( id, success, error )
+  {
+    var url = decodeURIComponent( id );
+    $.ajax( {
+      'url' : url,
+      'success' : function( data )
+      {
+        success( data, url );
+      },
+      'dataType' : 'text',
+      'error' : function( xhr, status, errorMessage )
+      {
+        error( errorMessage );
+      }
+    } );
+  }
+
+  function fetchLocalSnippet( id, success, error )
   {
     var url = './gists/' + id + '.adoc';
     $.ajax( {
@@ -119,16 +165,41 @@ function DocGist( $ )
       var gist = $.trim( $target.val() );
       if ( gist.indexOf( '/' ) !== -1 )
       {
-        var pos = gist.lastIndexOf( '/' );
-        gist = gist.substr( pos + 1 );
+        var baseLen = DROPBOX_BASE_URL.length;
+        if ( gist.length > baseLen && gist.substr( 0, baseLen ) === DROPBOX_BASE_URL )
+        {
+          gist = 'dropbox-' + encodeURIComponent( gist.substr( baseLen ) );
+        }
+        else
+        {
+          var pos = gist.lastIndexOf( '/' );
+          var endOfUrl = gist.substr( pos + 1 );
+          if ( gist.indexOf( '://' ) !== -1 && !VALID_GIST.test( endOfUrl ) )
+          {
+            gist = encodeURIComponent( gist );
+          }
+          else
+          {
+            gist = endOfUrl;
+          }
+        }
       }
       if ( gist.charAt( 0 ) === '?' )
       {
-        // for the case a DocGist URL was pasted by mistake!
+        // in case a DocGist URL was pasted by mistake!
         gist = gist.substr( 1 );
       }
       window.location.assign( '?' + gist );
     }
+  }
+
+  function share()
+  {
+    var title = document.title;
+    var href = encodeURIComponent( window.location.href );
+    $( '#twitter-share' ).attr( 'href',
+        'https://twitter.com/intent/tweet?text=' + encodeURIComponent( 'Check this out: ' + title ) + '&url=' + href );
+    $( '#facebook-share' ).attr( 'href', 'http://www.facebook.com/share.php?u=' + href );
   }
 
   function errorMessage( message, gist )

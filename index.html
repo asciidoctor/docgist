@@ -1,6 +1,6 @@
 <html>
 
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 
 <!-- Bootstrap -->
 <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
@@ -16,8 +16,10 @@
   margin: 1em auto;
   max-width: 60em;
 }
+
 #gist-id {
   width: 20em;
+  height: auto;
 }
 </style>
 
@@ -33,8 +35,26 @@
       <a class="btn" href="https://github.com/nawroth/docgist" target="_blank">
         <i class="icon-code-fork"></i> Project Home
       </a>
+      <div class="btn-group">
+        <a class="btn dropdown-toggle" data-toggle="dropdown" data-target="#">
+          <i class="icon-share-alt"></i> Share
+          <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+          <li><a id="twitter-share" href="" target="_blank" data-toggle="tooltip" title="Tweet">
+              <i class="icon-twitter-sign"></i> Twitter
+            </a></li>
+          <li><a id="facebook-share" href="" target="_blank" data-toggle="tooltip" title="Share link on Facebook">
+              <i class="icon-facebook-sign"></i> Facebook
+            </a></li>
+      </div>
       <form class="navbar-form pull-right">
-        <input type="text" class="span2" id="gist-id" placeholder="Gist URL or id">
+        <div class="input-prepend">
+          <span class="add-on">
+            <i class="icon-github"></i> <i class="icon-dropbox"></i>
+          </span>
+          <input type="text" class="span2" id="gist-id" placeholder="GitHub Gist / Dropbox URL">
+        </div>
       </form>
     </div>
   </div>

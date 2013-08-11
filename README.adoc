@@ -7,4 +7,9 @@ The single addition to common AsciiDoc syntax is that links to image files will 
 This happens in a post-processing step after AsciiDoctor has been executed.
 
 See it live at http://docgist.nawroth.se/
- 
+
+The original idea for and some code of this project came from here: https://github.com/neo4j-contrib/graphgist -- where some additional functionality around the Cypher query language is included as well.
+
+The code is licensensed under the Apache License, Version 2.0.
+
+
