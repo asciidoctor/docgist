@@ -75,6 +75,10 @@ function DocGist( $ )
     }
     $content.html( generatedHtml );
     $gistId.val( '' );
+    $( 'pre > code' ).each( function( i, e )
+    {
+      hljs.highlightBlock( e );
+    } );
   }
 
   function fetchGithubGist( gist, success, error )
