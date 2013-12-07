@@ -62,6 +62,7 @@ function DocGist( $ )
     $( '#twitter-share' ).attr( 'href',
         'https://twitter.com/intent/tweet?text=' + encodeURIComponent( 'Check this out: ' + title ) + '&url=' + href );
     $( '#facebook-share' ).attr( 'href', 'http://www.facebook.com/share.php?u=' + href );
+    $( '#google-plus-share' ).attr( 'href', 'https://plus.google.com/share?url=' + href );
   }
 
   function errorMessage( message, gist )
