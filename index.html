@@ -3,86 +3,105 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 
 <!-- Bootstrap -->
-<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
-<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
-<link href="http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet">
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
 
 <script src="js/opal.js"></script>
 <script src="js/asciidoctor.js"></script>
+<script src="js/asciidoctor_extensions.js"></script>
 <script src="js/base64.js"></script>
 <script src="js/gist.js"></script>
 <script src="js/docgist.js"></script>
 
 <link href="style/asciidoctor.css" rel="stylesheet">
 
-<link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/7.4/styles/github.min.css" rel="stylesheet">
-<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/7.4/highlight.min.js"></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.0/styles/github.min.css" rel="stylesheet">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.0/highlight.min.js"></script>
 
 <style>
-#content {
-  margin: 1em auto;
-  max-width: 60em;
-}
+    #content {
+        margin: 1em auto;
+        max-width: 60em;
+    }
 
-#gist-id {
-  width: 20em;
-  height: auto;
-}
+    #gist-id {
+        width: 20em;
+        height: auto;
+    }
 
-.navbar a {
-  text-decoration: none;
-}
+    .navbar a {
+        text-decoration: none;
+    }
 
-.navbar * {
-  box-sizing: content-box;
-}
+    .navbar * {
+        box-sizing: content-box;
+    }
+
+    div.navbar-header {
+        height: 52px;
+    }
+
+    #nav-buttons {
+        margin: 8px 0;
+        display: inline-block;
+    }
 </style>
 
 <body>
-  <div class="navbar">
-    <div class="navbar-inner">
-      <a class="brand" href="./">
-        <i class="icon-edit-sign"></i> DocGist
-      </a>
-      <a class="btn btn-success" id="gist-link" href="" target="_blank" style="">
-        <i class="icon-github"></i> Page Source
-      </a>
-      <a class="btn" href="https://github.com/nawroth/docgist" target="_blank">
-        <i class="icon-code-fork"></i> Project Home
-      </a>
-      <div class="btn-group">
-        <a class="btn dropdown-toggle" data-toggle="dropdown" data-target="#">
-          <i class="icon-share-alt"></i> Share
-          <span class="caret"></span>
+<div class="navbar navbar-default">
+    <div class="navbar-header">
+        <a class="navbar-brand" href="./">
+            <i class="fa fa-pencil-square"></i> DocGist
         </a>
-        <ul class="dropdown-menu">
-          <li><a id="twitter-share" href="" target="_blank" data-toggle="tooltip" title="Tweet">
-              <i class="icon-twitter-sign"></i> Twitter
-            </a></li>
-          <li><a id="facebook-share" href="" target="_blank" data-toggle="tooltip" title="Share link on Facebook">
-              <i class="icon-facebook-sign"></i> Facebook
-            </a></li>
-          <li><a id="google-plus-share" href="" target="_blank" data-toggle="tooltip" title="Share link on Google+">
-              <i class="icon-google-plus-sign"></i> Google+
-            </a></li>
-        </ul>
-      </div>
-      <form class="navbar-form pull-right">
-        <div class="input-prepend">
-          <span class="add-on">
-            <i class="icon-github"></i> <i class="icon-dropbox"></i>
-          </span>
-          <input type="text" class="span2" id="gist-id" placeholder="GitHub Gist/File / Dropbox URL">
-        </div>
-      </form>
     </div>
-  </div>
-  <div id="content">
+    <div>
+        <span id="nav-buttons">
+            <a class="btn btn-success" id="gist-link" href="" target="_blank" style="">
+                <i class="fa fa-github"></i> Page Source
+            </a>
+            <a class="btn btn-default" href="https://github.com/nawroth/docgist" target="_blank">
+                <i class="fa fa-code-fork"></i> Project Home
+            </a>
+
+            <div class="btn-group">
+                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-target="#">
+                    <i class="fa fa-share-alt"></i> Share
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a id="twitter-share" href="" target="_blank" data-toggle="tooltip" title="Tweet">
+                        <i class="fa fa-fw fa-twitter-square"></i> Twitter
+                    </a></li>
+                    <li><a id="facebook-share" href="" target="_blank" data-toggle="tooltip"
+                           title="Share link on Facebook">
+                        <i class="fa fa-fw fa-facebook-square"></i> Facebook
+                    </a></li>
+                    <li><a id="google-plus-share" href="" target="_blank" data-toggle="tooltip"
+                           title="Share link on Google+">
+                        <i class="fa fa-fw fa-google-plus-square"></i> Google+
+                    </a></li>
+                </ul>
+            </div>
+        </span>
+
+        <form class="navbar-form pull-right">
+            <div class="input-group">
+          <span class="input-group-addon">
+            <i class="fa fa-github"></i> <i class="fa fa-dropbox"></i>
+          </span>
+                <input type="text" class="span2 form-control" id="gist-id"
+                       placeholder="GitHub Gist/File / Dropbox URL">
+            </div>
+        </form>
+    </div>
+</div>
+<div id="content">
     <img alt="loading" src="images/loading.gif" style="margin: 5em;">
-  </div>
+</div>
 </body>
 
 </html>
