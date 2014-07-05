@@ -1,9 +1,9 @@
 'use strict';
 
 function DocGist($) {
-    var DEFAULT_SOURCE = '5897167';
+    var DEFAULT_SOURCE = 'github-asciidoctor%2Fdocgist%2F%2Fgists%2Fexample.adoc';
     var ASCIIDOCTOR_OPTIONS = Opal.hash2([ 'attributes' ], {
-        'attributes': [ 'notitle!' ]
+        'attributes': [ 'showtitle' ]
     });
 
     var $content = undefined;

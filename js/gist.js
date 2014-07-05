@@ -220,7 +220,7 @@ function Gist($, $content) {
     function errorMessage(message, gist) {
         var messageText;
         if (gist) {
-            messageText = 'Something went wrong fetching the GraphGist "' + gist + '":<p>' + message + '</p>';
+            messageText = 'Something went wrong fetching the DocGist "' + gist + '":<p>' + message + '</p>';
         }
         else {
             messageText = '<p>' + message + '</p>';
