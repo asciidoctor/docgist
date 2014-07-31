@@ -3,7 +3,7 @@
 function DocGist($) {
     var DEFAULT_SOURCE = 'github-asciidoctor%2Fdocgist%2F%2Fgists%2Fexample.adoc';
     var ASCIIDOCTOR_OPTIONS = Opal.hash2([ 'attributes' ], {
-        'attributes': [ 'showtitle', 'icons=font' ]
+        'attributes': [ 'showtitle', 'icons=font', 'sectanchors', 'sectlinks' ]
     });
 
     var $content = undefined;
