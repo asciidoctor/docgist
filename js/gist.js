@@ -18,6 +18,8 @@ function Gist($, $content) {
     var DROPBOX_PUBLIC_BASE_URL = 'https://dl.dropboxusercontent.com/u/';
     var DROPBOX_PRIVATE_BASE_URL = 'https://www.dropbox.com/s/';
     var DROPBOX_PRIVATE_API_BASE_URL = 'https://dl.dropboxusercontent.com/s/';
+    var RISEUP_BASE_URL = 'https://pad.riseup.net/p/';
+    var RISEUP_EXPORT_POSTFIX = '/export/txt';
 
     var VALID_GIST = /^[0-9a-f]{5,32}\/?$/;
 
@@ -39,25 +41,20 @@ function Gist($, $content) {
             }
         }
         var fetcher = fetchGithubGist;
-        if (id.length > 8 && id.substr(0, 8) === 'dropbox-') {
+        if (id.indexOf('dropbox-') === 0) {
             fetcher = fetchPublicDropboxFile;
-            id = id.substr(8);
         }
-        else if (id.length > 9 && id.substr(0, 9) === 'dropboxs-') {
+        else if (id.indexOf('dropboxs-') === 0) {
             fetcher = fetchPrivateDropboxFile;
-            id = id.substr(9);
         }
-        else if (id.length > 7 && id.substr(0, 7) === 'github-') {
+        else if (id.indexOf('github-') === 0) {
             fetcher = fetchGithubFile;
-            id = id.substr(7);
         }
-        else if (!VALID_GIST.test(id)) {
-            if (id.indexOf('%3A%2F%2F') !== -1) {
-                fetcher = fetchAnyUrl;
-            }
-            else {
-                fetcher = fetchLocalSnippet;
-            }
+        else if(id.indexOf('riseup-') === 0) {
+            fetcher = fetchRiseupFile;
+        }
+        else if (!VALID_GIST.test(id) && id.indexOf('%3A%2F%2F') !== -1) {
+            fetcher = fetchAnyUrl;
         }
         fetcher(id, renderer, function (message) {
             errorMessage(message, id);
@@ -93,6 +90,9 @@ function Gist($, $content) {
                         gist += '//' + parts.slice(pathIndex).join('/');
                     } // else pretend it's a raw URL - encoding needed in both cases
                     gist = encodeURIComponent(gist);
+                }
+                else if (gist.length > RISEUP_BASE_URL.length && gist.indexOf(RISEUP_BASE_URL) === 0) {
+                    gist = 'riseup-' + gist.split('/')[4];
                 }
                 else {
                     var pos = gist.lastIndexOf('/');
@@ -136,6 +136,7 @@ function Gist($, $content) {
     }
 
     function fetchGithubFile(gist, success, error) {
+        gist = gist.substr(7);
         var decoded = decodeURIComponent(gist);
         var parts = decoded.split('/');
         var branch = 'master';
@@ -167,54 +168,40 @@ function Gist($, $content) {
     }
 
     function fetchPublicDropboxFile(id, success, error) {
-        fetchDropboxFile(id, success, error, DROPBOX_PUBLIC_BASE_URL);
+      id = id.substr(8);
+      fetchDropboxFile(id, success, error, DROPBOX_PUBLIC_BASE_URL);
     }
 
     function fetchPrivateDropboxFile(id, success, error) {
-        fetchDropboxFile(id, success, error, DROPBOX_PRIVATE_API_BASE_URL);
+      id = id.substr(9);
+      fetchDropboxFile(id, success, error, DROPBOX_PRIVATE_API_BASE_URL);
     }
 
     function fetchDropboxFile(id, success, error, baseUrl) {
-        var url = baseUrl + decodeURIComponent(id);
-        $.ajax({
-            'url': url,
-            'success': function (data) {
-                success(data, url);
-            },
-            'dataType': 'text',
-            'error': function (xhr, status, errorMessage) {
-                error(errorMessage);
-            }
-        });
+        fetchFromUrl(baseUrl + decodeURIComponent(id), success, error);
+    }
+
+    function fetchRiseupFile(id, success, error) {
+      id = id.substr(7);
+      var webUrl = RISEUP_BASE_URL + decodeURIComponent(id);
+      fetchFromUrl(webUrl + RISEUP_EXPORT_POSTFIX, success, error, webUrl);
     }
 
     function fetchAnyUrl(id, success, error) {
-        var url = decodeURIComponent(id);
-        $.ajax({
-            'url': url,
-            'success': function (data) {
-                success(data, url);
-            },
-            'dataType': 'text',
-            'error': function (xhr, status, errorMessage) {
-                error(errorMessage);
-            }
-        });
+        fetchFromUrl(decodeURIComponent(id), success, error);
     }
 
-    function fetchLocalSnippet(id, success, error) {
-        var url = './gists/' + id + '.adoc';
-        $.ajax({
-            'url': url,
-            'success': function (data) {
-                var link = 'https://github.com/neo4j-contrib/graphgist/tree/master/gists/' + id + '.adoc';
-                success(data, link);
-            },
-            'dataType': 'text',
-            'error': function (xhr, status, errorMessage) {
-                error(errorMessage);
-            }
-        });
+    function fetchFromUrl(url, success, error, sourceUrl) {
+      $.ajax({
+        'url': url,
+        'success': function (data) {
+          success(data, sourceUrl ? sourceUrl : url);
+        },
+        'dataType': 'text',
+        'error': function (xhr, status, errorMessage) {
+          error(errorMessage);
+        }
+      });
     }
 
     function errorMessage(message, gist) {
