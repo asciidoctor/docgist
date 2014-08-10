@@ -53,6 +53,12 @@
     div.alert {
         font-size: 1.125rem;
     }
+
+    @media print {
+        a.href-is-equal-to-content:after {
+            content: none;
+        }
+    }
 </style>
 
 <body>

@@ -37,6 +37,13 @@ function DocGist($) {
 
         setPageTitle();
         share();
+
+        $('#content a[href^="http:"], #content a[href^="https:"]').each(function () {
+            var $a = $(this);
+            if (this.href === $a.text()) {
+                $a.addClass('href-is-equal-to-content');
+            }
+        });
     }
 
     function setPageTitle() {
