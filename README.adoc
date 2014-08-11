@@ -10,10 +10,31 @@ NOTE: DocGist is a hosted alternative to the Asciidoctor.js Live Preview extensi
 
 See it live at http://gist.asciidoctor.org.
 
-== Special Processing
+== Run Locally
 
-The single addition to common AsciiDoc syntax is that links to image files will render the image and not the link, in case the link and the link text are identical.
-This happens in a post-processing step after AsciiDoctor has been executed.
+To run DocGist locally, make it available somewhere on `localhost`.
+First, check out the code:
+
+[source,shell]
+git clone git@github.com:asciidoctor/docgist.git
+cd docgist
+
+With Ruby, you can then do something like this:
+
+[source,ruby]
+ruby -run -e httpd . -p 9090
+
+With Python, there's this:
+
+[source,python]
+python -m SimpleHTTPServer
+
+If you have Apache httpd running on your machine, you can for example add a symlink along the lines of the following to make it serve DocGist:
+
+[source,shell]
+sudo ln -s /home/anders/git/docgist /var/www/docgist
+
+The above makes DocGist available at http://localhost/docgist/.
 
 == History
 
