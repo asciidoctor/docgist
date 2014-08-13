@@ -2,8 +2,10 @@
 
 function DocGist($) {
     var DEFAULT_SOURCE = 'github-asciidoctor%2Fdocgist%2F%2Fgists%2Fexample.adoc';
-    var ASCIIDOCTOR_OPTIONS = Opal.hash2([ 'attributes' ], {
-        'attributes': [ 'showtitle', 'icons=font', 'sectanchors', 'sectlinks' ]
+    var ASCIIDOCTOR_OPTIONS = Opal.hash2(['to_file', 'safe', 'attributes'], {
+        'to_file': false,
+        'safe': 'secure',
+        'attributes': ['showtitle=@', 'icons=font', 'sectanchors=@', 'source-highlighter=highlightjs@']
     });
 
     var $content = undefined;
@@ -18,35 +20,44 @@ function DocGist($) {
         $gistId.keydown(gist.readSourceId);
     });
 
-    function renderContent(doc, link) {
+    function renderContent(content, link) {
         $('#gist-link').attr('href', link);
         $content.empty();
-        var generatedHtml = undefined;
+        var doc, html = undefined;
+        var highlightSource = false;
         try {
-            generatedHtml = Opal.Asciidoctor.$render(doc, ASCIIDOCTOR_OPTIONS);
+            doc = Opal.Asciidoctor.$load(content, ASCIIDOCTOR_OPTIONS);
+            var attributeEq = doc.$method('attr?');
+            if (attributeEq.$call('source-highlighter', 'highlightjs') || attributeEq.$call('source-highlighter', 'highlight.js')) {
+              highlightSource = true;
+            }
+            html = doc.$convert();
         }
         catch (e) {
             errorMessage(e.name + ':' + '<p>' + e.message + '</p>');
             return;
         }
-        $content.html(generatedHtml);
+        $content.html(html);
         $gistId.val('');
-        $('pre > code').each(function (i, e) {
-            hljs.highlightBlock(e);
-        });
+        if (highlightSource) {
+          $('pre.highlight > code').each(function (i, e) {
+              // only highlight blocks marked with an explicit language
+              if (e.hasAttribute('data-lang')) {
+                hljs.highlightBlock(e);
+              }
+              else {
+                // NOTE add class to work around missing styles on code element
+                $(e).addClass('hljs');
+              }
+          });
+        }
 
-        setPageTitle();
+        setPageTitle(doc);
         share();
     }
 
-    function setPageTitle() {
-        var heading = $('h1').first();
-        if (!heading.length) {
-            heading = $('h2').first();
-        }
-        if (heading.length) {
-            document.title = heading.text();
-        }
+    function setPageTitle(doc) {
+        document.title = doc.$doctitle(Opal.hash2(['sanitize', 'use_fallback'], {'sanitize': true, 'use_fallback': true}))
     }
 
     function share() {
