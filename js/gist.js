@@ -20,6 +20,7 @@ function Gist($, $content) {
     var DROPBOX_PRIVATE_API_BASE_URL = 'https://dl.dropboxusercontent.com/s/';
     var RISEUP_BASE_URL = 'https://pad.riseup.net/p/';
     var RISEUP_EXPORT_POSTFIX = '/export/txt';
+    var COPY_COM_PUBLIC_LINK = 'https://copy.com/';
 
     var VALID_GIST = /^[0-9a-f]{5,32}\/?$/;
 
@@ -53,6 +54,11 @@ function Gist($, $content) {
         'Shared Private Dropbox File': {
             'baseUrl': DROPBOX_PRIVATE_BASE_URL, 'parse': function (gist, parts, baseUrl) {
                 return useRestOfTheUrl('dropboxs-', baseUrl, gist);
+            }
+        },
+        'Copy.com Public Link': {
+            'baseUrl': COPY_COM_PUBLIC_LINK, 'parse': function (gist, parts, baseUrl) {
+                return useRestOfTheUrl('copy-', baseUrl, gist);
             }
         },
         'Riseup Pad': {
@@ -101,6 +107,7 @@ function Gist($, $content) {
         'github-': fetchGithubFile,
         'dropbox-': fetchPublicDropboxFile,
         'dropboxs-': fetchPrivateDropboxFile,
+        'copy-': fetchCopyComPublicLink,
         'riseup-': fetchRiseupFile,
         'eps-': fetchSecureEtherpadFile,
         'epsp-': fetchSecureEtherpadPDirFile,
@@ -292,6 +299,11 @@ function Gist($, $content) {
 
     function fetchDropboxFile(id, success, error, baseUrl) {
         fetchFromUrl(baseUrl + decodeURIComponent(id), success, error);
+    }
+
+    function fetchCopyComPublicLink(id, success, error) {
+        id = id.substr(5);
+        fetchFromUrl(COPY_COM_PUBLIC_LINK + decodeURIComponent(id), success, error);
     }
 
     function fetchRiseupFile(id, success, error) {
