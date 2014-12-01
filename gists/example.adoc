@@ -5,7 +5,7 @@ The conversion to HTML is performed in the browser (client-side) using the https
 DocGist can render documents located anywhere, as long as the host permits cross-domain access.
 
 [NOTE]
-DocGist uses the http://asciidoctor.org/news/2014/08/12/asciidoctor-1-5-0-released/[latest release (1.5.0)] of Asciidoctor.
+DocGist uses the http://asciidoctor.org/news/2014/08/12/asciidoctor-1-5-0-released/[latest release (1.5.2)] of Asciidoctor.
 If you want to use the syntax of older versions, add `:compat-mode:` to the document header.
 There's more information on this in the link:./?github-asciidoctor%2Fasciidoctor.org%2F%2Fdocs%2Fmigration.adoc[migration guide].
 
