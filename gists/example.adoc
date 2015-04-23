@@ -21,6 +21,51 @@ GraphGist is an interactive documentation tool for the Neo4j database and Cypher
 * The page is rendered.
 * Share the URL with others so they can read the page.
 
+== Images
+
+Relative image URLs are resolved to the same location as the document.
+If the images are located elsewhere, use the `imagesdir` attribute to point out the location.
+See the http://asciidoctor.org/docs/user-manual/#set-the-images-directory[Asciidoctor user manual] for the details.
+There's also an link:./?github-asciidoctor%2Fdocgist%2F%2Fgists%2Fimages.adoc[image example].
+
+----
+image::sunset.jpg[]
+----
+
+Is rendered as:
+
+image::sunset.jpg[]
+
+== Source code highlighting
+
+By default, source code is highlighted using https://highlightjs.org/[highlight.js].
+Simply include the source code like this:
+
+--
+ [source,ruby]
+ .app.rb
+ ----
+ require 'sinatra'
+ get '/hi' do
+   "Hello World!"
+ end
+ ----
+--
+
+This how it gets rendered:
+
+[source,ruby]
+.app.rb
+----
+require 'sinatra'
+get '/hi' do
+  "Hello World!"
+end
+----
+
+https://code.google.com/p/google-code-prettify/[Prettify] is supported as well.
+See the link:./?github-asciidoctor%2Fdocgist%2F%2Fgists%2Fprettify.adoc[Prettify example] for how to activate it.
+
 == Tips and tricks
 
 Links to other DocGists can use this syntax: `+link:./?5897167[DocGist intro]+` which renders as link:./?5897167[DocGist intro].

@@ -232,7 +232,6 @@ function Gist($, $content) {
         return {'id': prefix + encodeURIComponent(gist.substr(baseUrl.length))};
     }
 
-
     function fetchGithubGist(gist, success, error) {
         if (!VALID_GIST.test(gist)) {
             error('The gist id is malformed: ' + gist);
@@ -276,8 +275,10 @@ function Gist($, $content) {
             'success': function (data) {
                 var content = Base64.decode(data.content);
                 var link = data.html_url;
-                var imagesdir = 'https://raw.github.com/' + parts[0] + '/' + parts[1]
-                    + '/' + branch + '/' + data.path.substring(0, -data.name.length);
+                // use cdn.rawgit.com instead ? see https://rawgit.com/faq
+                // the behavior (images cached forever) might be too unexpected though
+                var imagesdir = 'https://rawgit.com/' + parts[0] + '/' + parts[1]
+                    + '/' + branch + '/' + data.path.substr(0, data.path.length - data.name.length);
                 success(content, link, imagesdir);
             },
             'dataType': 'json',
@@ -349,7 +350,7 @@ function Gist($, $content) {
         $.ajax({
             'url': url,
             'success': function (data) {
-                success(data, sourceUrl ? sourceUrl : url);
+                success(data, sourceUrl ? sourceUrl : url, url);
             },
             'dataType': 'text',
             'error': function (xhr, status, errorMessage) {
