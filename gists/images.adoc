@@ -1,0 +1,22 @@
+= Images
+
+:imagesdir: assets
+
+Let's try out using the `imagesdir` attribute to point out the location of our images.
+For the full details see the http://asciidoctor.org/docs/user-manual/#set-the-images-directory[Asciidoctor user manual].
+
+In our case, the images are located in the `assets` directory, so this is what goes into the document header:
+
+----
+:imagesdir: assets
+----
+
+We include the image the usual way:
+
+----
+image::Tux.svg[]
+----
+
+And here's the rendering:
+
+image::Tux.svg[]

@@ -2,11 +2,7 @@
 
 function DocGist($) {
     var DEFAULT_SOURCE = 'github-asciidoctor%2Fdocgist%2F%2Fgists%2Fexample.adoc';
-    var ASCIIDOCTOR_OPTIONS = Opal.hash2(['to_file', 'safe', 'attributes'], {
-        'to_file': false,
-        'safe': 'secure',
-        'attributes': ['showtitle=@', 'icons=font', 'sectanchors=@', 'source-highlighter=highlightjs@']
-    });
+    var ASCIIDOCTOR_DEFAULT_ATTRIBUTES = ['showtitle=@', 'icons=font', 'sectanchors=@', 'source-highlighter=highlightjs@', 'platform=opal', 'platform-opal', 'env=browser', 'env-browser'];
 
     var $content = undefined;
     var $gistId = undefined;
@@ -20,18 +16,38 @@ function DocGist($) {
         $gistId.keydown(gist.readSourceId);
     });
 
-    function renderContent(content, link) {
+    function getAsciidoctorOptions() {
+        return Opal.hash({
+            'to_file': false,
+            'safe': 'secure',
+            'attributes': ASCIIDOCTOR_DEFAULT_ATTRIBUTES.concat([].slice.apply(arguments))
+        });
+    }
+
+    function renderContent(content, link, imageBasePath) {
         $('#gist-link').attr('href', link);
         $content.empty();
         var doc, html = undefined;
-        var highlightSource = false;
+        var highlighter = undefined;
         try {
-            doc = Opal.Asciidoctor.$load(content, ASCIIDOCTOR_OPTIONS);
-            var attributeEq = doc.$method('attr?');
-            if (attributeEq.$call('source-highlighter', 'highlightjs') || attributeEq.$call('source-highlighter', 'highlight.js')) {
-              highlightSource = true;
+            doc = Opal.Asciidoctor.$load(content, getAsciidoctorOptions('parse_header_only=true'));
+            var attributes = doc.attributes.map;
+            var attributeOverrides = [];
+            if ('source-highlighter' in attributes) {
+                highlighter = attributes['source-highlighter'];
             }
-            html = doc.$convert();
+            if (imageBasePath) {
+                if ('imagesdir' in attributes) {
+                    // only alter relative values, not URLs
+                    if (attributes.imagesdir.substr(0, 4) !== 'http') {
+                        attributeOverrides.push('imagesdir=' + imageBasePath + attributes.imagesdir);
+                    }
+                } else {
+                    // default to the same location as the document
+                    attributeOverrides.push('imagesdir=' + imageBasePath.substr(0, imageBasePath.length - 1));
+                }
+            }
+            html = Opal.Asciidoctor.$convert(content, getAsciidoctorOptions.apply(null, attributeOverrides));
         }
         catch (e) {
             errorMessage(e.name + ':' + '<p>' + e.message + '</p>');
@@ -39,17 +55,9 @@ function DocGist($) {
         }
         $content.html(html);
         $gistId.val('');
-        if (highlightSource) {
-          $('pre.highlight > code').each(function (i, e) {
-              // only highlight blocks marked with an explicit language
-              if (e.hasAttribute('data-lang')) {
-                hljs.highlightBlock(e);
-              }
-              else {
-                // NOTE add class to work around missing styles on code element
-                $(e).addClass('hljs');
-              }
-          });
+
+        if (highlighter) {
+            applyHighlighting(highlighter);
         }
 
         appendMathJax();
@@ -58,7 +66,7 @@ function DocGist($) {
     }
 
     function setPageTitle(doc) {
-        document.title = doc.$doctitle(Opal.hash2(['sanitize', 'use_fallback'], {'sanitize': true, 'use_fallback': true}))
+        document.title = doc.$doctitle(Opal.hash({'sanitize': true, 'use_fallback': true}))
     }
 
     function share() {
@@ -89,8 +97,54 @@ function DocGist($) {
 
         var mathJaxJsScript = document.createElement('script');
         mathJaxJsScript.type = 'text/javascript';
-        mathJaxJsScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.4.0/MathJax.js?config=TeX-MML-AM_HTMLorMML';
+        mathJaxJsScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.5.1/MathJax.js?config=TeX-MML-AM_HTMLorMML';
         document.head.appendChild(mathJaxJsScript);
+    }
+
+    function applyHighlighting(highlighter) {
+        var hl = highlighter.toLowerCase();
+        var AVAILABLE_HIGHLIGHTERS = {
+            'highlightjs': highlightUsingHighlightjs,
+            'highlight.js': highlightUsingHighlightjs,
+            'prettify': highlightUsingPrettify
+        };
+        if (hl in AVAILABLE_HIGHLIGHTERS) {
+            AVAILABLE_HIGHLIGHTERS[hl]();
+        } else {
+            console.log('Unknown syntax highlighter: ' + highlighter);
+            // not in IE8
+            if ('keys' in Object) {
+                console.log('Recognized highlighter names: ' + Object.keys(AVAILABLE_HIGHLIGHTERS));
+            }
+        }
+    }
+
+    function highlightUsingPrettify() {
+        $('pre.highlight > code', $content).each(function (i, e) {
+            // only highlight blocks marked with an explicit language
+            if (e.hasAttribute('data-lang')) {
+                $(e).addClass('prettyprint');
+            }
+        });
+        var prettify = document.createElement('script');
+        prettify.type = 'text/javascript';
+        prettify.async = true;
+        prettify.src = 'https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/run_prettify.min.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(prettify, s);
+    }
+
+    function highlightUsingHighlightjs() {
+        $('pre.highlight > code', $content).each(function (i, e) {
+            // only highlight blocks marked with an explicit language
+            if (e.hasAttribute('data-lang')) {
+                hljs.highlightBlock(e);
+            }
+            else {
+                // NOTE add class to work around missing styles on code element
+                $(e).addClass('hljs');
+            }
+        });
     }
 
     function errorMessage(message, gist) {
