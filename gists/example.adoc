@@ -1,5 +1,7 @@
 = DocGist
 
+toc::[]
+
 DocGist is a URL proxy tool that converts http://asciidoctor.org/docs/asciidoc-syntax-quick-reference/[AsciiDoc] documents fetched from Gists (http://gist.github.com), GitHub repositories, Dropbox folders and other sources to HTML.
 The conversion to HTML is performed in the browser (client-side) using the https://github.com/asciidoctor/asciidoctor.js[Asciidoctor.js] JavaScript library.
 DocGist can render documents located anywhere, as long as the host permits cross-domain access.
@@ -36,6 +38,14 @@ Is rendered as:
 
 image::sunset.jpg[]
 
+== Table of contents
+
+To add a table of contents, put this in the place you want it to appear:
+
+--
+ toc::[]
+--
+
 == Source code highlighting
 
 By default, source code is highlighted using https://highlightjs.org/[highlight.js].
@@ -65,6 +75,38 @@ end
 
 https://code.google.com/p/google-code-prettify/[Prettify] is supported as well.
 See the link:./?github-asciidoctor%2Fdocgist%2F%2Fgists%2Fprettify.adoc[Prettify example] for how to activate it.
+
+You can also choose to use https://codemirror.net/[CodeMirror], see the link:./?github-asciidoctor%2Fdocgist%2F%2Fgists%2Fcodemirror.adoc[CodeMirror example].
+
+NOTE: Only one source highlighter can be defined per document when using DocGist.
+
+== Math
+
+Thanks to https://www.mathjax.org/[MathJax] mathematical expressions can be typeset in DocGist documents.
+
+For block content, do like this:
+
+--
+ [stem]
+ ++++
+ sqrt(4) = 2
+ ++++
+--
+
+It will render like below:
+
+[stem]
+++++
+sqrt(4) = 2
+++++
+
+You can use it inline as well, for example:
+
+--
+ Water (stem:[H_2O]) is a critical component.
+--
+
+Which renders like this: Water (stem:[H_2O]) is a critical component.
 
 == Tips and tricks
 
