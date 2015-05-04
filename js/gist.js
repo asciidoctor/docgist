@@ -277,9 +277,10 @@ function Gist($, $content) {
                 var link = data.html_url;
                 // use cdn.rawgit.com instead ? see https://rawgit.com/faq
                 // the behavior (images cached forever) might be too unexpected though
-                var imagesdir = 'https://rawgit.com/' + parts[0] + '/' + parts[1]
-                    + '/' + branch + '/' + data.path.substr(0, data.path.length - data.name.length);
-                success(content, link, imagesdir);
+                var rootdir = 'https://rawgit.com/' + parts[0] + '/' + parts[1]
+                    + '/' + branch;
+                var imagesdir = rootdir + '/' + data.path.substr(0, data.path.length - data.name.length - 1);
+                success(content, link, imagesdir, rootdir);
             },
             'dataType': 'json',
             'error': function (xhr, status, errorMessage) {
@@ -346,17 +347,28 @@ function Gist($, $content) {
         fetchFromUrl(decodeURIComponent(id), success, error);
     }
 
-    function fetchFromUrl(url, success, error, sourceUrl) {
+    function fetchFromUrl(url, success, error, sourceUrl, imagesdir, rootdir) {
         $.ajax({
             'url': url,
             'success': function (data) {
-                success(data, sourceUrl ? sourceUrl : url, url);
+                success(data, sourceUrl ? sourceUrl : url, imagesdir ? imagesdir : removeDocumentNameFromUrl(url), rootdir ? rootdir : getOrigin(url));
             },
             'dataType': 'text',
             'error': function (xhr, status, errorMessage) {
                 error(errorMessage);
             }
         });
+    }
+
+    function removeDocumentNameFromUrl(url) {
+        var pos = url.lastIndexOf('/');
+        return url.substr(0, pos);
+    }
+
+    function getOrigin(url) {
+        var link = document.createElement('a');
+        link.setAttribute('href', url);
+        return link.origin;
     }
 
     function errorMessage(message, gist) {

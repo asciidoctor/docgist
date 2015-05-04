@@ -1,0 +1,51 @@
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+// Modified by the DocGist team.
+
+"use strict";
+
+CodeMirror.colorize = function(collection, defaultMode) {
+    var isBlock = /^(p|li|div|h\\d|pre|blockquote|td)$/;
+
+    function textContent(node, out) {
+        if (node.nodeType == 3) return out.push(node.nodeValue);
+        for (var ch = node.firstChild; ch; ch = ch.nextSibling) {
+            textContent(ch, out);
+            if (isBlock.test(node.nodeType)) out.push("\n");
+        }
+    }
+
+    function run(node, mode) {
+        CodeMirror.requireMode(mode, function() {
+            var text = [];
+            textContent(node, text);
+            node.innerHTML = "";
+            CodeMirror.runMode(text.join(""), mode, node);
+
+            node.className += mode == "cypher" ? " cm-s-neo" : " cm-s-default";
+        });
+    }
+
+    if (!collection) collection = document.body.getElementsByTagName("code");
+
+    for (var i = 0; i < collection.length; ++i) {
+        var node = collection[i];
+        var mode = node.getAttribute("data-lang") || defaultMode;
+        if (!mode) continue;
+
+        var info = CodeMirror.findModeByName(mode);
+        if (info) {
+            mode = info.mode;
+        } else {
+            info = CodeMirror.findModeByMIME(mode);
+            if (info) {
+                mode = info.mode;
+            }
+        }
+
+        run(node, mode);
+    }
+};
+
+CodeMirror.modeURL = '//cdnjs.cloudflare.com/ajax/libs/codemirror/' + window.DocgistLibVersions.codemirror + '/mode/%N/%N.js';
+CodeMirror.colorize();

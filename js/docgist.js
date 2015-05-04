@@ -2,7 +2,14 @@
 
 function DocGist($) {
     var DEFAULT_SOURCE = 'github-asciidoctor%2Fdocgist%2F%2Fgists%2Fexample.adoc';
-    var ASCIIDOCTOR_DEFAULT_ATTRIBUTES = ['showtitle=@', 'icons=font', 'sectanchors=@', 'source-highlighter=highlightjs@', 'platform=opal', 'platform-opal', 'env=browser', 'env-browser'];
+    var ASCIIDOCTOR_DEFAULT_ATTRIBUTES = ['showtitle=@', 'icons=font', 'sectanchors=@', 'source-highlighter=highlightjs@', 'platform=opal', 'platform-opal', 'env=docgist', 'env-docgist', 'toc=macro'];
+    var DOCGIST_LIB_VERSIONS = {
+        'highlightjs' : '8.5',
+        'prettify' : 'r298',
+        'codemirror': '5.2.0',
+        'mathjax': '2.5.1'
+    };
+    window.DocgistLibVersions = DOCGIST_LIB_VERSIONS;
 
     var $content = undefined;
     var $gistId = undefined;
@@ -24,7 +31,7 @@ function DocGist($) {
         });
     }
 
-    function renderContent(content, link, imageBasePath) {
+    function renderContent(content, link, imageBaseLocation, siteBaseLocation) {
         $('#gist-link').attr('href', link);
         $content.empty();
         var doc, html = undefined;
@@ -36,15 +43,22 @@ function DocGist($) {
             if ('source-highlighter' in attributes) {
                 highlighter = attributes['source-highlighter'];
             }
-            if (imageBasePath) {
+            if (imageBaseLocation || siteBaseLocation) {
                 if ('imagesdir' in attributes) {
                     // only alter relative values, not URLs
-                    if (attributes.imagesdir.substr(0, 4) !== 'http') {
-                        attributeOverrides.push('imagesdir=' + imageBasePath + attributes.imagesdir);
+                    var imagesdir = attributes.imagesdir;
+                    if (imagesdir.slice(-1) === '/') {
+                        // root-relative URL
+                        if (siteBaseLocation) {
+                            attributeOverrides.push('imagesdir=' + siteBaseLocation + imagesdir);
+                        }
+                    } else if (imageBaseLocation && imagesdir.substr(0, 4) !== 'http') {
+                        // relative URL
+                        attributeOverrides.push('imagesdir=' + imageBaseLocation + '/' + imagesdir);
                     }
-                } else {
+                } else if (imageBaseLocation) {
                     // default to the same location as the document
-                    attributeOverrides.push('imagesdir=' + imageBasePath.substr(0, imageBasePath.length - 1));
+                    attributeOverrides.push('imagesdir=' + imageBaseLocation);
                 }
             }
             html = Opal.Asciidoctor.$convert(content, getAsciidoctorOptions.apply(null, attributeOverrides));
@@ -62,6 +76,17 @@ function DocGist($) {
 
         appendMathJax();
         setPageTitle(doc);
+
+        // fix root-relative locations
+        if (siteBaseLocation) {
+            $('img[src ^= "/"]', $content).each(function(){
+                this.src = siteBaseLocation + this.getAttribute('src');
+            });
+            $('a[href ^= "/"]', $content).each(function(){
+                this.href = siteBaseLocation + this.getAttribute('href');
+            });
+        }
+
         share();
     }
 
@@ -95,10 +120,8 @@ function DocGist($) {
             '});';
         document.head.appendChild(mathJaxJsScriptConfig);
 
-        var mathJaxJsScript = document.createElement('script');
-        mathJaxJsScript.type = 'text/javascript';
-        mathJaxJsScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.5.1/MathJax.js?config=TeX-MML-AM_HTMLorMML';
-        document.head.appendChild(mathJaxJsScript);
+        var version = DOCGIST_LIB_VERSIONS.mathjax;
+        addScriptElement('https://cdnjs.cloudflare.com/ajax/libs/mathjax/' + version + '/MathJax.js?config=TeX-MML-AM_HTMLorMML');
     }
 
     function applyHighlighting(highlighter) {
@@ -106,7 +129,8 @@ function DocGist($) {
         var AVAILABLE_HIGHLIGHTERS = {
             'highlightjs': highlightUsingHighlightjs,
             'highlight.js': highlightUsingHighlightjs,
-            'prettify': highlightUsingPrettify
+            'prettify': highlightUsingPrettify,
+            'codemirror': highlightUsingCodeMirror
         };
         if (hl in AVAILABLE_HIGHLIGHTERS) {
             AVAILABLE_HIGHLIGHTERS[hl]();
@@ -119,6 +143,29 @@ function DocGist($) {
         }
     }
 
+    function addScriptElement(url) {
+        var element = document.createElement('script');
+        element.type = 'text/javascript';
+        element.async = true;
+        element.src = url;
+        var first = document.getElementsByTagName('script')[0];
+        first.parentNode.insertBefore(element, first);
+    }
+
+    function executeScripts(urls) {
+        // adds script elements and makes sure they execute in the order they are given
+        // from http://www.html5rocks.com/en/tutorials/speed/script-loading/
+        !function(e,t,r){function n(){for(;d[0]&&"loaded"==d[0][f];)c=d.shift(),c[o]=!i.parentNode.insertBefore(c,i)}for(var s,a,c,d=[],i=e.scripts[0],o="onreadystatechange",f="readyState";s=r.shift();)a=e.createElement(t),"async"in i?(a.async=!1,e.head.appendChild(a)):i[f]?(d.push(a),a[o]=n):e.write("<"+t+' src="'+s+'" defer></'+t+">"),a.src=s}(document,"script",urls)
+    }
+
+    function addLinkElement(url) {
+        var element = document.createElement('link');
+        element.rel = 'stylesheet';
+        element.href = url;
+        var first = document.getElementsByTagName('link')[0];
+        first.parentNode.insertBefore(element, first);
+    }
+
     function highlightUsingPrettify() {
         $('pre.highlight > code', $content).each(function (i, e) {
             // only highlight blocks marked with an explicit language
@@ -126,26 +173,27 @@ function DocGist($) {
                 $(e).addClass('prettyprint');
             }
         });
-        var prettify = document.createElement('script');
-        prettify.type = 'text/javascript';
-        prettify.async = true;
-        prettify.src = 'https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/run_prettify.min.js';
-        var s = document.getElementsByTagName('script')[0];
-        s.parentNode.insertBefore(prettify, s);
+        var version = DOCGIST_LIB_VERSIONS.prettify;
+        addScriptElement('//cdnjs.cloudflare.com/ajax/libs/prettify/' + version + '/run_prettify.min.js');
+    }
+
+    function highlightUsingCodeMirror() {
+        var version = DOCGIST_LIB_VERSIONS.codemirror;
+        addLinkElement('//cdnjs.cloudflare.com/ajax/libs/codemirror/' + version + '/codemirror.min.css');
+        addLinkElement('//cdnjs.cloudflare.com/ajax/libs/codemirror/' + version + '/theme/neo.min.css');
+        executeScripts([
+            '//cdnjs.cloudflare.com/ajax/libs/codemirror/' + version + '/codemirror.min.js',
+            '//cdnjs.cloudflare.com/ajax/libs/codemirror/' + version + '/addon/runmode/runmode.min.js',
+            '//cdnjs.cloudflare.com/ajax/libs/codemirror/' + version + '/addon/mode/loadmode.min.js',
+            '//cdnjs.cloudflare.com/ajax/libs/codemirror/' + version + '/mode/meta.min.js',
+            'js/colorize.js']);
     }
 
     function highlightUsingHighlightjs() {
-        $('pre.highlight > code', $content).each(function (i, e) {
-            // only highlight blocks marked with an explicit language
-            if (e.hasAttribute('data-lang')) {
-                hljs.highlightBlock(e);
-            }
-            else {
-                // NOTE add class to work around missing styles on code element
-                $(e).addClass('hljs');
-            }
-        });
-    }
+        var version = DOCGIST_LIB_VERSIONS.highlightjs;
+        addLinkElement('//cdnjs.cloudflare.com/ajax/libs/highlight.js/' + version + '/styles/github.min.css');
+        executeScripts(['//cdnjs.cloudflare.com/ajax/libs/highlight.js/' + version + '/highlight.min.js','js/run-highlight.js']);
+     }
 
     function errorMessage(message, gist) {
         var messageText;

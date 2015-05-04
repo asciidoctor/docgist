@@ -1,0 +1,41 @@
+= Using CodeMirror
+
+:source-highlighter: codemirror
+
+To activate support for http://codemirror.net/[CodeMirror] add the following to the document header:
+
+----
+:source-highlighter: codemirror
+----
+
+Then simply include the source code like this:
+
+--
+ [source,ruby]
+ .app.rb
+ ----
+ require 'sinatra'
+ get '/hi' do
+   "Hello World!"
+ end
+ ----
+--
+
+This is how it gets rendered:
+
+[source,ruby]
+.app.rb
+----
+require 'sinatra'
+get '/hi' do
+  "Hello World!"
+end
+----
+
+If you highlight http://neo4j.com/developer/cypher/[Cypher] code, it's special theme kicks in:
+
+[source,cypher]
+.Create a movie node
+----
+CREATE (:Movie { title:"The Matrix",released:1997 })
+----
