@@ -42,7 +42,8 @@ function Gist($, $content) {
             }
         },
         'Raw GitHub Repository File': {
-            'baseUrl': ['https://raw.github.com/', 'https://raw.githubusercontent.com/'], 'parse': function (gist, parts) {
+            'baseUrl': ['https://raw.github.com/', 'https://raw.githubusercontent.com/'],
+            'parse': function (gist, parts) {
                 return useGithubRepoParts({'branch': 5, 'path': 6}, parts);
             }
         },
@@ -242,14 +243,61 @@ function Gist($, $content) {
         $.ajax({
             'url': url,
             'success': function (data) {
-                var file = data.files[Object.keys(data.files)[0]];
+                var keys = searchForAttribute(data.files, 'language', 'AsciiDoc');
+                if (keys.length === 0) {
+                    keys = searchForAttribute(data.files, 'type', 'text/plain');
+                }
+                if (keys.length === 0) {
+                    keys = [Object.keys(data.files)[0]];
+                }
+                var file = data.files[keys[0]];
                 var content = file.content;
                 var link = data.html_url;
-                success(content, link);
+                var svgs = extractImagesFromGithubGist(data.files);
+                if (svgs) {
+                    var magicPath = '__images__';
+                    success(content, link, magicPath, undefined, function replaceImages($content) {
+                        addGithubImagesToContent($content, magicPath, svgs);
+                    });
+                } else {
+                    success(content, link);
+                }
             },
             'dataType': 'json',
             'error': function (xhr, status, errorMessage) {
                 error(errorMessage);
+            }
+        });
+    }
+
+    function searchForAttribute(obj, prop, value) {
+        var keys = [];
+        for (var key in obj) {
+            if (obj[key][prop] === value) {
+                keys.push(key);
+            }
+        }
+        return keys;
+    }
+
+    function extractImagesFromGithubGist(obj) {
+        var keys = searchForAttribute(obj, 'language', 'SVG');
+        var res = {};
+        $.each(keys, function (ix, value) {
+            res[value] = obj[value].content;
+        });
+        return res;
+    }
+
+    function addGithubImagesToContent($content, imageLocation, images) {
+        $content.find('img').each(function () {
+            if (this.src.indexOf(imageLocation) > 0) {
+                var parts = this.src.split('/');
+                var filename = parts.pop();
+                var path = parts.pop();
+                if (path === imageLocation && filename in images) {
+                    $(this).replaceWith(images[filename]);
+                }
             }
         });
     }

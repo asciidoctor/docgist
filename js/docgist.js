@@ -4,10 +4,10 @@ function DocGist($) {
     var DEFAULT_SOURCE = 'github-asciidoctor%2Fdocgist%2F%2Fgists%2Fexample.adoc';
     var ASCIIDOCTOR_DEFAULT_ATTRIBUTES = ['showtitle=@', 'icons=font', 'sectanchors=@', 'source-highlighter=highlightjs@', 'platform=opal', 'platform-opal', 'env=docgist', 'env-docgist', 'toc=macro'];
     var DOCGIST_LIB_VERSIONS = {
-        'highlightjs' : '8.5',
-        'prettify' : 'r298',
-        'codemirror': '5.2.0',
-        'mathjax': '2.5.1'
+        'highlightjs': '8.9.1',
+        'prettify': 'r298',
+        'codemirror': '5.8.0',
+        'mathjax': '2.5.3'
     };
     window.DocgistLibVersions = DOCGIST_LIB_VERSIONS;
 
@@ -31,7 +31,7 @@ function DocGist($) {
         });
     }
 
-    function renderContent(content, link, imageBaseLocation, siteBaseLocation) {
+    function renderContent(content, link, imageBaseLocation, siteBaseLocation, imageContentReplacer) {
         $('#gist-link').attr('href', link);
         $content.empty();
         var doc, html = undefined;
@@ -70,6 +70,10 @@ function DocGist($) {
         $content.html(html);
         $gistId.val('');
 
+        if (imageContentReplacer) {
+            imageContentReplacer($content);
+        }
+
         if (highlighter) {
             applyHighlighting(highlighter);
         }
@@ -79,10 +83,10 @@ function DocGist($) {
 
         // fix root-relative locations
         if (siteBaseLocation) {
-            $('img[src ^= "/"]', $content).each(function(){
+            $('img[src ^= "/"]', $content).each(function () {
                 this.src = siteBaseLocation + this.getAttribute('src');
             });
-            $('a[href ^= "/"]', $content).each(function(){
+            $('a[href ^= "/"]', $content).each(function () {
                 this.href = siteBaseLocation + this.getAttribute('href');
             });
         }
@@ -98,7 +102,7 @@ function DocGist($) {
         var title = document.title;
         var href = encodeURIComponent(window.location.href);
         $('#twitter-share').attr('href',
-                'https://twitter.com/intent/tweet?text=' + encodeURIComponent('Check this out: ' + title) + '&url=' + href);
+            'https://twitter.com/intent/tweet?text=' + encodeURIComponent('Check this out: ' + title) + '&url=' + href);
         $('#facebook-share').attr('href', 'http://www.facebook.com/share.php?u=' + href);
         $('#google-plus-share').attr('href', 'https://plus.google.com/share?url=' + href);
     }
@@ -192,8 +196,8 @@ function DocGist($) {
     function highlightUsingHighlightjs() {
         var version = DOCGIST_LIB_VERSIONS.highlightjs;
         addLinkElement('//cdnjs.cloudflare.com/ajax/libs/highlight.js/' + version + '/styles/github.min.css');
-        executeScripts(['//cdnjs.cloudflare.com/ajax/libs/highlight.js/' + version + '/highlight.min.js','js/run-highlight.js']);
-     }
+        executeScripts(['//cdnjs.cloudflare.com/ajax/libs/highlight.js/' + version + '/highlight.min.js', 'js/run-highlight.js']);
+    }
 
     function errorMessage(message, gist) {
         var messageText;
