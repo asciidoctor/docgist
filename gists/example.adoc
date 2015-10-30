@@ -80,6 +80,13 @@ You can also choose to use https://codemirror.net/[CodeMirror], see the link:./?
 
 NOTE: Only one source highlighter can be defined per document when using DocGist.
 
+[CAUTION]
+.Experimental
+====
+Highighting can be used inline as well, for example `[src-ruby]`do`` renders like: [src-ruby]`do`.
+This is a feature of DocGist.
+====
+
 == Math
 
 Thanks to https://www.mathjax.org/[MathJax] mathematical expressions can be typeset in DocGist documents.

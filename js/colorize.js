@@ -30,7 +30,17 @@ CodeMirror.colorize = function(collection, defaultMode) {
 
     for (var i = 0; i < collection.length; ++i) {
         var node = collection[i];
-        var mode = node.getAttribute("data-lang") || defaultMode;
+        var mode = node.getAttribute("data-lang");
+        if (!mode) {
+            var cls = node.className;
+            if (cls && cls.indexOf("language-") === 0) {
+                mode = cls.substr(9);
+            } else if (cls && cls.indexOf("src-") === 0) {
+                mode = cls.substr(4);
+            } else {
+                mode = defaultMode;
+            }
+        }
         if (!mode) continue;
 
         var info = CodeMirror.findModeByName(mode);

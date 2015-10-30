@@ -32,10 +32,17 @@ get '/hi' do
 end
 ----
 
-If you highlight http://neo4j.com/developer/cypher/[Cypher] code, it's special theme kicks in:
+If you highlight http://neo4j.com/developer/cypher/[Cypher] code, its special theme kicks in here on DocGist:
 
 [source,cypher]
 .Create a movie node
 ----
 CREATE (:Movie { title:"The Matrix",released:1997 })
 ----
+
+[CAUTION]
+.Experimental
+====
+Highighting can be used inline as well, for example `[src-cypher]`CREATE`` renders like: [src-cypher]`CREATE`.
+This is a feature of DocGist.
+====

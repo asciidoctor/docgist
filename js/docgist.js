@@ -171,11 +171,8 @@ function DocGist($) {
     }
 
     function highlightUsingPrettify() {
-        $('pre.highlight > code', $content).each(function (i, e) {
-            // only highlight blocks marked with an explicit language
-            if (e.hasAttribute('data-lang')) {
-                $(e).addClass('prettyprint');
-            }
+        $('code[class^="language-"],code[class^="src-"]', $content).each(function (i, e) {
+            e.className = e.className.replace('src-', 'language-') + ' prettyprint';
         });
         var version = DOCGIST_LIB_VERSIONS.prettify;
         addScriptElement('//cdnjs.cloudflare.com/ajax/libs/prettify/' + version + '/run_prettify.min.js');

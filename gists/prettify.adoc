@@ -31,3 +31,11 @@ get '/hi' do
   "Hello World!"
 end
 ----
+
+[CAUTION]
+.Experimental
+====
+Highighting can be used inline as well, for example `[src-ruby]`do`` renders like: [src-ruby]`do`.
+This is a feature of DocGist.
+====
+

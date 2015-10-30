@@ -1,10 +1,8 @@
-$('pre.highlight > code', $('#content')).each(function (i, e) {
-    // only highlight blocks marked with an explicit language
-    if (e.hasAttribute('data-lang')) {
-        hljs.highlightBlock(e);
-    }
-    else {
-        // NOTE add class to work around missing styles on code element
-        $(e).addClass('hljs');
+$('code[class^="language-"],code[class^="src-"]', $('#content')).each(function (i, e) {
+    e.className = e.className.replace('src-', 'language-');
+    hljs.highlightBlock(e);
+    var $e = $(e);
+    if ($e.parent('pre.highlight').length === 0) {
+        $e.css('display', 'inline');
     }
 });
