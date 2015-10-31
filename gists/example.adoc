@@ -81,10 +81,11 @@ You can also choose to use https://codemirror.net/[CodeMirror], see the link:./?
 NOTE: Only one source highlighter can be defined per document when using DocGist.
 
 [CAUTION]
-.Experimental
+.Experimental Features in DocGist
 ====
-Highighting can be used inline as well, for example `[src-ruby]`do`` renders like: [src-ruby]`do`.
-This is a feature of DocGist.
+* Highlighting can be used inline as well, for example `[src-ruby]`do`` renders like: [src-ruby]`do`.
+* Multiple code snippets in different languages can be combined into a tabbed view.
+  See the link:./?github-asciidoctor%2Fdocgist%2F%2Fgists%2Ftabbed-source.adoc[Tabbed Source] example for more information.
 ====
 
 == Math

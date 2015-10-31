@@ -70,6 +70,10 @@ function DocGist($) {
         $content.html(html);
         $gistId.val('');
 
+        if ('tabbed-source' in attributes) {
+            tabTheSource($content);
+        }
+
         if (imageContentReplacer) {
             imageContentReplacer($content);
         }
@@ -92,6 +96,83 @@ function DocGist($) {
         }
 
         share();
+    }
+
+    function tabTheSource($content) {
+        var snippets = {};
+        var order = {};
+        var languageEventElements = {};
+        $('div.listingblock', $content).each(function () {
+            var $block = $(this);
+            var title = $('div.title', this).text();
+            if (!title) {
+                return;
+            }
+            var $content = $('div.content', this);
+            var language = $('code', $content).data('lang');
+            if (title in order) {
+                order[title].push(language);
+            } else {
+                order[title] = [language];
+            }
+            if (!(title in snippets)) {
+                snippets[title] = {};
+            }
+            snippets[title][language] = {
+                '$block': $block,
+                '$content': $content
+            };
+        });
+        var $UL = $('<ul class="nav nav-tabs" role="tablist"/>');
+        var $LI = $('<li role="presentation"/>');
+        var $A = $('<a role="tab" data-toggle="tab" style="text-decoration:none;"/>');
+        var $WRAPPER = $('<div class="tab-content"/>');
+        for (var title in order) {
+            var languages = order[title];
+            if (languages.length === 1) {
+                continue;
+            }
+            var idBase = title.toLocaleLowerCase().replace(' ', '-');
+            var $ul = $UL.clone();
+            var $wrapper = $WRAPPER.clone();
+            for (var i = 0; i < languages.length; i++) {
+                var language = languages[i];
+                var source = snippets[title][language];
+                var $content = source['$content'];
+                var id;
+                if ($content.attr('id')) {
+                    id = $content.attr('id');
+                } else {
+                    id = idBase + '-' + language;
+                    $content.attr('id', id);
+                }
+                $content.addClass('tab-pane').css('position', 'relative');
+                var $li = $LI.clone();
+                var $a = $A.clone();
+                $a.attr('href', '#' + id).text(language).data('lang', language).on('shown.bs.tab', function (e) {
+                    var language = $(e.target).data('lang');
+                    var $elements = languageEventElements[language];
+                    for (var j = 0; j < $elements.length; j++) {
+                        $elements[j].tab('show');
+                    }
+                });
+                if (language in languageEventElements) {
+                    languageEventElements[language].push($a);
+                } else {
+                    languageEventElements[language] = [$a];
+                }
+                $wrapper.append($content);
+                if (i === 0) {
+                    $li.addClass('active');
+                    $content.addClass('active');
+                } else {
+                    source['$block'].remove();
+                }
+                $li.append($a);
+                $ul.append($li);
+            }
+            snippets[title][languages[0]]['$block'].append($ul).append($wrapper);
+        }
     }
 
     function setPageTitle(doc) {

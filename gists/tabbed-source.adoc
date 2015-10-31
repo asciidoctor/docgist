@@ -1,0 +1,77 @@
+= Tabbed Source
+:source-highlighter: prettify
+:tabbed-source:
+
+[CAUTION]
+.Experimental
+====
+Tabbed source is an experimental feature available in DocGist.
+====
+
+[abstract]
+--
+The tabbed source feature combines multiple source code blocks which share a common title into a tabbed view.
+--
+
+To enable tabbed source, set this attribute in the document header:
+
+[source,asciidoc]
+.Document Header Attribute
+----
+:tabbed-source:
+----
+
+== Example Rendering
+
+[source,java]
+.First Example
+----
+String foo = "bar";
+----
+
+[source,javascript]
+.First Example
+----
+var foo = "bar";
+----
+
+[source,java]
+.Second Example
+----
+String bar = "foo";
+----
+
+[source,javascript]
+.Second Example
+----
+var bar = "foo";
+----
+
+== Example Source
+
+[source,asciidoc]
+----
+ [source,java]
+ .First Example
+ ----
+ String foo = "bar";
+ ----
+
+ [source,javascript]
+ .First Example
+ ----
+ var foo = "bar";
+ ----
+
+ [source,java]
+ .Second Example
+ ----
+ String bar = "foo";
+ ----
+
+ [source,javascript]
+ .Second Example
+ ----
+ var bar = "foo";
+ ----
+----

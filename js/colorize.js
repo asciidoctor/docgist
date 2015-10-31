@@ -16,6 +16,17 @@ CodeMirror.colorize = function(collection, defaultMode) {
     }
 
     function run(node, mode) {
+        var found = false;
+        for (var i = 0; i < CodeMirror.modeInfo.length; i++) {
+            if (CodeMirror.modeInfo[i].mode === mode) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            // avoid loading modes that don't exist
+            return;
+        }
         CodeMirror.requireMode(mode, function() {
             var text = [];
             textContent(node, text);
