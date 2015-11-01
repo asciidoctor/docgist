@@ -4,9 +4,7 @@ function DocGist($) {
     var DEFAULT_SOURCE = 'github-asciidoctor%2Fdocgist%2F%2Fgists%2Fexample.adoc';
     var ASCIIDOCTOR_DEFAULT_ATTRIBUTES = ['showtitle=@', 'icons=font', 'sectanchors=@', 'source-highlighter=highlightjs@', 'platform=opal', 'platform-opal', 'env=docgist', 'env-docgist', 'toc=macro'];
     var DOCGIST_LIB_VERSIONS = {
-        'highlightjs': '8.9.1',
         'prettify': 'r298',
-        'codemirror': '5.8.0',
         'mathjax': '2.5.3'
     };
     window.DocgistLibVersions = DOCGIST_LIB_VERSIONS;
@@ -237,12 +235,6 @@ function DocGist($) {
         first.parentNode.insertBefore(element, first);
     }
 
-    function executeScripts(urls) {
-        // adds script elements and makes sure they execute in the order they are given
-        // from http://www.html5rocks.com/en/tutorials/speed/script-loading/
-        !function(e,t,r){function n(){for(;d[0]&&"loaded"==d[0][f];)c=d.shift(),c[o]=!i.parentNode.insertBefore(c,i)}for(var s,a,c,d=[],i=e.scripts[0],o="onreadystatechange",f="readyState";s=r.shift();)a=e.createElement(t),"async"in i?(a.async=!1,e.head.appendChild(a)):i[f]?(d.push(a),a[o]=n):e.write("<"+t+' src="'+s+'" defer></'+t+">"),a.src=s}(document,"script",urls)
-    }
-
     function addLinkElement(url) {
         var element = document.createElement('link');
         element.rel = 'stylesheet';
@@ -260,21 +252,18 @@ function DocGist($) {
     }
 
     function highlightUsingCodeMirror() {
-        var version = DOCGIST_LIB_VERSIONS.codemirror;
-        addLinkElement('//cdnjs.cloudflare.com/ajax/libs/codemirror/' + version + '/codemirror.min.css');
-        addLinkElement('//cdnjs.cloudflare.com/ajax/libs/codemirror/' + version + '/theme/neo.min.css');
-        executeScripts([
-            '//cdnjs.cloudflare.com/ajax/libs/codemirror/' + version + '/codemirror.min.js',
-            '//cdnjs.cloudflare.com/ajax/libs/codemirror/' + version + '/addon/runmode/runmode.min.js',
-            '//cdnjs.cloudflare.com/ajax/libs/codemirror/' + version + '/addon/mode/loadmode.min.js',
-            '//cdnjs.cloudflare.com/ajax/libs/codemirror/' + version + '/mode/meta.min.js',
-            'js/colorize.js']);
+        CodeMirror.colorize();
     }
 
     function highlightUsingHighlightjs() {
-        var version = DOCGIST_LIB_VERSIONS.highlightjs;
-        addLinkElement('//cdnjs.cloudflare.com/ajax/libs/highlight.js/' + version + '/styles/github.min.css');
-        executeScripts(['//cdnjs.cloudflare.com/ajax/libs/highlight.js/' + version + '/highlight.min.js', 'js/run-highlight.js']);
+        $('code[class^="language-"],code[class^="src-"]', $content).each(function (i, e) {
+            e.className = e.className.replace('src-', 'language-');
+            hljs.highlightBlock(e);
+            var $e = $(e);
+            if ($e.parent('pre.highlight').length === 0) {
+                $e.css('display', 'inline');
+            }
+        });
     }
 
     function errorMessage(message, gist) {

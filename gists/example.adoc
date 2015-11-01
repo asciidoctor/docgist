@@ -62,7 +62,7 @@ Simply include the source code like this:
  ----
 --
 
-This how it gets rendered:
+This is how it gets rendered:
 
 [source,ruby]
 .app.rb

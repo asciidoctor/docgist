@@ -67,6 +67,3 @@ CodeMirror.colorize = function(collection, defaultMode) {
         run(node, mode);
     }
 };
-
-CodeMirror.modeURL = '//cdnjs.cloudflare.com/ajax/libs/codemirror/' + window.DocgistLibVersions.codemirror + '/mode/%N/%N.js';
-CodeMirror.colorize();
