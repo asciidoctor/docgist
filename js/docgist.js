@@ -29,8 +29,10 @@ function DocGist($) {
         });
     }
 
-    function renderContent(content, link, imageBaseLocation, siteBaseLocation, imageContentReplacer) {
-        $('#gist-link').attr('href', link);
+    function renderContent(content, options) {
+        if ('sourceUrl' in options) {
+            $('#gist-link').attr('href', options['sourceUrl']);
+        }
         $content.empty();
         var doc, html = undefined;
         var highlighter = undefined;
@@ -41,22 +43,22 @@ function DocGist($) {
             if ('source-highlighter' in attributes) {
                 highlighter = attributes['source-highlighter'];
             }
-            if (imageBaseLocation || siteBaseLocation) {
+            if ('imageBaseLocation' in options || 'siteBaseLocation' in options) {
                 if ('imagesdir' in attributes) {
                     // only alter relative values, not URLs
                     var imagesdir = attributes.imagesdir;
                     if (imagesdir.slice(-1) === '/') {
                         // root-relative URL
-                        if (siteBaseLocation) {
-                            attributeOverrides.push('imagesdir=' + siteBaseLocation + imagesdir);
+                        if ('siteBaseLocation' in options) {
+                            attributeOverrides.push('imagesdir=' + options['siteBaseLocation'] + imagesdir);
                         }
-                    } else if (imageBaseLocation && imagesdir.substr(0, 4) !== 'http') {
+                    } else if ('imageBaseLocation' in options && imagesdir.substr(0, 4) !== 'http') {
                         // relative URL
-                        attributeOverrides.push('imagesdir=' + imageBaseLocation + '/' + imagesdir);
+                        attributeOverrides.push('imagesdir=' + options['imageBaseLocation'] + '/' + imagesdir);
                     }
-                } else if (imageBaseLocation) {
+                } else if ('imageBaseLocation' in options) {
                     // default to the same location as the document
-                    attributeOverrides.push('imagesdir=' + imageBaseLocation);
+                    attributeOverrides.push('imagesdir=' + options['imageBaseLocation']);
                 }
             }
             html = Opal.Asciidoctor.$convert(content, getAsciidoctorOptions.apply(null, attributeOverrides));
@@ -72,8 +74,8 @@ function DocGist($) {
             tabTheSource($content);
         }
 
-        if (imageContentReplacer) {
-            imageContentReplacer($content);
+        if ('imageContentReplacer' in options) {
+            options['imageContentReplacer']($content);
         }
 
         if (highlighter) {
@@ -84,12 +86,12 @@ function DocGist($) {
         setPageTitle(doc);
 
         // fix root-relative locations
-        if (siteBaseLocation) {
+        if ('siteBaseLocation' in options) {
             $('img[src ^= "/"]', $content).each(function () {
-                this.src = siteBaseLocation + this.getAttribute('src');
+                this.src = options['siteBaseLocation'] + this.getAttribute('src');
             });
             $('a[href ^= "/"]', $content).each(function () {
-                this.href = siteBaseLocation + this.getAttribute('href');
+                this.href = options['siteBaseLocation'] + this.getAttribute('href');
             });
         }
 

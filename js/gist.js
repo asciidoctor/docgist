@@ -256,11 +256,15 @@ function Gist($, $content) {
                 var svgs = extractImagesFromGithubGist(data.files);
                 if (svgs) {
                     var magicPath = '__images__';
-                    success(content, link, magicPath, undefined, function replaceImages($content) {
-                        addGithubImagesToContent($content, magicPath, svgs);
+                    success(content, {
+                        'sourceUrl': link,
+                        'imageBaseLocation': magicPath,
+                        'imageContentReplacer': function replaceImages($content) {
+                            addGithubImagesToContent($content, magicPath, svgs);
+                        }
                     });
                 } else {
-                    success(content, link);
+                    success(content, {'sourceUrl': link});
                 }
             },
             'dataType': 'json',
@@ -328,7 +332,11 @@ function Gist($, $content) {
                 var rootdir = 'https://rawgit.com/' + parts[0] + '/' + parts[1]
                     + '/' + branch;
                 var imagesdir = rootdir + '/' + data.path.substr(0, data.path.length - data.name.length - 1);
-                success(content, link, imagesdir, rootdir);
+                success(content, {
+                    'sourceUrl': link,
+                    'imageBaseLocation': imagesdir,
+                    'siteBaseLocation': rootdir
+                });
             },
             'dataType': 'json',
             'error': function (xhr, status, errorMessage) {
@@ -399,7 +407,11 @@ function Gist($, $content) {
         $.ajax({
             'url': url,
             'success': function (data) {
-                success(data, sourceUrl ? sourceUrl : url, imagesdir ? imagesdir : removeDocumentNameFromUrl(url), rootdir ? rootdir : getOrigin(url));
+                success(data, {
+                    'sourceUrl':  sourceUrl ? sourceUrl : url,
+                    'imageBaseLocation': imagesdir ? imagesdir : removeDocumentNameFromUrl(url),
+                    'siteBaseLocation': rootdir ? rootdir : getOrigin(url)
+                });
             },
             'dataType': 'text',
             'error': function (xhr, status, errorMessage) {
