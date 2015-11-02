@@ -2,7 +2,7 @@
 
 function DocGist($) {
     var DEFAULT_SOURCE = 'github-asciidoctor%2Fdocgist%2F%2Fgists%2Fexample.adoc';
-    var ASCIIDOCTOR_DEFAULT_ATTRIBUTES = ['showtitle=@', 'icons=font', 'sectanchors=@', 'source-highlighter=highlightjs@', 'platform=opal', 'platform-opal', 'env=docgist', 'env-docgist', 'toc=macro'];
+    var ASCIIDOCTOR_DEFAULT_ATTRIBUTES = ['showtitle=@', 'icons=font', 'sectanchors=@', 'source-highlighter=highlightjs@', 'platform=opal', 'platform-opal', 'env=docgist', 'env-docgist', 'toc=macro', 'example-caption!'];
     var DOCGIST_LIB_VERSIONS = {
         'prettify': 'r298',
         'mathjax': '2.5.3'
@@ -70,9 +70,7 @@ function DocGist($) {
         $content.html(html);
         $gistId.val('');
 
-        if ('tabbed-source' in attributes) {
-            tabTheSource($content);
-        }
+        tabTheSource($content);
 
         if ('imageContentReplacer' in options) {
             options['imageContentReplacer']($content);
@@ -99,46 +97,38 @@ function DocGist($) {
     }
 
     function tabTheSource($content) {
-        var snippets = {};
-        var order = {};
-        var languageEventElements = {};
-        $('div.listingblock', $content).each(function () {
-            var $block = $(this);
-            var title = $('div.title', this).text();
-            if (!title) {
-                return;
-            }
-            var $content = $('div.content', this);
-            var language = $('code', $content).data('lang');
-            if (title in order) {
-                order[title].push(language);
-            } else {
-                order[title] = [language];
-            }
-            if (!(title in snippets)) {
-                snippets[title] = {};
-            }
-            snippets[title][language] = {
-                '$block': $block,
-                '$content': $content
-            };
-        });
         var $UL = $('<ul class="nav nav-tabs" role="tablist"/>');
         var $LI = $('<li role="presentation"/>');
         var $A = $('<a role="tab" data-toggle="tab" style="text-decoration:none;"/>');
-        var $WRAPPER = $('<div class="tab-content"/>');
-        for (var title in order) {
-            var languages = order[title];
-            if (languages.length === 1) {
-                continue;
+        var $WRAPPER = $('<div class="tab-content content"/>');
+        var snippets = [];
+        var languageEventElements = {};
+        $('div.tabbed-example', $content).each(function () {
+            var $exampleBlock = $(this);
+            var title = $exampleBlock.children('div.title', this).first().text();
+            var languages = [];
+            var $languageBlocks = {};
+            $('div.listingblock', this).each(function () {
+                var language = $('code', this).data('lang');
+                languages.push(language);
+                $languageBlocks[language] = $(this);
+            });
+            if (languages.length > 1) {
+                snippets.push({'$exampleBlock': $exampleBlock, 'languages': languages, '$languageBlocks': $languageBlocks});
             }
-            var idBase = title.toLocaleLowerCase().replace(' ', '-');
-            var $ul = $UL.clone();
+        });
+        var idNum = 0;
+        for (var ix = 0; ix < snippets.length; ix++) {
+            var snippet = snippets[ix];
+            var languages = snippet.languages;
+            var $languageBlocks = snippet.$languageBlocks;
+            var $exampleBlock = snippet.$exampleBlock;
+            var idBase = 'tabbed-example-' + idNum++;
             var $wrapper = $WRAPPER.clone();
+            var $ul = $UL.clone();
             for (var i = 0; i < languages.length; i++) {
                 var language = languages[i];
-                var source = snippets[title][language];
-                var $content = source['$content'];
+                var $content = $($languageBlocks[language]);
                 var id;
                 if ($content.attr('id')) {
                     id = $content.attr('id');
@@ -165,13 +155,12 @@ function DocGist($) {
                 if (i === 0) {
                     $li.addClass('active');
                     $content.addClass('active');
-                } else {
-                    source['$block'].remove();
                 }
                 $li.append($a);
                 $ul.append($li);
             }
-            snippets[title][languages[0]]['$block'].append($ul).append($wrapper);
+            $exampleBlock.children('div.content').first().replaceWith($ul);
+            $exampleBlock.append($wrapper);
         }
     }
 
