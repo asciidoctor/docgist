@@ -1,5 +1,4 @@
 = Using CodeMirror
-
 :source-highlighter: codemirror
 
 To activate support for http://codemirror.net/[CodeMirror] add the following to the document header:

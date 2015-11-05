@@ -1,5 +1,4 @@
 = Using Prettify
-
 :source-highlighter: prettify
 
 To activate support for https://code.google.com/p/google-code-prettify/[Prettify] add the following to the document header:

@@ -38,15 +38,15 @@ function DocGist($) {
         var highlighter = undefined;
         try {
             doc = Opal.Asciidoctor.$load(content, getAsciidoctorOptions('parse_header_only=true'));
-            var attributes = doc.attributes.map;
+            var attributes = doc.attributes;
             var attributeOverrides = [];
-            if ('source-highlighter' in attributes) {
-                highlighter = attributes['source-highlighter'];
+            if (attributes['$has_key?']('source-highlighter')) {
+                highlighter = attributes.$fetch('source-highlighter');
             }
             if ('imageBaseLocation' in options || 'siteBaseLocation' in options) {
-                if ('imagesdir' in attributes) {
+                if (attributes['$has_key?']('imagesdir')) {
                     // only alter relative values, not URLs
-                    var imagesdir = attributes.imagesdir;
+                    var imagesdir = attributes.$fetch('imagesdir');
                     if (imagesdir.slice(-1) === '/') {
                         // root-relative URL
                         if ('siteBaseLocation' in options) {
