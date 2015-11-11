@@ -2,7 +2,8 @@
 
 function DocGist($) {
     var DEFAULT_SOURCE = 'github-asciidoctor%2Fdocgist%2F%2Fgists%2Fexample.adoc';
-    var ASCIIDOCTOR_DEFAULT_ATTRIBUTES = ['showtitle=@', 'icons=font', 'sectanchors=@', 'source-highlighter=highlightjs@', 'platform=opal', 'platform-opal', 'env=docgist', 'env-docgist', 'toc=macro', 'example-caption!'];
+    var DEFAULT_HIGHLIGHTER = 'highlightjs';
+    var ASCIIDOCTOR_DEFAULT_ATTRIBUTES = ['showtitle=@', 'icons=font', 'sectanchors=@', 'source-highlighter=' + DEFAULT_HIGHLIGHTER + '@', 'coderay-unavailable', 'pygments-unavailable', 'platform=opal', 'platform-opal', 'env=docgist', 'env-docgist', 'toc=macro', 'example-caption!'];
     var DOCGIST_LIB_VERSIONS = {
         'prettify': 'r298',
         'mathjax': '2.5.3'
@@ -40,9 +41,16 @@ function DocGist($) {
             doc = Opal.Asciidoctor.$load(content, getAsciidoctorOptions('parse_header_only=true'));
             var attributes = doc.attributes;
             var attributeOverrides = [];
+
             if (attributes['$has_key?']('source-highlighter')) {
-                highlighter = attributes.$fetch('source-highlighter');
+                highlighter = attributes.$fetch('source-highlighter').toLowerCase();
+                if (highlighter === 'coderay' || highlighter === 'pygments') {
+                    console.log('Syntax highlighter not supported by DocGist: "' + highlighter + '", using "' + DEFAULT_HIGHLIGHTER + '" instead.');
+                    attributeOverrides.push('source-highlighter=' + DEFAULT_HIGHLIGHTER);
+                    highlighter = DEFAULT_HIGHLIGHTER;
+                }
             }
+
             if ('imageBaseLocation' in options || 'siteBaseLocation' in options) {
                 if (attributes['$has_key?']('imagesdir')) {
                     // only alter relative values, not URLs
@@ -61,6 +69,7 @@ function DocGist($) {
                     attributeOverrides.push('imagesdir=' + options['imageBaseLocation']);
                 }
             }
+
             html = Opal.Asciidoctor.$convert(content, getAsciidoctorOptions.apply(null, attributeOverrides));
         }
         catch (e) {
@@ -114,7 +123,11 @@ function DocGist($) {
                 $languageBlocks[language] = $(this);
             });
             if (languages.length > 1) {
-                snippets.push({'$exampleBlock': $exampleBlock, 'languages': languages, '$languageBlocks': $languageBlocks});
+                snippets.push({
+                    '$exampleBlock': $exampleBlock,
+                    'languages': languages,
+                    '$languageBlocks': $languageBlocks
+                });
             }
         });
         var idNum = 0;
@@ -199,21 +212,28 @@ function DocGist($) {
     }
 
     function applyHighlighting(highlighter) {
-        var hl = highlighter.toLowerCase();
         var AVAILABLE_HIGHLIGHTERS = {
             'highlightjs': highlightUsingHighlightjs,
             'highlight.js': highlightUsingHighlightjs,
             'prettify': highlightUsingPrettify,
             'codemirror': highlightUsingCodeMirror
         };
-        if (hl in AVAILABLE_HIGHLIGHTERS) {
-            AVAILABLE_HIGHLIGHTERS[hl]();
+
+        $('pre.CodeRay > code[data-lang],pre.pygments > code[data-lang]', $content).each(function () {
+            var $e = $(this);
+            var language = $e.data('lang');
+            $e.addClass('language-' + language);
+        });
+
+        if (highlighter in AVAILABLE_HIGHLIGHTERS) {
+            AVAILABLE_HIGHLIGHTERS[highlighter]();
         } else {
-            console.log('Unknown syntax highlighter: ' + highlighter);
+            console.log('Unknown syntax highlighter "' + highlighter + '", using "' + DEFAULT_HIGHLIGHTER + '" instead.');
             // not in IE8
             if ('keys' in Object) {
                 console.log('Recognized highlighter names: ' + Object.keys(AVAILABLE_HIGHLIGHTERS));
             }
+            AVAILABLE_HIGHLIGHTERS[DEFAULT_HIGHLIGHTER]();
         }
     }
 

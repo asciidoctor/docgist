@@ -1,5 +1,5 @@
 = Tabbed source
-:source-highlighter: prettify
+:source-highlighter: codemirror
 
 [CAUTION]
 .Experimental
@@ -65,18 +65,18 @@ var baz = "bar";
 The source for one tabbed example looks like this:
 
 [source,asciidoc]
+....
+[.tabbed-example]
+.Second example
+====
+[source,java]
 ----
-  [.tabbed-example]
-  .Second example
-  ====
-  [source,java]
-  ----
-  String bar = "foo";
-  ----
+String bar = "foo";
+----
 
-  [source,javascript]
-  ----
-  var bar = "foo";
-  ----
-  ====
+[source,javascript]
 ----
+var bar = "foo";
+----
+====
+....

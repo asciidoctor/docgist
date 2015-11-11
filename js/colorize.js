@@ -16,6 +16,11 @@ CodeMirror.colorize = function(collection, defaultMode) {
     }
 
     function run(node, mode) {
+        if (mode === "asciidoc" || mode === "cypher") {
+            // no need to require those modes; we always load them
+            applyMode(node, mode);
+            return;
+        }
         var found = false;
         for (var i = 0; i < CodeMirror.modeInfo.length; i++) {
             if (CodeMirror.modeInfo[i].mode === mode) {
@@ -28,13 +33,17 @@ CodeMirror.colorize = function(collection, defaultMode) {
             return;
         }
         CodeMirror.requireMode(mode, function() {
-            var text = [];
-            textContent(node, text);
-            node.innerHTML = "";
-            CodeMirror.runMode(text.join(""), mode, node);
-
-            node.className += mode == "cypher" ? " cm-s-neo" : " cm-s-default";
+            applyMode(node, mode);
         });
+    }
+
+    function applyMode(node, mode) {
+        var text = [];
+        textContent(node, text);
+        node.innerHTML = "";
+        CodeMirror.runMode(text.join(""), mode, node);
+
+        node.className += mode == "cypher" ? " cm-s-neo" : " cm-s-default";
     }
 
     if (!collection) collection = document.body.getElementsByTagName("code");
