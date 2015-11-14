@@ -1,5 +1,6 @@
 = Using CodeMirror
 :source-highlighter: codemirror
+:source-language: cypher
 
 To activate support for http://codemirror.net/[CodeMirror] add the following to the document header:
 
@@ -73,8 +74,10 @@ CREATE (:Movie { title:"The Matrix",released:1997 })
 ====
 Highlighting can be used inline as well, for example:
 
-* `[src-cypher]`CREATE`` renders like: [src-cypher]`CREATE` and
-* `[src-ruby]`require`` renders like: [src-ruby]`require`.
+* `[src-cypher]`CREATE`` renders like: [src-cypher]`CREATE`,
+* `[src-ruby]`require`` renders like: [src-ruby]`require`, and
+* `[src]`MATCH`` renders like: [src]`MATCH`.
 
+The last one is due to the fact that we have set [src-asciidoc]`:source-language: cypher` in the document header.
 This is a feature of DocGist.
 ====

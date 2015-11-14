@@ -231,6 +231,9 @@ function DocGist($) {
             $('pre>code:not([data-lang])', $content).each(function () {
                 $(this).data('lang', sourceLanguage).addClass('language-' + sourceLanguage);
             });
+            $('code.src', $content).each(function () {
+                $(this).data('lang', sourceLanguage).addClass('src-' + sourceLanguage).removeClass('src');
+            });
         }
 
         $('pre.CodeRay > code[data-lang],pre.pygments > code[data-lang]', $content).each(function () {
@@ -294,7 +297,7 @@ function DocGist($) {
                 }
             }
             if ($parent.length === 0) {
-                $e.css('display', 'inline').addClass(language);
+                $e.css('display', 'inline').addClass(language).css('padding', 0);
             } else {
                 $parent.addClass(language);
             }

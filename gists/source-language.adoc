@@ -42,3 +42,11 @@ it will render as JavaScript in this case, as that's what we configured as the d
 var foo = "bar";
 ----
 
+[CAUTION]
+.Experimental
+====
+Highlighting can be used inline as well, and will pick up the `source-language` attribute.
+For example `[src]`var`` renders like: [src]`var`.
+
+This is a feature of DocGist.
+====

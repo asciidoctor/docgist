@@ -1,5 +1,6 @@
 = Using highlight.js
 :source-highlighter: highlightjs
+:source-language: ruby
 
 To activate support for https://highlightjs.org/[highlight.js] add the following to the document header:
 
@@ -67,6 +68,7 @@ Want to see a image::images/tiger.png[Tiger]?
 [CAUTION]
 .Experimental
 ====
-Highighting can be used inline as well, for example `[src-ruby]`require`` renders like: [src-ruby]`require`.
-This is a feature of DocGist.
+* Highighting can be used inline as well, for example `[src-ruby]`require`` renders like: [src-ruby]`require`.
+* By setting [src-asciidoc]`:source-language: ruby` in the document header we can simply write `[src]`require`` which then renders like: [src]`require`.
+* This is a feature of DocGist.
 ====
