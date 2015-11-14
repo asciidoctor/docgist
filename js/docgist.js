@@ -3,6 +3,7 @@
 function DocGist($) {
     var DEFAULT_SOURCE = 'github-asciidoctor%2Fdocgist%2F%2Fgists%2Fexample.adoc';
     var DEFAULT_HIGHLIGHTER = 'codemirror';
+    var UNAVAILABLE_HIGHLIGHTERS = ['coderay', 'pygments', 'source-highlight', 'highlight'];
     var ASCIIDOCTOR_DEFAULT_ATTRIBUTES = {
         'showtitle': '@',
         'icons': 'font',
@@ -35,12 +36,8 @@ function DocGist($) {
         $gistId.keydown(gist.readSourceId);
     });
 
-    function getAsciidoctorOptions(overrides, withoutDefaults) {
-        var attributes = {};
-        if (!withoutDefaults) {
-            $.extend(attributes, ASCIIDOCTOR_DEFAULT_ATTRIBUTES);
-        }
-        $.extend(attributes, overrides);
+    function getAsciidoctorOptions(overrides) {
+        var attributes = $.extend({}, ASCIIDOCTOR_DEFAULT_ATTRIBUTES, overrides);
         var attributeList = [];
         for (var key in attributes) {
             attributeList.push(key + '=' + attributes[key]);
@@ -61,13 +58,13 @@ function DocGist($) {
         var highlighter = undefined;
         var sourceLanguage = undefined;
         try {
-            doc = Opal.Asciidoctor.$load(content, getAsciidoctorOptions({'parse_header_only': 'true'}, true));
+            doc = Opal.Asciidoctor.$load(content, getAsciidoctorOptions({'parse_header_only': 'true'}));
             var attributes = doc.attributes;
             var attributeOverrides = {};
 
             if (attributes['$has_key?']('source-highlighter')) {
                 highlighter = attributes.$fetch('source-highlighter').toLowerCase();
-                if (highlighter === 'coderay' || highlighter === 'pygments') {
+                if ($.inArray(highlighter, UNAVAILABLE_HIGHLIGHTERS) !== -1) {
                     console.log('Syntax highlighter not supported by DocGist: "' + highlighter + '", using "' + DEFAULT_HIGHLIGHTER + '" instead.');
                     attributeOverrides['source-highlighter'] = DEFAULT_HIGHLIGHTER;
                     highlighter = DEFAULT_HIGHLIGHTER;
