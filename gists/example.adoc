@@ -30,6 +30,7 @@ If the images are located elsewhere, use the `imagesdir` attribute to point out 
 See the http://asciidoctor.org/docs/user-manual/#set-the-images-directory[Asciidoctor user manual] for the details.
 There's also an link:./?github-asciidoctor%2Fdocgist%2F%2Fgists%2Fimages.adoc[image example].
 
+[source,asciidoc]
 ----
 image::sunset.jpg[]
 ----
@@ -42,9 +43,10 @@ image::sunset.jpg[]
 
 To add a table of contents, put this in the place you want it to appear:
 
---
- toc::[]
---
+[source,asciidoc]
+....
+toc::[]
+....
 
 == Source code highlighting
 
@@ -53,6 +55,7 @@ See the link:./?github-asciidoctor%2Fdocgist%2F%2Fgists%2Fcodemirror.adoc[CodeMi
 
 Simply include the source code like this:
 
+[source,asciidoc]
 ....
 [source,ruby]
 .app.rb
@@ -104,12 +107,13 @@ Thanks to https://www.mathjax.org/[MathJax] mathematical expressions can be type
 
 For block content, do like this:
 
---
- [stem]
- ++++
- sqrt(4) = 2
- ++++
---
+[source,asciidoc]
+....
+[stem]
+++++
+sqrt(4) = 2
+++++
+....
 
 It will render like below:
 
@@ -120,9 +124,10 @@ sqrt(4) = 2
 
 You can use it inline as well, for example:
 
---
- Water (stem:[H_2O]) is a critical component.
---
+[source,asciidoc]
+....
+Water (stem:[H_2O]) is a critical component.
+....
 
 Which renders like this: Water (stem:[H_2O]) is a critical component.
 
@@ -134,7 +139,7 @@ This makes things easier in case you run DocGist locally to fiddle with the "`ba
 You can view the source Gist of this page by clicking on the green button in the navbar.
 
 How about some UML?
-The following image is included using the syntax `image::http://yuml.me/c9ce39b0.png[]`.
+The following image is included using the syntax [src-asciidoc]`image::http://yuml.me/c9ce39b0.png[]`.
 
 image::http://yuml.me/c9ce39b0.png[]
 
