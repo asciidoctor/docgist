@@ -1,0 +1,72 @@
+= Using highlight.js
+:source-highlighter: highlightjs
+
+To activate support for https://highlightjs.org/[highlight.js] add the following to the document header:
+
+[source,asciidoc]
+----
+:source-highlighter: highlightjs
+----
+
+Then simply include the source code like this:
+
+[source,asciidoc]
+....
+[source,ruby]
+.app.rb
+----
+require 'sinatra'
+get '/hi' do
+ "Hello World!"
+end
+----
+....
+
+This is how it gets rendered:
+
+[source,ruby]
+.app.rb
+----
+require 'sinatra'
+get '/hi' do
+  "Hello World!"
+end
+----
+
+You can highlight AsciiDoc source as well:
+
+[source,asciidoc]
+....
+[source,asciidoc]
+----
+== We're back!
+
+Want to see a image::images/tiger.png[Tiger]?
+
+.Nested highlighting
+++++
+<this_is inline="xml"></this_is>
+++++
+----
+....
+
+This will render like so:
+
+[source,asciidoc]
+----
+== We're back!
+
+Want to see a image::images/tiger.png[Tiger]?
+
+.Nested highlighting
+++++
+<this_is inline="xml"></this_is>
+++++
+----
+
+[CAUTION]
+.Experimental
+====
+Highighting can be used inline as well, for example `[src-ruby]`require`` renders like: [src-ruby]`require`.
+This is a feature of DocGist.
+====

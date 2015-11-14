@@ -3,22 +3,24 @@
 
 To activate support for http://codemirror.net/[CodeMirror] add the following to the document header:
 
+[source,asciidoc]
 ----
 :source-highlighter: codemirror
 ----
 
 Then simply include the source code like this:
 
---
- [source,ruby]
- .app.rb
- ----
- require 'sinatra'
- get '/hi' do
-   "Hello World!"
- end
- ----
---
+[source,asciidoc]
+....
+[source,ruby]
+.app.rb
+----
+require 'sinatra'
+get '/hi' do
+  "Hello World!"
+end
+----
+....
 
 This is how it gets rendered:
 
@@ -31,7 +33,34 @@ get '/hi' do
 end
 ----
 
-If you highlight http://neo4j.com/developer/cypher/[Cypher] code, its special theme kicks in here on DocGist:
+If you highlight AsciiDoc code, the _elegant_ theme will kick in on DocGist.
+
+The source:
+
+[source,asciidoc]
+....
+[source,asciidoc]
+----
+= Lightweight Markup Languages
+Doc Writer <doc.writer@asciidoc.org>
+v1.0, 2012-01-01
+
+According to Wikipedia...
+----
+....
+
+How it gets rendered:
+
+[source,asciidoc]
+----
+= Lightweight Markup Languages
+Doc Writer <doc.writer@asciidoc.org>
+v1.0, 2012-01-01
+
+According to Wikipedia...
+----
+
+If you highlight http://neo4j.com/developer/cypher/[Cypher] code, its special _neo_ theme kicks in here on DocGist:
 
 [source,cypher]
 .Create a movie node
@@ -42,6 +71,10 @@ CREATE (:Movie { title:"The Matrix",released:1997 })
 [CAUTION]
 .Experimental
 ====
-Highighting can be used inline as well, for example `[src-cypher]`CREATE`` renders like: [src-cypher]`CREATE`.
+Highlighting can be used inline as well, for example:
+
+* `[src-cypher]`CREATE`` renders like: [src-cypher]`CREATE` and
+* `[src-ruby]`require`` renders like: [src-ruby]`require`.
+
 This is a feature of DocGist.
 ====

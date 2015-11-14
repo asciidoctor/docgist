@@ -2,7 +2,7 @@
 
 function DocGist($) {
     var DEFAULT_SOURCE = 'github-asciidoctor%2Fdocgist%2F%2Fgists%2Fexample.adoc';
-    var DEFAULT_HIGHLIGHTER = 'highlightjs';
+    var DEFAULT_HIGHLIGHTER = 'codemirror';
     var ASCIIDOCTOR_DEFAULT_ATTRIBUTES = ['showtitle=@', 'icons=font', 'sectanchors=@', 'source-highlighter=' + DEFAULT_HIGHLIGHTER + '@', 'coderay-unavailable', 'pygments-unavailable', 'platform=opal', 'platform-opal', 'env=docgist', 'env-docgist', 'toc=macro', 'example-caption!'];
     var DOCGIST_LIB_VERSIONS = {
         'prettify': 'r298',
@@ -37,6 +37,7 @@ function DocGist($) {
         $content.empty();
         var doc, html = undefined;
         var highlighter = undefined;
+        var sourceLanguage = undefined;
         try {
             doc = Opal.Asciidoctor.$load(content, getAsciidoctorOptions('parse_header_only=true'));
             var attributes = doc.attributes;
@@ -49,6 +50,13 @@ function DocGist($) {
                     attributeOverrides.push('source-highlighter=' + DEFAULT_HIGHLIGHTER);
                     highlighter = DEFAULT_HIGHLIGHTER;
                 }
+            }
+
+            if (attributes['$has_key?']('language')) {
+                sourceLanguage = attributes.$fetch('language').toLowerCase();
+            }
+            if (attributes['$has_key?']('source-language')) {
+                sourceLanguage = attributes.$fetch('source-language').toLowerCase();
             }
 
             if ('imageBaseLocation' in options || 'siteBaseLocation' in options) {
@@ -86,7 +94,7 @@ function DocGist($) {
         }
 
         if (highlighter) {
-            applyHighlighting(highlighter);
+            applyHighlighting(highlighter, sourceLanguage);
         }
 
         appendMathJax();
@@ -211,13 +219,19 @@ function DocGist($) {
         addScriptElement('https://cdnjs.cloudflare.com/ajax/libs/mathjax/' + version + '/MathJax.js?config=TeX-MML-AM_HTMLorMML');
     }
 
-    function applyHighlighting(highlighter) {
+    function applyHighlighting(highlighter, sourceLanguage) {
         var AVAILABLE_HIGHLIGHTERS = {
             'highlightjs': highlightUsingHighlightjs,
             'highlight.js': highlightUsingHighlightjs,
             'prettify': highlightUsingPrettify,
             'codemirror': highlightUsingCodeMirror
         };
+
+        if (sourceLanguage) {
+            $('pre>code:not([data-lang])', $content).each(function () {
+                $(this).data('lang', sourceLanguage).addClass('language-' + sourceLanguage);
+            });
+        }
 
         $('pre.CodeRay > code[data-lang],pre.pygments > code[data-lang]', $content).each(function () {
             var $e = $(this);
@@ -271,8 +285,18 @@ function DocGist($) {
             e.className = e.className.replace('src-', 'language-');
             hljs.highlightBlock(e);
             var $e = $(e);
-            if ($e.parent('pre.highlight').length === 0) {
-                $e.css('display', 'inline');
+            var $parent = $e.parent('pre.highlight');
+            var language = $e.data('lang');
+            if (!language) {
+                var matches = e.className.match(/language-([a-z]*)/);
+                if (matches.length === 2) {
+                    language = matches[1];
+                }
+            }
+            if ($parent.length === 0) {
+                $e.css('display', 'inline').addClass(language);
+            } else {
+                $parent.addClass(language);
             }
         });
     }

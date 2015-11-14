@@ -12,6 +12,7 @@
 
 <link href="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.css" rel="stylesheet">
 <link href="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/theme/neo.min.css" rel="stylesheet">
+<link href="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/theme/elegant.min.css" rel="stylesheet">
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/addon/runmode/runmode.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/addon/mode/loadmode.min.js"></script>
@@ -23,9 +24,9 @@
     CodeMirror.modeURL = '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/mode/%N/%N.js';
 </script>
 
-<link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/styles/github.min.css" rel="stylesheet">
+<link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/styles/default.min.css" rel="stylesheet">
 <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/highlight.min.js"></script>
-
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/languages/asciidoc.min.js"></script>
 <script src="js/asciidoctor-all.min.js"></script>
 <script src="js/base64.js"></script>
 <script src="js/gist.js"></script>
@@ -66,6 +67,19 @@
 
     div.alert {
         font-size: 1.125rem;
+    }
+
+    /* fix bootstrap asiciidoctor clash */
+    .listingblock pre.highlightjs {
+        padding: 1em;
+    }
+    .listingblock pre.highlightjs>code {
+        padding: 0;
+    }
+
+    .cm-s-elegant span.cm-comment {
+        /* workaround for tables */
+        font-style: normal;
     }
 
     div.exampleblock.tabbed-example > div.content > div.listingblock {

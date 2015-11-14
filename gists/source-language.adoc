@@ -1,0 +1,44 @@
+= Source language
+:source-language: javascript
+
+To set a default language for source  blocks, set the `source-language` attribute in the document header:
+
+[source,asciidoc]
+----
+:source-language: javascript
+----
+
+Source blocks where the source language is defined behave as usual:
+
+[source,asciidoc]
+....
+[source,java]
+----
+String foo = "bar";
+----
+....
+
+renders as:
+
+[source,java]
+----
+String foo = "bar";
+----
+
+If we don't give a language:
+
+[source,asciidoc]
+....
+[source]
+----
+var foo = "bar";
+----
+....
+
+it will render as JavaScript in this case, as that's what we configured as the default language:
+
+[source]
+----
+var foo = "bar";
+----
+

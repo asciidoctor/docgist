@@ -48,19 +48,21 @@ To add a table of contents, put this in the place you want it to appear:
 
 == Source code highlighting
 
-By default, source code is highlighted using https://highlightjs.org/[highlight.js].
+By default, source code is highlighted using https://codemirror.net/[CodeMirror].
+See the link:./?github-asciidoctor%2Fdocgist%2F%2Fgists%2Fcodemirror.adoc[CodeMirror example] for more information.
+
 Simply include the source code like this:
 
---
- [source,ruby]
- .app.rb
- ----
- require 'sinatra'
- get '/hi' do
-   "Hello World!"
- end
- ----
---
+....
+[source,ruby]
+.app.rb
+----
+require 'sinatra'
+get '/hi' do
+ "Hello World!"
+end
+----
+....
 
 This is how it gets rendered:
 
@@ -76,9 +78,17 @@ end
 https://code.google.com/p/google-code-prettify/[Prettify] is supported as well.
 See the link:./?github-asciidoctor%2Fdocgist%2F%2Fgists%2Fprettify.adoc[Prettify example] for how to activate it.
 
-You can also choose to use https://codemirror.net/[CodeMirror], see the link:./?github-asciidoctor%2Fdocgist%2F%2Fgists%2Fcodemirror.adoc[CodeMirror example].
+https://highlightjs.org/[highlight.js] is supported too.
+See the link:./?github-asciidoctor%2Fdocgist%2F%2Fgists%2Fhighlightjs.adoc[highlight.js example] for how to activate it.
 
-NOTE: Only one source highlighter can be defined per document when using DocGist.
+If you want to set a default language for `source` blocks, set the `source-language` attribute in the document header.
+See link:./?github-asciidoctor%2Fdocgist%2F%2Fgists%2Fprettify.adoc[Source language] for how to use it.
+
+[NOTE]
+====
+* Only one source highlighter can be defined per document when using DocGist.
+* The source highlighter must be set in the document header.
+====
 
 [CAUTION]
 .Experimental Features in DocGist
