@@ -3,7 +3,20 @@
 function DocGist($) {
     var DEFAULT_SOURCE = 'github-asciidoctor%2Fdocgist%2F%2Fgists%2Fexample.adoc';
     var DEFAULT_HIGHLIGHTER = 'codemirror';
-    var ASCIIDOCTOR_DEFAULT_ATTRIBUTES = ['showtitle=@', 'icons=font', 'sectanchors=@', 'source-highlighter=' + DEFAULT_HIGHLIGHTER + '@', 'coderay-unavailable', 'pygments-unavailable', 'platform=opal', 'platform-opal', 'env=docgist', 'env-docgist', 'toc=macro', 'example-caption!'];
+    var ASCIIDOCTOR_DEFAULT_ATTRIBUTES = {
+        'showtitle': '@',
+        'icons': 'font',
+        'sectanchors': '@',
+        'source-highlighter': DEFAULT_HIGHLIGHTER + '@',
+        'coderay-unavailable': '',
+        'pygments-unavailable': '',
+        'platform': 'opal',
+        'platform-opal': '',
+        'env': 'docgist',
+        'env-docgist': '',
+        'toc': 'macro',
+        'example-caption!': ''
+    };
     var DOCGIST_LIB_VERSIONS = {
         'prettify': 'r298',
         'mathjax': '2.5.3'
@@ -22,11 +35,20 @@ function DocGist($) {
         $gistId.keydown(gist.readSourceId);
     });
 
-    function getAsciidoctorOptions() {
+    function getAsciidoctorOptions(overrides, withoutDefaults) {
+        var attributes = {};
+        if (!withoutDefaults) {
+            $.extend(attributes, ASCIIDOCTOR_DEFAULT_ATTRIBUTES);
+        }
+        $.extend(attributes, overrides);
+        var attributeList = [];
+        for (var key in attributes) {
+            attributeList.push(key + '=' + attributes[key]);
+        }
         return Opal.hash({
             'to_file': false,
             'safe': 'secure',
-            'attributes': ASCIIDOCTOR_DEFAULT_ATTRIBUTES.concat([].slice.apply(arguments))
+            'attributes': attributeList
         });
     }
 
@@ -39,17 +61,20 @@ function DocGist($) {
         var highlighter = undefined;
         var sourceLanguage = undefined;
         try {
-            doc = Opal.Asciidoctor.$load(content, getAsciidoctorOptions('parse_header_only=true'));
+            doc = Opal.Asciidoctor.$load(content, getAsciidoctorOptions({'parse_header_only': 'true'}, true));
             var attributes = doc.attributes;
-            var attributeOverrides = [];
+            var attributeOverrides = {};
 
             if (attributes['$has_key?']('source-highlighter')) {
                 highlighter = attributes.$fetch('source-highlighter').toLowerCase();
                 if (highlighter === 'coderay' || highlighter === 'pygments') {
                     console.log('Syntax highlighter not supported by DocGist: "' + highlighter + '", using "' + DEFAULT_HIGHLIGHTER + '" instead.');
-                    attributeOverrides.push('source-highlighter=' + DEFAULT_HIGHLIGHTER);
+                    attributeOverrides['source-highlighter'] = DEFAULT_HIGHLIGHTER;
                     highlighter = DEFAULT_HIGHLIGHTER;
                 }
+            } else {
+                attributeOverrides['source-highlighter'] = DEFAULT_HIGHLIGHTER;
+                highlighter = DEFAULT_HIGHLIGHTER;
             }
 
             if (attributes['$has_key?']('language')) {
@@ -66,19 +91,19 @@ function DocGist($) {
                     if (imagesdir.slice(-1) === '/') {
                         // root-relative URL
                         if ('siteBaseLocation' in options) {
-                            attributeOverrides.push('imagesdir=' + options['siteBaseLocation'] + imagesdir);
+                            attributeOverrides['imagesdir'] = options['siteBaseLocation'] + imagesdir;
                         }
                     } else if ('imageBaseLocation' in options && imagesdir.substr(0, 4) !== 'http') {
                         // relative URL
-                        attributeOverrides.push('imagesdir=' + options['imageBaseLocation'] + '/' + imagesdir);
+                        attributeOverrides['imagesdir'] = options['imageBaseLocation'] + '/' + imagesdir;
                     }
                 } else if ('imageBaseLocation' in options) {
                     // default to the same location as the document
-                    attributeOverrides.push('imagesdir=' + options['imageBaseLocation']);
+                    attributeOverrides['imagesdir'] = options['imageBaseLocation'];
                 }
             }
 
-            html = Opal.Asciidoctor.$convert(content, getAsciidoctorOptions.apply(null, attributeOverrides));
+            html = Opal.Asciidoctor.$convert(content, getAsciidoctorOptions(attributeOverrides));
         }
         catch (e) {
             errorMessage(e.name + ':' + '<p>' + e.message + '</p>');
@@ -228,19 +253,10 @@ function DocGist($) {
         };
 
         if (sourceLanguage) {
-            $('pre>code:not([data-lang])', $content).each(function () {
-                $(this).data('lang', sourceLanguage).addClass('language-' + sourceLanguage);
-            });
             $('code.src', $content).each(function () {
                 $(this).data('lang', sourceLanguage).addClass('src-' + sourceLanguage).removeClass('src');
             });
         }
-
-        $('pre.CodeRay > code[data-lang],pre.pygments > code[data-lang]', $content).each(function () {
-            var $e = $(this);
-            var language = $e.data('lang');
-            $e.addClass('language-' + language);
-        });
 
         if (highlighter in AVAILABLE_HIGHLIGHTERS) {
             AVAILABLE_HIGHLIGHTERS[highlighter]();

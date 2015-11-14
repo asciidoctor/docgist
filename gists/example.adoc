@@ -85,7 +85,7 @@ https://highlightjs.org/[highlight.js] is supported too.
 See the link:./?github-asciidoctor%2Fdocgist%2F%2Fgists%2Fhighlightjs.adoc[highlight.js example] for how to activate it.
 
 If you want to set a default language for `source` blocks, set the `source-language` attribute in the document header.
-See link:./?github-asciidoctor%2Fdocgist%2F%2Fgists%2Fprettify.adoc[Source language] for how to use it.
+See link:./?github-asciidoctor%2Fdocgist%2F%2Fgists%2Fsource-language.adoc[Source language] for how to use it.
 
 [NOTE]
 ====
@@ -98,7 +98,7 @@ See link:./?github-asciidoctor%2Fdocgist%2F%2Fgists%2Fprettify.adoc[Source langu
 ====
 * Highlighting can be used inline as well, for example `[src-ruby]`do`` renders like: [src-ruby]`do`.
 * Multiple code snippets in different languages can be combined into a tabbed view.
-  See the link:./?github-asciidoctor%2Fdocgist%2F%2Fgists%2Ftabbed-source.adoc[Tabbed Source] example for more information.
+  See the link:./?github-asciidoctor%2Fdocgist%2F%2Fgists%2Ftabbed-source.adoc[Tabbed source] example for more information.
 ====
 
 == Math
