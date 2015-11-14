@@ -2,6 +2,10 @@
 
 function DocGist($) {
     var DEFAULT_SOURCE = 'github-asciidoctor%2Fdocgist%2F%2Fgists%2Fexample.adoc';
+    var DOCGIST_LIB_VERSIONS = {
+        'prettify': 'r298',
+        'mathjax': '2.5.3'
+    };
     var DEFAULT_HIGHLIGHTER = 'codemirror';
     var UNAVAILABLE_HIGHLIGHTERS = ['coderay', 'pygments', 'source-highlight', 'highlight'];
     var ASCIIDOCTOR_DEFAULT_ATTRIBUTES = {
@@ -16,11 +20,7 @@ function DocGist($) {
         'env': 'docgist',
         'env-docgist': '',
         'toc': 'macro',
-        'example-caption!': ''
-    };
-    var DOCGIST_LIB_VERSIONS = {
-        'prettify': 'r298',
-        'mathjax': '2.5.3'
+        'example-caption!': '@'
     };
     window.DocgistLibVersions = DOCGIST_LIB_VERSIONS;
 
@@ -36,8 +36,8 @@ function DocGist($) {
         $gistId.keydown(gist.readSourceId);
     });
 
-    function getAsciidoctorOptions(overrides) {
-        var attributes = $.extend({}, ASCIIDOCTOR_DEFAULT_ATTRIBUTES, overrides);
+    function getAsciidoctorOptions(overrides, urlOverrides) {
+        var attributes = $.extend({}, ASCIIDOCTOR_DEFAULT_ATTRIBUTES, urlOverrides, overrides);
         var attributeList = [];
         for (var key in attributes) {
             attributeList.push(key + '=' + attributes[key]);
@@ -47,6 +47,44 @@ function DocGist($) {
             'safe': 'secure',
             'attributes': attributeList
         });
+    }
+
+    function getUrlAttributes() {
+        // from http://stackoverflow.com/a/2880929/36710
+        var attributes = {};
+        var match,
+            pl = /\+/g,  // Regex for replacing addition symbol with a space
+            search = /([^&=]+)=?([^&]*)/g,
+            decode = function (s) {
+                return decodeURIComponent(s.replace(pl, " "));
+            },
+            query = window.location.search.substring(1);
+
+        var skipFirst = true;
+        while (match = search.exec(query)) {
+            if (skipFirst) {
+                skipFirst = false;
+            } else {
+                attributes[decode(match[1])] = decode(match[2]);
+            }
+        }
+        return attributes;
+    }
+
+    function existsInObjectOrHash(key, hash, object) {
+        if (key in object) {
+            return true;
+        } else {
+            return hash['$has_key?'](key);
+        }
+    }
+
+    function getValueFromObjectOrHash(key, hash, object) {
+        if (key in object) {
+            return object[key];
+        } else {
+            return hash.$fetch(key);
+        }
     }
 
     function renderContent(content, options) {
@@ -60,10 +98,11 @@ function DocGist($) {
         try {
             doc = Opal.Asciidoctor.$load(content, getAsciidoctorOptions({'parse_header_only': 'true'}));
             var attributes = doc.attributes;
+            var urlAttributes = getUrlAttributes();
             var attributeOverrides = {};
 
-            if (attributes['$has_key?']('source-highlighter')) {
-                highlighter = attributes.$fetch('source-highlighter').toLowerCase();
+            if (existsInObjectOrHash('source-highlighter', attributes, urlAttributes)) {
+                highlighter = getValueFromObjectOrHash('source-highlighter', attributes, urlAttributes).toLowerCase();
                 if ($.inArray(highlighter, UNAVAILABLE_HIGHLIGHTERS) !== -1) {
                     console.log('Syntax highlighter not supported by DocGist: "' + highlighter + '", using "' + DEFAULT_HIGHLIGHTER + '" instead.');
                     attributeOverrides['source-highlighter'] = DEFAULT_HIGHLIGHTER;
@@ -74,17 +113,16 @@ function DocGist($) {
                 highlighter = DEFAULT_HIGHLIGHTER;
             }
 
-            if (attributes['$has_key?']('language')) {
-                sourceLanguage = attributes.$fetch('language').toLowerCase();
-            }
-            if (attributes['$has_key?']('source-language')) {
-                sourceLanguage = attributes.$fetch('source-language').toLowerCase();
+            if (existsInObjectOrHash('source-language', attributes, urlAttributes)) {
+                sourceLanguage = getValueFromObjectOrHash('source-language', attributes, urlAttributes).toLowerCase();
+            } else if (existsInObjectOrHash('language', attributes, urlAttributes)) {
+                sourceLanguage = getValueFromObjectOrHash('language', attributes, urlAttributes).toLowerCase();
             }
 
             if ('imageBaseLocation' in options || 'siteBaseLocation' in options) {
-                if (attributes['$has_key?']('imagesdir')) {
+                if (existsInObjectOrHash('imagesdir', attributes, urlAttributes)) {
                     // only alter relative values, not URLs
-                    var imagesdir = attributes.$fetch('imagesdir');
+                    var imagesdir = getValueFromObjectOrHash('imagesdir', attributes, urlAttributes);
                     if (imagesdir.slice(-1) === '/') {
                         // root-relative URL
                         if ('siteBaseLocation' in options) {
@@ -100,7 +138,7 @@ function DocGist($) {
                 }
             }
 
-            html = Opal.Asciidoctor.$convert(content, getAsciidoctorOptions(attributeOverrides));
+            html = Opal.Asciidoctor.$convert(content, getAsciidoctorOptions(attributeOverrides, urlAttributes));
         }
         catch (e) {
             errorMessage(e.name + ':' + '<p>' + e.message + '</p>');

@@ -73,12 +73,15 @@
     .listingblock pre.highlightjs {
         padding: 1em;
     }
-    .listingblock pre.highlightjs>code {
+
+    .listingblock pre.highlightjs > code {
         padding: 0;
     }
+
     .verseblock pre {
         padding: 1em;
     }
+
     .cm-s-elegant span.cm-comment {
         /* workaround for tables */
         font-style: normal;
@@ -94,6 +97,18 @@
         }
     }
 </style>
+
+<script>
+    (function () {
+        var f = function () {
+        };
+        if (!window.console) {
+            window.console = {
+                log: f, info: f, warn: f, debug: f, error: f
+            };
+        }
+    }());
+</script>
 
 <body>
 <div class="navbar navbar-default">
