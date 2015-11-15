@@ -1,11 +1,12 @@
 'use strict';
 
 function DocGist($) {
-    var DEFAULT_SOURCE = 'github-asciidoctor%2Fdocgist%2F%2Fgists%2Fexample.adoc';
+    var DEFAULT_SOURCE = decodeURIComponent('github-asciidoctor%2Fdocgist%2F%2Fgists%2Fexample.adoc');
     var DOCGIST_LIB_VERSIONS = {
         'prettify': 'r298',
         'mathjax': '2.5.3'
     };
+    window.DocgistLibVersions = DOCGIST_LIB_VERSIONS;
     var DEFAULT_HIGHLIGHTER = 'codemirror';
     var UNAVAILABLE_HIGHLIGHTERS = ['coderay', 'pygments', 'source-highlight', 'highlight'];
     var ASCIIDOCTOR_DEFAULT_ATTRIBUTES = {
@@ -22,17 +23,19 @@ function DocGist($) {
         'toc': 'macro',
         'example-caption!': '@'
     };
-    window.DocgistLibVersions = DOCGIST_LIB_VERSIONS;
 
     var $content = undefined;
     var $gistId = undefined;
+    var urlAttributes = undefined;
 
     $(document).ready(function () {
         $content = $('#content');
         $gistId = $('#gist-id');
 
         var gist = new Gist($, $content);
-        gist.getGistAndRenderPage(renderContent, DEFAULT_SOURCE);
+        var urlInfo = getUrlAttributes();
+        urlAttributes = urlInfo.attributes;
+        gist.getGistAndRenderPage(renderContent, urlInfo.id, DEFAULT_SOURCE);
         $gistId.keydown(gist.readSourceId);
     });
 
@@ -60,15 +63,15 @@ function DocGist($) {
             },
             query = window.location.search.substring(1);
 
-        var skipFirst = true;
+        var first = undefined;
         while (match = search.exec(query)) {
-            if (skipFirst) {
-                skipFirst = false;
+            if (!first) {
+                first = decode(match[1]);
             } else {
                 attributes[decode(match[1])] = decode(match[2]);
             }
         }
-        return attributes;
+        return {'id': first, 'attributes': attributes};
     }
 
     function existsInObjectOrHash(key, hash, object) {
@@ -98,7 +101,6 @@ function DocGist($) {
         try {
             doc = Opal.Asciidoctor.$load(content, getAsciidoctorOptions({'parse_header_only': 'true'}));
             var attributes = doc.attributes;
-            var urlAttributes = getUrlAttributes();
             var attributeOverrides = {};
 
             if (existsInObjectOrHash('source-highlighter', attributes, urlAttributes)) {
@@ -168,6 +170,10 @@ function DocGist($) {
             $('a[href ^= "/"]', $content).each(function () {
                 this.href = options['siteBaseLocation'] + this.getAttribute('href');
             });
+        }
+
+        if ('interXrefReplacer' in options) {
+            options['interXrefReplacer']($content);
         }
 
         share();

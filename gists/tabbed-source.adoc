@@ -1,3 +1,4 @@
+[[tabbed-source]]
 = Tabbed source
 :source-highlighter: codemirror
 

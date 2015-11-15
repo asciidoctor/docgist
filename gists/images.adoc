@@ -1,3 +1,4 @@
+[[images]]
 = Images
 :imagesdir: assets
 
@@ -6,12 +7,14 @@ For the full details see the http://asciidoctor.org/docs/user-manual/#set-the-im
 
 In our case, the images are located in the `assets` directory, so this is what goes into the document header:
 
+[source,asciidoc]
 ----
 :imagesdir: assets
 ----
 
 We include the image the usual way:
 
+[source,asciidoc]
 ----
 image::Tux.svg[]
 ----

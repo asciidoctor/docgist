@@ -1,3 +1,4 @@
+[[prettify]]
 = Using Prettify
 :source-highlighter: prettify
 :source-language: ruby

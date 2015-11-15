@@ -119,37 +119,26 @@ function Gist($, $content) {
 
     return {'getGistAndRenderPage': getGistAndRenderPage, 'readSourceId': readSourceId};
 
-    function getGistAndRenderPage(renderer, defaultSource) {
-        var id = window.location.search;
-        if (id.length < 2) {
-            id = defaultSource;
-        }
-        else {
-            id = id.substr(1);
-            var idCut = id.indexOf('&');
-            if (idCut !== -1) {
-                id = id.substring(0, idCut);
-            }
-            if (id.indexOf('_ga=') === 0) {
-                id = defaultSource;
-            }
+    function getGistAndRenderPage(renderer, source, defaultSource) {
+        if (typeof source !== 'string' || source.length < 2) {
+            source = defaultSource;
         }
         var fetcher = null;
         for (var fetch in internal.fetchers) {
-            if (id.indexOf(fetch) === 0) {
+            if (source.indexOf(fetch) === 0) {
                 fetcher = internal.fetchers[fetch];
                 break;
             }
         }
         if (!fetcher) {
-            if (!VALID_GIST.test(id) && id.indexOf('%3A%2F%2F') !== -1) {
+            if (!VALID_GIST.test(source) && source.indexOf('://') !== -1) {
                 fetcher = fetchAnyUrl;
             } else {
                 fetcher = fetchGithubGist;
             }
         }
-        fetcher(id, renderer, function (message) {
-            errorMessage(message, id);
+        fetcher(source, renderer, function (message) {
+            errorMessage(message, source);
         });
     }
 
@@ -308,12 +297,11 @@ function Gist($, $content) {
 
     function fetchGithubFile(gist, success, error) {
         gist = gist.substr(7);
-        var decoded = decodeURIComponent(gist);
-        var parts = decoded.split('/');
+        var parts = gist.split('/');
         var branch = 'master';
         var pathPartsIndex = 3;
-        if (decoded.indexOf('/contents/') !== -1) {
-            window.location.assign('?github-' + encodeURIComponent(decoded.replace('/contents/', '//')));
+        if (gist.indexOf('/contents/') !== -1) {
+            window.location.assign('?github-' + encodeURIComponent(gist.replace('/contents/', '//')));
             return;
         }
         if (parts.length >= 4 && parts[3] === '') {
@@ -335,7 +323,10 @@ function Gist($, $content) {
                 success(content, {
                     'sourceUrl': link,
                     'imageBaseLocation': imagesdir,
-                    'siteBaseLocation': rootdir
+                    'siteBaseLocation': rootdir,
+                    'interXrefReplacer': function ($content) {
+                        interXrefReplacer('github-' + gist, $content);
+                    }
                 });
             },
             'dataType': 'json',
@@ -347,7 +338,11 @@ function Gist($, $content) {
 
     function fetchPublicDropboxFile(id, success, error) {
         id = id.substr(8);
-        fetchDropboxFile(id, success, error, DROPBOX_PUBLIC_BASE_URL);
+        fetchDropboxFile(id, success, error, DROPBOX_PUBLIC_BASE_URL, {
+            'interXrefReplacer': function ($content) {
+                interXrefReplacer('dropbox-' + id, $content);
+            }
+        });
     }
 
     function fetchPrivateDropboxFile(id, success, error) {
@@ -355,19 +350,24 @@ function Gist($, $content) {
         fetchDropboxFile(id, success, error, DROPBOX_PRIVATE_API_BASE_URL);
     }
 
-    function fetchDropboxFile(id, success, error, baseUrl) {
-        fetchFromUrl(baseUrl + decodeURIComponent(id), success, error);
+    function fetchDropboxFile(id, success, error, baseUrl, options) {
+        fetchFromUrl(baseUrl + id, success, error, options);
     }
 
     function fetchCopyComPublicLink(id, success, error) {
         id = id.substr(5);
-        fetchFromUrl(COPY_COM_PUBLIC_LINK + decodeURIComponent(id), success, error);
+        fetchFromUrl(COPY_COM_PUBLIC_LINK + id, success, error);
     }
 
     function fetchRiseupFile(id, success, error) {
         id = id.substr(7);
-        var webUrl = RISEUP_BASE_URL + decodeURIComponent(id);
-        fetchFromUrl(webUrl + RISEUP_EXPORT_POSTFIX, success, error, webUrl);
+        var webUrl = RISEUP_BASE_URL + id;
+        fetchFromUrl(webUrl + RISEUP_EXPORT_POSTFIX, success, error, {
+            'sourceUrl': webUrl,
+            'interXrefReplacer': function ($content) {
+                padInterXrefReplacer($content, 'riseup');
+            }
+        });
     }
 
     function fetchSecureEtherpadFile(id, success, error) {
@@ -394,30 +394,74 @@ function Gist($, $content) {
         var idParts = id.split('-');
         var host = idParts[1];
         var pad = idParts.slice(2).join('-');
-        var webUrl = (secure ? 'https' : 'http') + '://' + host + '/' + (dir ? dir + '/' : '') + decodeURIComponent(pad);
+        var webUrl = (secure ? 'https' : 'http') + '://' + host + '/' + (dir ? dir + '/' : '') + pad;
         var exportUrl = webUrl + (exportPostfix ? exportPostfix : '/export/txt');
-        fetchFromUrl(exportUrl, success, error, webUrl);
+        fetchFromUrl(exportUrl, success, error, {
+            'sourceUrl': webUrl,
+            'interXrefReplacer': function ($content) {
+                padInterXrefReplacer($content, idParts.slice(0,2).join('-'));
+            }
+        });
     }
 
     function fetchAnyUrl(id, success, error) {
-        fetchFromUrl(decodeURIComponent(id), success, error);
+        fetchFromUrl(id, success, error, {
+            'interXrefReplacer': function ($content) {
+                interXrefReplacer(id, $content);
+            }
+        });
     }
 
-    function fetchFromUrl(url, success, error, sourceUrl, imagesdir, rootdir) {
+    function fetchFromUrl(url, success, error, opts) {
+        var options = {
+            'sourceUrl': url,
+            'imageBaseLocation': removeDocumentNameFromUrl(url),
+            'siteBaseLocation': getOrigin(url)
+        };
+        $.extend(options, opts);
         $.ajax({
             'url': url,
             'success': function (data) {
-                success(data, {
-                    'sourceUrl':  sourceUrl ? sourceUrl : url,
-                    'imageBaseLocation': imagesdir ? imagesdir : removeDocumentNameFromUrl(url),
-                    'siteBaseLocation': rootdir ? rootdir : getOrigin(url)
-                });
+                success(data, options);
             },
             'dataType': 'text',
             'error': function (xhr, status, errorMessage) {
                 error(errorMessage);
             }
         });
+    }
+
+    function interXrefReplacer(id, $content) {
+        $('a[href]', $content).each(function () {
+            var href = this.getAttribute('href');
+            if (interdocumentXrefFilter(href)) {
+                var parts = href.split('#');
+                var base = removeDocumentNameFromUrl(id) + '/';
+                var filenameWithoutHtmlExtension = parts[0].substr(0, parts[0].length - 4);
+                var document = './?' + encodeURIComponent(base + filenameWithoutHtmlExtension + getExtension(id)) + '#' + parts[1];
+                this.setAttribute('href', document);
+            }
+        });
+    }
+
+    function padInterXrefReplacer($content, padName) {
+        $('a[href]', $content).each(function () {
+            var href = this.getAttribute('href');
+            if (interdocumentXrefFilter(href)) {
+                var parts = href.split('#');
+                var filenameWithoutHtmlExtension = parts[0].substr(0, parts[0].length - 5);
+                var document = './?' + encodeURIComponent(padName + '-' + filenameWithoutHtmlExtension) + '#' + parts[1];
+                this.setAttribute('href', document);
+            }
+        });
+    }
+
+    function interdocumentXrefFilter(href) {
+        return (href && href.indexOf('#') > 0 && './?'.indexOf(href.charAt(0)) === -1 && href.indexOf('http://') === -1 && href.indexOf('https://') === -1);
+    }
+
+    function getExtension(url) {
+        return url.split('.').pop();
     }
 
     function removeDocumentNameFromUrl(url) {
