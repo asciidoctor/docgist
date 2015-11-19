@@ -18,6 +18,7 @@ function Gist($, $content) {
     var DROPBOX_PUBLIC_BASE_URL = 'https://dl.dropboxusercontent.com/u/';
     var DROPBOX_PRIVATE_BASE_URL = 'https://www.dropbox.com/s/';
     var DROPBOX_PRIVATE_API_BASE_URL = 'https://dl.dropboxusercontent.com/s/';
+    var GOOGLE_DOCS_BSE_URL = 'https://docs.google.com/document/d/';
     var RISEUP_BASE_URL = 'https://pad.riseup.net/p/';
     var RISEUP_EXPORT_POSTFIX = '/export/txt';
     var COPY_COM_PUBLIC_LINK = 'https://copy.com/';
@@ -62,6 +63,10 @@ function Gist($, $content) {
                 return useRestOfTheUrl('copy-', baseUrl, gist);
             }
         },
+        'Google Docs Document': {
+            'baseUrl': GOOGLE_DOCS_BSE_URL,
+            'parse': useGoogleDoc
+        },
         'Riseup Pad': {
             'baseUrl': RISEUP_BASE_URL, 'parse': function (gist, parts) {
                 if (parts.length < 5) {
@@ -75,9 +80,9 @@ function Gist($, $content) {
             }
         },
         'Etherpad': {
-            'baseUrl': ['https://beta.etherpad.org/', 'https://piratepad.ca/p/', 'https://factor.cc/pad/p/', 'https://pad.systemli.org/p/', 'https://pad.fnordig.de/p/',
-                'https://notes.typo3.org/p/', 'https://pad.lqdn.fr/p/', 'https://pad.okfn.org/p/', 'https://beta.publishwith.me/p/', 'https://tihlde.org/etherpad/p/',
-                'https://tihlde.org/pad/p/', 'https://etherpad.wikimedia.org/p/', 'https://etherpad.fr/p/', 'https://piratenpad.de/p/', 'https://bitpad.co.nz/p/',
+            'baseUrl': ['https://beta.etherpad.org/p/', 'https://piratepad.ca/p/', 'https://factor.cc/pad/p/', 'https://pad.systemli.org/p/', 'https://pad.fnordig.de/p/',
+                'https://notes.typo3.org/p/', 'https://pad.lqdn.fr/p/', 'https://pad.okfn.org/p/', 'https://beta.publishwith.me/p/', 'https://pad.tihlde.org/p/',
+                'https://etherpad.tihlde.org/p/', 'https://etherpad.wikimedia.org/p/', 'https://etherpad.fr/p/', 'https://piratenpad.de/p/', 'https://bitpad.co.nz/p/',
                 'http://notas.dados.gov.br/p/', 'http://free.primarypad.com/p/', 'http://board.net/p/', 'https://pad.odoo.com/p/', 'http://pad.planka.nu/p/',
                 'http://qikpad.co.uk/p/', 'http://pad.tn/p/', 'http://lite4.framapad.org/p/', 'http://pad.hdc.pw/p/'],
             'parse': function (gist, parts, baseUrl) {
@@ -109,6 +114,7 @@ function Gist($, $content) {
         'dropbox-': fetchPublicDropboxFile,
         'dropboxs-': fetchPrivateDropboxFile,
         'copy-': fetchCopyComPublicLink,
+        'gdoc-': fetchGoogleDoc,
         'riseup-': fetchRiseupFile,
         'eps-': fetchSecureEtherpadFile,
         'epsp-': fetchSecureEtherpadPDirFile,
@@ -171,16 +177,11 @@ function Gist($, $content) {
                     }
                 }
             }
-            if (gist.indexOf('?') !== -1) {
-                // in case a DocGist URL was pasted
-                gist = gist.split('?').pop();
-            } else {
-                if (gist.indexOf('://') !== -1) {
-                    gist = encodeURIComponent(gist);
-                }
-                else {
-                    errorMessage('Do not know how to parse "' + gist + '" as a DocGist source URL.');
-                }
+            if (gist.indexOf('://') !== -1) {
+                gist = encodeURIComponent(gist);
+            }
+            else {
+                errorMessage('Do not know how to parse "' + gist + '" as a DocGist source URL.');
             }
         }
         window.location.assign('?' + gist);
@@ -213,6 +214,18 @@ function Gist($, $content) {
         } else {
             return {'error': 'Missing content in the URL.'};
         }
+    }
+
+    function useGoogleDoc(id, parts) {
+        console.log(id, parts);
+        if (parts.length < 6) {
+            return {'error': 'No document id in the URL.'};
+        }
+        var doc = parts[5];
+        if (doc.length < 1) {
+            return {'error': 'Missing document id in the URL.'};
+        }
+        return {'id': 'gdoc-' + doc};
     }
 
     function useRestOfTheUrl(prefix, baseUrl, gist) {
@@ -399,9 +412,21 @@ function Gist($, $content) {
         fetchFromUrl(exportUrl, success, error, {
             'sourceUrl': webUrl,
             'interXrefReplacer': function ($content) {
-                padInterXrefReplacer($content, idParts.slice(0,2).join('-'));
+                padInterXrefReplacer($content, idParts.slice(0, 2).join('-'));
             }
         });
+    }
+
+    function fetchGoogleDoc(id, success, error) {
+        var baseUrl = GOOGLE_DOCS_BSE_URL + id.substr(5) + '/';
+        var webUrl = baseUrl + 'edit';
+        var url = baseUrl + 'export?format=txt';
+        var options = {
+            'sourceUrl': webUrl,
+            'imageBaseLocation': false,
+            'siteBaseLocation': false
+        };
+        fetchFromUrl(url, success, error, options);
     }
 
     function fetchAnyUrl(id, success, error) {

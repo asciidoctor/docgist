@@ -14,14 +14,16 @@ There's more information on this in the link:./?github-asciidoctor%2Fasciidoctor
 The original idea and code for DocGist came from http://gist.neo4j.org[GraphGist].
 GraphGist is an interactive documentation tool for the Neo4j database and Cypher query language.
 
-== How To Use
+== How to use
 
 * Create/locate a gist on GitHub (or use a file in Dropbox).
 ** Write text using AsciiDoc syntax in it.
 ** Save it.
 * Enter the URL (or id) of the gist in the form on top of this page and hit Enter on your keyboard.
 * The page is rendered.
-* Share the URL with others so they can read the page.
+* Share the URL to the page with others so they can read it.
+
+For other possible hosts that can store documents, see <<source-documents>>.
 
 == Images
 
@@ -145,3 +147,75 @@ image::http://yuml.me/c9ce39b0.png[]
 
 The URL is a reference to a yUML image.
 yUML is tool for creating UML diagrams online.
+
+[[source-documents]]
+== Source documents
+
+DocGist can view documents fetched from a number of different sources.
+It parses the URL to find out how to use it, and tries to be a bit smart to keep DocGist URLs short.
+
+[horizontal]
+GitHub Gist::
+A public or private GitHub Gist can be used.
+Example URL: https://gist.github.com/nawroth/5897167
+A GitHub Gist allows for storing multiple documents, but DocGist will only the first AsciiDoc document it finds.
+
+GitHub File::
+A file in a public git repo hosted at GitHub.
+Example URL: https://github.com/asciidoctor/docgist/blob/master/gists/example.adoc
+
+Dropbox Public folder::
+Put a file in the _Public_ folder of your Dropbox, grab the URL to it.
+Example URL: https://dl.dropboxusercontent.com/u/10666617/AsciiDoc/example.adoc
+
+Dropbox shared private file::
+Use the share-link of a private file in Dropbox.
+Example URL: https://www.dropbox.com/s/ttib5v9pfs23p9z/example.adoc
+
+Copy.com::
+Use the public link to the document.
+Example URL: https://copy.com/LdKsHnQbEZsl29BW
+
+Etherpad::
+http://etherpad.org/[Etherpad] is an online editor providing collaborative editing in real-time.
+There are different Etherpad hosts, these are ones that worked well when we tried them:
+https://beta.etherpad.org/, https://piratepad.ca/, https://factor.cc/pad/, https://pad.systemli.org/, https://pad.fnordig.de/, https://notes.typo3.org/, https://pad.lqdn.fr/, https://pad.okfn.org/, https://beta.publishwith.me/, https://etherpad.tihlde.org/, https://pad.tihlde.org/, https://etherpad.wikimedia.org/, https://etherpad.fr/, https://piratenpad.de/, https://bitpad.co.nz/, http://notas.dados.gov.br/, http://free.primarypad.com/, http://board.net/, https://pad.odoo.com/, http://pad.planka.nu/, http://qikpad.co.uk/, http://pad.tn/, http://lite4.framapad.org/, http://pad.hdc.pw/
+Note that the content might get removed from the host after some time.
+Example URL: https://pad.riseup.net/p/docgist
+
+Google Docs Documents::
+Write normal AsciiDoc in the document.
+Then use the _share_ link, set so that anyone with the link can view (at least) the document.
+Example URL: https://docs.google.com/document/d/1lEQTEAQRVxTtDfQ1N9HJ6azeOLYCKlGG17NOs72NWsU/edit
+
+Any URL::
+DocGist accepts documents from any host which allows for cross-domain requests.
+This is the kind of error you'll see in the console when a host doesn't support it:
++
+....
+No 'Access-Control-Allow-Origin' header is present on the requested resource.
+Origin 'http://gist.asciidoctor.org' is therefore not allowed access.
+....
++
+To make it work, the server should respond with one of the following headers:
+`Access-Control-Allow-Origin:http://gist.asciidoctor.org` or
+`Access-Control-Allow-Origin:*`.
+
+[TIP]
+.Additional services that should get added?
+====
+Please tell us if there's some additional service you'd like to see support for.
+There's two different ways a host can be integrated:
+
+Direct file access::
+Dropbox and Google Docs are examples of this.
+We only calculate the URL of the file, and request it.
+The server must respond with the correct headers as outlined above.
+
+Through a public API::
+This is what we use for GitHub.
+Note that we can only use an API as long as authorization isn't required.
+
+//
+To suggest an addition, file an https://github.com/asciidoctor/docgist/issues/[issue]!
+====
