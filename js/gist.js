@@ -337,8 +337,8 @@ function Gist($, $content) {
                     'sourceUrl': link,
                     'imageBaseLocation': imagesdir,
                     'siteBaseLocation': rootdir,
-                    'interXrefReplacer': function ($content) {
-                        interXrefReplacer('github-' + gist, $content);
+                    'interXrefReplacer': function (element, href) {
+                        interXrefReplacer('github-' + gist, element, href);
                     }
                 });
             },
@@ -352,8 +352,8 @@ function Gist($, $content) {
     function fetchPublicDropboxFile(id, success, error) {
         id = id.substr(8);
         fetchDropboxFile(id, success, error, DROPBOX_PUBLIC_BASE_URL, {
-            'interXrefReplacer': function ($content) {
-                interXrefReplacer('dropbox-' + id, $content);
+            'interXrefReplacer': function (element, href) {
+                interXrefReplacer('dropbox-' + id, element, href);
             }
         });
     }
@@ -377,8 +377,8 @@ function Gist($, $content) {
         var webUrl = RISEUP_BASE_URL + id;
         fetchFromUrl(webUrl + RISEUP_EXPORT_POSTFIX, success, error, {
             'sourceUrl': webUrl,
-            'interXrefReplacer': function ($content) {
-                padInterXrefReplacer($content, 'riseup');
+            'interXrefReplacer': function (element, href) {
+                padInterXrefReplacer('riseup', element, href);
             }
         });
     }
@@ -411,8 +411,8 @@ function Gist($, $content) {
         var exportUrl = webUrl + (exportPostfix ? exportPostfix : '/export/txt');
         fetchFromUrl(exportUrl, success, error, {
             'sourceUrl': webUrl,
-            'interXrefReplacer': function ($content) {
-                padInterXrefReplacer($content, idParts.slice(0, 2).join('-'));
+            'interXrefReplacer': function (element, href) {
+                padInterXrefReplacer(idParts.slice(0, 2).join('-'), element, href);
             }
         });
     }
@@ -431,8 +431,8 @@ function Gist($, $content) {
 
     function fetchAnyUrl(id, success, error) {
         fetchFromUrl(id, success, error, {
-            'interXrefReplacer': function ($content) {
-                interXrefReplacer(id, $content);
+            'interXrefReplacer': function (element, href) {
+                interXrefReplacer(id, element, href);
             }
         });
     }
@@ -456,29 +456,23 @@ function Gist($, $content) {
         });
     }
 
-    function interXrefReplacer(id, $content) {
-        $('a[href]', $content).each(function () {
-            var href = this.getAttribute('href');
-            if (interdocumentXrefFilter(href)) {
-                var parts = href.split('#');
-                var base = removeDocumentNameFromUrl(id) + '/';
-                var filenameWithoutHtmlExtension = parts[0].substr(0, parts[0].length - 4);
-                var document = './?' + encodeURIComponent(base + filenameWithoutHtmlExtension + getExtension(id)) + '#' + parts[1];
-                this.setAttribute('href', document);
-            }
-        });
+    function interXrefReplacer(id, element, href) {
+        if (interdocumentXrefFilter(href)) {
+            var parts = href.split('#');
+            var base = removeDocumentNameFromUrl(id) + '/';
+            var filenameWithoutHtmlExtension = parts[0].substr(0, parts[0].length - 4);
+            var document = './?' + encodeURIComponent(base + filenameWithoutHtmlExtension + getExtension(id)) + '#' + parts[1];
+            element.setAttribute('href', document);
+        }
     }
 
-    function padInterXrefReplacer($content, padName) {
-        $('a[href]', $content).each(function () {
-            var href = this.getAttribute('href');
-            if (interdocumentXrefFilter(href)) {
-                var parts = href.split('#');
-                var filenameWithoutHtmlExtension = parts[0].substr(0, parts[0].length - 5);
-                var document = './?' + encodeURIComponent(padName + '-' + filenameWithoutHtmlExtension) + '#' + parts[1];
-                this.setAttribute('href', document);
-            }
-        });
+    function padInterXrefReplacer(padName, element, href) {
+        if (interdocumentXrefFilter(href)) {
+            var parts = href.split('#');
+            var filenameWithoutHtmlExtension = parts[0].substr(0, parts[0].length - 5);
+            var document = './?' + encodeURIComponent(padName + '-' + filenameWithoutHtmlExtension) + '#' + parts[1];
+            element.setAttribute('href', document);
+        }
     }
 
     function interdocumentXrefFilter(href) {

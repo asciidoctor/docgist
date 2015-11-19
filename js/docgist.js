@@ -173,7 +173,10 @@ function DocGist($) {
         }
 
         if ('interXrefReplacer' in options) {
-            options['interXrefReplacer']($content);
+            $('a[href]', $content).each(function () {
+                var href = this.getAttribute('href');
+                options['interXrefReplacer'](this, href);
+            });
         }
 
         share();
