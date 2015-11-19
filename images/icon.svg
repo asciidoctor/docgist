@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   version="1.1"
+   id="svg2"
+   viewBox="0 0 89.598223 89.598223"
+   height="25.28661mm"
+   width="25.28661mm">
+  <defs
+     id="defs4" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     transform="translate(-289.36133,-436.93777)"
+     id="layer1">
+    <rect
+       y="419.9649"
+       x="277.74457"
+       height="121.21833"
+       width="118.18785"
+       id="rect4185"
+       style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.08599997;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.95811516" />
+    <g
+       transform="translate(0,-6)"
+       id="flowRoot4136"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:45px;line-height:125%;font-family:'Open Sans';-inkscape-font-specification:'Open Sans, Semi-Bold';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1">
+      <path
+         id="path4164"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:90px;line-height:125%;font-family:FontAwesome;-inkscape-font-specification:'FontAwesome, Normal';text-align:center;writing-mode:lr-tb;text-anchor:middle"
+         d="m 333.95954,508.85742 5.8259,-5.82589 -7.63393,-7.63393 -5.8259,5.82589 0,2.8125 4.82143,0 0,4.82143 2.8125,0 z m 22.04799,-34.50335 q 0.8538,-0.85379 0.0502,-1.65736 -0.80357,-0.80357 -1.65737,0.0502 l -17.57812,17.57813 q -0.8538,0.85379 -0.0502,1.65736 0.80357,0.80357 1.65737,-0.0502 l 17.57812,-17.57813 z m 4.06808,28.17523 0,9.54241 q 0,5.97656 -4.26897,10.24553 -4.21875,4.21875 -10.19531,4.21875 l -41.78572,0 q -5.97656,0 -10.24553,-4.21875 -4.21875,-4.26897 -4.21875,-10.24553 l 0,-41.78572 q 0,-5.97656 4.21875,-10.19531 4.26897,-4.26897 10.24553,-4.26897 l 41.78572,0 q 3.16406,0 5.87611,1.25558 0.75335,0.35156 0.90402,1.15513 0.15067,0.8538 -0.45201,1.45648 l -2.46093,2.46093 q -0.70313,0.70313 -1.60715,0.40179 -1.15513,-0.30134 -2.26004,-0.30134 l -41.78572,0 q -3.31473,0 -5.67522,2.36049 -2.36049,2.36049 -2.36049,5.67522 l 0,41.78572 q 0,3.31473 2.36049,5.67522 2.36049,2.36049 5.67522,2.36049 l 41.78572,0 q 3.31473,0 5.67522,-2.36049 2.36049,-2.36049 2.36049,-5.67522 l 0,-6.32813 q 0,-0.6529 0.45201,-1.10491 l 3.21429,-3.21428 q 0.75335,-0.75335 1.75781,-0.35157 1.00446,0.40179 1.00446,1.45648 z m -4.82142,-37.06474 14.46428,14.46429 -33.75,33.75 -14.46428,0 0,-14.46429 33.75,-33.75 z m 22.2991,6.62947 -4.62053,4.62053 -14.46429,-14.46428 4.62054,-4.62054 q 1.40625,-1.40625 3.41518,-1.40625 2.00892,0 3.41517,1.40625 l 7.63393,7.63393 q 1.40625,1.40625 1.40625,3.41518 0,2.00893 -1.40625,3.41518 z" />
+    </g>
+  </g>
+</svg>
