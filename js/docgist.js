@@ -31,6 +31,9 @@ function DocGist($) {
     $(document).ready(function () {
         $content = $('#content');
         $gistId = $('#gist-id');
+        if (top.location != self.location) {
+            $('body>div.navbar').css('display', 'none');
+        }
 
         var gist = new Gist($, $content);
         var urlInfo = getUrlAttributes();
