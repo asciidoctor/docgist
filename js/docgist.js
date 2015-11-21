@@ -21,15 +21,18 @@ function DocGist($) {
         'env': 'docgist',
         'env-docgist': '',
         'toc': 'macro',
-        'example-caption!': '@'
+        'example-caption!': '@',
+        'version-label!': '@'
     };
 
     var $content = undefined;
+    var $footer = undefined;
     var $gistId = undefined;
     var urlAttributes = undefined;
 
     $(document).ready(function () {
         $content = $('#content');
+        $footer = $('#footer-text');
         $gistId = $('#gist-id');
         if (top.location != self.location) {
             $('body>div.navbar').css('display', 'none');
@@ -165,6 +168,8 @@ function DocGist($) {
         appendMathJax();
         setPageTitle(doc);
 
+        addMetadataToFooter(attributes, urlAttributes);
+
         // fix root-relative locations
         if ('siteBaseLocation' in options) {
             $('img[src ^= "/"]', $content).each(function () {
@@ -183,6 +188,81 @@ function DocGist($) {
         }
 
         share();
+    }
+
+    function addMetadataToFooter(attributes, urlAttributes) {
+        if (existsInObjectOrHash('no-header-footer', attributes, urlAttributes)) {
+            $footer.css('display', 'none');
+            return;
+        } else {
+            $footer.css('display', 'block');
+        }
+        var $ITEM = $('<i/>');
+        var $SPAN = $('<span/>');
+
+        function addMetadataItem(keys, description, icon, valueTransformers) {
+            var iconAdded = false;
+            for (var ix in keys) {
+                var key = keys[ix];
+                if (existsInObjectOrHash(key, attributes, urlAttributes)) {
+                    var value = getValueFromObjectOrHash(key, attributes, urlAttributes);
+                    if (icon && !iconAdded) {
+                        iconAdded = true;
+                        $footer.append($ITEM.clone().addClass('fa fa-' + icon).prop('title', description));
+                    }
+                    var $span = $SPAN.clone().text(value);
+                    if ($.isArray(valueTransformers)) {
+                        for (var i = 0; i < valueTransformers.length; i++) {
+                            valueTransformers[i](value, $span);
+                        }
+                    }
+                    $footer.append($span);
+                }
+            }
+        }
+
+        function wrapInEmail(key) {
+            return function (value, $element) {
+                if (existsInObjectOrHash(key, attributes, urlAttributes)) {
+                    var address = getValueFromObjectOrHash(key, attributes, urlAttributes);
+                    $element.wrapInner('<a href="mailto:' + address + '">');
+                }
+            };
+        }
+
+        function wrapInLinkWithValue(baseUrl) {
+            return function (value, $element) {
+                $element.wrapInner('<a href="' + baseUrl + value + '">');
+            };
+        }
+
+        function wrapInLink(baseUrl) {
+            return function (value, $element) {
+                $element.wrapInner('<a href="' + baseUrl + '">');
+            };
+        }
+
+        function prepend(str) {
+            return function (value, $element) {
+                $element.text(str + value);
+            };
+        }
+
+        if (existsInObjectOrHash('authorcount', attributes, urlAttributes)) {
+            var authorCount = getValueFromObjectOrHash('authorcount', attributes, urlAttributes);
+            var first = true;
+            for (var authorIndex = 1; authorIndex <= authorCount; authorIndex++) {
+                addMetadataItem(['author_' + authorIndex], 'Author', (first ? 'user' : false), [wrapInEmail('email_' + authorIndex)]);
+                first = false;
+            }
+        }
+
+        addMetadataItem(['twitter'], 'Twitter', 'twitter', [wrapInLinkWithValue('https://twitter.com/')]);
+        addMetadataItem(['github'], 'GitHub', 'github', [wrapInLinkWithValue('https://github.com/')]);
+        addMetadataItem(['revnumber', 'revdate', 'revremark'], 'Version', 'thumb-tack');
+        addMetadataItem(['tags', 'keywords'], 'Tags/Keywords', 'tags');
+        addMetadataItem(['asciidoctor-version'], 'Powered by', 'bolt', [prepend('Asciidoctor '), wrapInLink('http://asciidoctor.org/')]);
+        addMetadataItem(['env'], 'Powered by', 'pencil-square-o', [wrapInLink(window.location.href)]);
     }
 
     function tabTheSource($content) {

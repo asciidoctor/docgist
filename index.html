@@ -92,6 +92,37 @@
         margin-bottom: 0;
     }
 
+    #footer {
+        max-width: 60em;
+        margin: 1em auto;
+        padding-left: .9375em;
+        padding-right: .9375em;
+        background: none;
+    }
+
+    #footer-text {
+        padding: 0.25em;
+        border-top: 1px solid #ddddd8;
+        color: rgba(0, 0, 0, 0.7);
+        font-size: 0.9375em;
+    }
+
+    #footer-text > span {
+        padding: 0 0 0 0.5em;
+    }
+
+    #footer-text > i.fa {
+        padding: 0 0 0 0.5em;
+    }
+
+    #footer-text > i.fa:first-child {
+        padding: 0;
+    }
+
+    #footer-text > span > a {
+        color: inherit;
+    }
+
     @media print {
         a.bare:after {
             content: none;
@@ -161,6 +192,9 @@
 </div>
 <div id="content">
     <img alt="loading" src="images/loading.gif" style="margin: 5em;">
+</div>
+<div id="footer">
+    <div id="footer-text"></div>
 </div>
 </body>
 
