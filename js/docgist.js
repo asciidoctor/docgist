@@ -109,6 +109,10 @@ function DocGist($) {
             var attributes = doc.attributes;
             var attributeOverrides = {};
 
+            if (existsInObjectOrHash('no-header-footer', attributes, urlAttributes)) {
+                $('body>div.navbar').css('display', 'none');
+            }
+
             if (existsInObjectOrHash('source-highlighter', attributes, urlAttributes)) {
                 highlighter = getValueFromObjectOrHash('source-highlighter', attributes, urlAttributes).toLowerCase();
                 if ($.inArray(highlighter, UNAVAILABLE_HIGHLIGHTERS) !== -1) {
