@@ -22,7 +22,9 @@ function DocGist($) {
         'env-docgist': '',
         'toc': 'macro',
         'example-caption!': '@',
-        'version-label!': '@'
+        'version-label!': '@',
+        'stylesdir': 'style@',
+        'stylesheet': 'asciidoctor.css@'
     };
 
     var $content = undefined;
@@ -108,6 +110,20 @@ function DocGist($) {
             doc = Opal.Asciidoctor.$load(content, getAsciidoctorOptions({'parse_header_only': 'true'}));
             var attributes = doc.attributes;
             var attributeOverrides = {};
+
+            if (existsInObjectOrHash('stylesheet', attributes, urlAttributes)) {
+                var stylesheet = getValueFromObjectOrHash('stylesheet', attributes, urlAttributes);
+                if (existsInObjectOrHash('stylesdir', attributes, urlAttributes)) {
+                    var stylesdir = getValueFromObjectOrHash('stylesdir', attributes, urlAttributes);
+                    if (stylesdir) {
+                        if (stylesdir.slice(-1) !== '/') {
+                            stylesdir += '/';
+                        }
+                        stylesheet = stylesdir + stylesheet;
+                    }
+                }
+                addLinkElement(stylesheet);
+            }
 
             if (existsInObjectOrHash('no-header-footer', attributes, urlAttributes)) {
                 $('body>div.navbar').css('display', 'none');
@@ -414,8 +430,9 @@ function DocGist($) {
         var element = document.createElement('link');
         element.rel = 'stylesheet';
         element.href = url;
-        var first = document.getElementsByTagName('link')[0];
-        first.parentNode.insertBefore(element, first);
+        var linkElements = document.getElementsByTagName('link');
+        var last = linkElements[linkElements.length - 1];
+        last.parentNode.insertBefore(element, last.nextSibling);
     }
 
     function highlightUsingPrettify() {

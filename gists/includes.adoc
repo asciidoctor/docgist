@@ -1,0 +1,7 @@
+= Includes
+
+include::images.adoc[]
+
+include::prettify.adoc[]
+
+
