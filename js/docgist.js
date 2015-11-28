@@ -4,6 +4,7 @@ function DocGist($) {
     var DEFAULT_SOURCE = decodeURIComponent('github-asciidoctor%2Fdocgist%2F%2Fgists%2Fexample.adoc');
     var DOCGIST_LIB_VERSIONS = {
         'prettify': 'r298',
+        'highlightjs': '8.9.1',
         'mathjax': '2.5.3'
     };
     window.DocgistLibVersions = DOCGIST_LIB_VERSIONS;
@@ -111,8 +112,9 @@ function DocGist($) {
             var attributes = doc.attributes;
             var attributeOverrides = {};
 
+            var stylesheet = '';
             if (existsInObjectOrHash('stylesheet', attributes, urlAttributes)) {
-                var stylesheet = getValueFromObjectOrHash('stylesheet', attributes, urlAttributes);
+                stylesheet = getValueFromObjectOrHash('stylesheet', attributes, urlAttributes);
                 if (existsInObjectOrHash('stylesdir', attributes, urlAttributes)) {
                     var stylesdir = getValueFromObjectOrHash('stylesdir', attributes, urlAttributes);
                     if (stylesdir) {
@@ -181,8 +183,13 @@ function DocGist($) {
             options['imageContentReplacer']($content);
         }
 
+        var hasDarkSourceBlocks = $.inArray(stylesheet, ['style/github.css', 'style/iconic.css']) !== -1;
         if (highlighter) {
-            applyHighlighting(highlighter, sourceLanguage);
+            applyHighlighting(highlighter, sourceLanguage, hasDarkSourceBlocks);
+        }
+
+        if (stylesheet === 'style/iconic.css') {
+            $('h1').css('margin-bottom', '3rem');
         }
 
         appendMathJax();
@@ -391,7 +398,7 @@ function DocGist($) {
         addScriptElement('https://cdnjs.cloudflare.com/ajax/libs/mathjax/' + version + '/MathJax.js?config=TeX-MML-AM_HTMLorMML');
     }
 
-    function applyHighlighting(highlighter, sourceLanguage) {
+    function applyHighlighting(highlighter, sourceLanguage, hasDarkSourceBlocks) {
         var AVAILABLE_HIGHLIGHTERS = {
             'highlightjs': highlightUsingHighlightjs,
             'highlight.js': highlightUsingHighlightjs,
@@ -406,14 +413,14 @@ function DocGist($) {
         }
 
         if (highlighter in AVAILABLE_HIGHLIGHTERS) {
-            AVAILABLE_HIGHLIGHTERS[highlighter]();
+            AVAILABLE_HIGHLIGHTERS[highlighter](hasDarkSourceBlocks);
         } else {
             console.log('Unknown syntax highlighter "' + highlighter + '", using "' + DEFAULT_HIGHLIGHTER + '" instead.');
             // not in IE8
             if ('keys' in Object) {
                 console.log('Recognized highlighter names: ' + Object.keys(AVAILABLE_HIGHLIGHTERS));
             }
-            AVAILABLE_HIGHLIGHTERS[DEFAULT_HIGHLIGHTER]();
+            AVAILABLE_HIGHLIGHTERS[DEFAULT_HIGHLIGHTER](hasDarkSourceBlocks);
         }
     }
 
@@ -435,19 +442,25 @@ function DocGist($) {
         last.parentNode.insertBefore(element, last.nextSibling);
     }
 
-    function highlightUsingPrettify() {
+    function highlightUsingPrettify(hasDarkSourceBlocks) {
         $('code[class^="language-"],code[class^="src-"]', $content).each(function (i, e) {
             e.className = e.className.replace('src-', 'language-') + ' prettyprint';
         });
         var version = DOCGIST_LIB_VERSIONS.prettify;
         addScriptElement('//cdnjs.cloudflare.com/ajax/libs/prettify/' + version + '/run_prettify.min.js');
+        if (hasDarkSourceBlocks) {
+            addLinkElement('//google-code-prettify.googlecode.com/svn/loader/skins/desert.css');
+        }
     }
 
-    function highlightUsingCodeMirror() {
-        CodeMirror.colorize();
+    function highlightUsingCodeMirror(hasDarkSourceBlocks) {
+        CodeMirror.colorize(undefined, undefined, hasDarkSourceBlocks);
     }
 
-    function highlightUsingHighlightjs() {
+    function highlightUsingHighlightjs(hasDarkSourceBlocks) {
+        if (hasDarkSourceBlocks) {
+            addLinkElement('//cdnjs.cloudflare.com/ajax/libs/highlight.js/' + DOCGIST_LIB_VERSIONS.highlightjs + '/styles/darkula.min.css');
+        }
         $('code[class^="language-"],code[class^="src-"]', $content).each(function (i, e) {
             e.className = e.className.replace('src-', 'language-');
             hljs.highlightBlock(e);

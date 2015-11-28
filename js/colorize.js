@@ -4,7 +4,7 @@
 
 "use strict";
 
-CodeMirror.colorize = function (collection, defaultMode) {
+CodeMirror.colorize = function (collection, defaultMode, isDark) {
     var isBlock = /^(p|li|div|h\\d|pre|blockquote|td)$/;
 
     function textContent(node, out) {
@@ -43,7 +43,11 @@ CodeMirror.colorize = function (collection, defaultMode) {
         node.innerHTML = "";
         CodeMirror.runMode(text.join(""), mode, node);
 
-        node.className += mode == "cypher" ? " cm-s-neo" : ( mode == "asciidoc" ? " cm-s-elegant" : " cm-s-default");
+        if (isDark) {
+            node.className += " cm-s-midnight";
+        } else {
+            node.className += mode == "cypher" ? " cm-s-neo" : ( mode == "asciidoc" ? " cm-s-elegant" : " cm-s-default");
+        }
     }
 
     if (!collection) collection = document.body.getElementsByTagName("code");
