@@ -181,7 +181,7 @@ http://etherpad.org/[Etherpad] is an online editor providing collaborative editi
 There are different Etherpad hosts, these are ones that worked well when we tried them:
 https://beta.etherpad.org/, https://piratepad.ca/, https://factor.cc/pad/, https://pad.systemli.org/, https://pad.fnordig.de/, https://notes.typo3.org/, https://pad.lqdn.fr/, https://pad.okfn.org/, https://beta.publishwith.me/, https://etherpad.tihlde.org/, https://pad.tihlde.org/, https://etherpad.wikimedia.org/, https://etherpad.fr/, https://piratenpad.de/, https://bitpad.co.nz/, http://notas.dados.gov.br/, http://free.primarypad.com/, http://board.net/, https://pad.odoo.com/, http://pad.planka.nu/, http://qikpad.co.uk/, http://pad.tn/, http://lite4.framapad.org/, http://pad.hdc.pw/
 Note that the content might get removed from the host after some time.
-Example URL: https://pad.riseup.net/p/docgist
+Example URL: https://beta.etherpad.org/p/docgist
 
 Google Docs Documents::
 Write normal AsciiDoc in the document.
