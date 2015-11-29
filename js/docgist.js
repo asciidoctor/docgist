@@ -32,6 +32,7 @@ function DocGist($) {
     var $footer = undefined;
     var $gistId = undefined;
     var urlAttributes = undefined;
+    var id = undefined;
 
     $(document).ready(function () {
         $content = $('#content');
@@ -44,6 +45,7 @@ function DocGist($) {
         var gist = new Gist($, $content);
         var urlInfo = getUrlAttributes();
         urlAttributes = urlInfo.attributes;
+        id = urlInfo.id;
         gist.getGistAndRenderPage(renderContent, urlInfo.id, DEFAULT_SOURCE);
         $gistId.keydown(gist.readSourceId);
     });
@@ -183,7 +185,7 @@ function DocGist($) {
             options['imageContentReplacer']($content);
         }
 
-        var hasDarkSourceBlocks = $.inArray(stylesheet, ['style/github.css', 'style/iconic.css']) !== -1;
+        var hasDarkSourceBlocks = $.inArray(stylesheet, ['style/github.css', 'style/iconic.css', 'style/rubygems.css']) !== -1;
         if (highlighter) {
             applyHighlighting(highlighter, sourceLanguage, hasDarkSourceBlocks);
         }
@@ -214,6 +216,7 @@ function DocGist($) {
             });
         }
 
+        loadThemeMenu(stylesheet);
         share();
     }
 
@@ -477,6 +480,52 @@ function DocGist($) {
                 $e.css('display', 'inline').addClass(language).css('padding', 0);
             } else {
                 $parent.addClass(language);
+            }
+        });
+    }
+
+    function loadThemeMenu(stylesheet) {
+        var THEMES = {
+            'asciidoctor': 'Asciidoctor',
+            'colony': 'Colony',
+            'foundation': 'Foundation',
+            'foundation-lime': 'Foundation (Lime)',
+            'foundation-potion': 'Foundation (Potion)',
+            'github': 'GitHub',
+            'golo': 'Golo',
+            'iconic': 'Iconic',
+            'maker': 'Maker',
+            'readthedocs': 'Read the Docs',
+            'riak': 'Riak',
+            'rocket-panda': 'Rocket Panda',
+            'rubygems': 'RubyGems'
+        };
+        var $LI = $('<li/>');
+        var $A = $('<a href="javascript:;"/>');
+        var $themeMenu = $('#theme-menu');
+
+        var currentStyle = '';
+        if (stylesheet && stylesheet.indexOf('style/') === 0) {
+            currentStyle = stylesheet.slice(6, -4);
+        }
+        $.each(THEMES, function (name, descriptiveName) {
+            var $a = $A.clone().text(descriptiveName);
+            var $li = $LI.clone().append($a).appendTo($themeMenu);
+            if (name === currentStyle) {
+                $li.addClass('disabled');
+            } else {
+                $a.click(function () {
+                    var url = '?';
+                    url += id ? id : DEFAULT_SOURCE;
+                    for (var key in urlAttributes) {
+                        if (key !== 'stylesdir' && key !== 'stylesheet') {
+                            url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(urlAttributes[key]);
+                        }
+                    }
+                    url += '&stylesheet=' + name + '.css';
+                    window.location.assign(url);
+                    return false;
+                });
             }
         });
     }
