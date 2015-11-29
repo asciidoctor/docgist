@@ -70,21 +70,16 @@ CodeMirror.colorize = function (collection, defaultMode, isDark) {
         if (!mode) continue;
 
         var originalMode = undefined;
-        if (mode === "java") {
-            originalMode = "text/x-java";
-        } else if (mode === "properties") {
-            originalMode = "text/x-properties";
-        } else if (mode === "json") {
-            originalMode = "application/json";
-        }
 
         var info = CodeMirror.findModeByName(mode);
         if (info) {
             mode = info.mode;
+            originalMode = info.mime;
         } else {
             info = CodeMirror.findModeByMIME(mode);
             if (info) {
                 mode = info.mode;
+                originalMode = info.mime;
             }
         }
 
