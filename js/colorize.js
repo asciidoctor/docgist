@@ -15,12 +15,13 @@ CodeMirror.colorize = function (collection, defaultMode, isDark) {
         }
     }
 
-    function run(node, mode) {
+    function run(node, mode, originalMode) {
         if (mode === "asciidoc" || mode === "cypher") {
             // no need to require those modes; we always load them
             applyMode(node, mode);
             return;
         }
+
         var found = false;
         for (var i = 0; i < CodeMirror.modeInfo.length; i++) {
             if (CodeMirror.modeInfo[i].mode === mode) {
@@ -32,8 +33,9 @@ CodeMirror.colorize = function (collection, defaultMode, isDark) {
             // avoid loading modes that don't exist
             return;
         }
+
         CodeMirror.requireMode(mode, function () {
-            applyMode(node, mode);
+            applyMode(node, originalMode ? originalMode : mode);
         });
     }
 
@@ -67,6 +69,15 @@ CodeMirror.colorize = function (collection, defaultMode, isDark) {
         }
         if (!mode) continue;
 
+        var originalMode = undefined;
+        if (mode === "java") {
+            originalMode = "text/x-java";
+        } else if (mode === "properties") {
+            originalMode = "text/x-properties";
+        } else if (mode === "json") {
+            originalMode = "application/json";
+        }
+
         var info = CodeMirror.findModeByName(mode);
         if (info) {
             mode = info.mode;
@@ -77,6 +88,6 @@ CodeMirror.colorize = function (collection, defaultMode, isDark) {
             }
         }
 
-        run(node, mode);
+        run(node, mode, originalMode);
     }
 };
