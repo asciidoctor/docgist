@@ -42,7 +42,7 @@ textarea{overflow:auto;vertical-align:top}
 table{border-collapse:collapse;border-spacing:0}
 *,*:before,*:after{-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box}
 html,body{font-size:100%}
-body{background:#ede0ce;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Old Standasrd TT",serif;font-weight:400;font-style:normal;line-height:1;position:relative;cursor:auto}
+body{background:#ede0ce;color:rgba(0,0,0,1.0);padding:0;margin:0;font-family:"Old Standasrd TT",serif;font-weight:400;font-style:normal;line-height:1;position:relative;cursor:auto}
 a:hover{cursor:pointer}
 img,object,embed{max-width:100%;height:auto}
 object,embed{height:100%}
@@ -106,7 +106,7 @@ h4{font-size:1.4375em}}
 table{background:none;margin-bottom:1.25em;border:none}
 table thead,table tfoot{background:none;font-weight:bold}
 table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,1.0);text-align:left}
-table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,1.0)}
 table tr.even,table tr.alt,table tr:nth-of-type(even){background:none}
 table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{display:table-cell;line-height:1.6}
 body{tab-size:4}
@@ -231,7 +231,7 @@ table.pyhltable .linenodiv{background:none!important;padding-right:0!important}
 .quoteblock .quoteblock blockquote{padding:0 0 0 .75em}
 .quoteblock .quoteblock blockquote:before{display:none}
 .verseblock{margin:0 1em 1.25em 1em}
-.verseblock pre{font-family:"Open Standard TT",serif;font-size:1.15rem;color:rgba(0,0,0,1.0);font-weight:300;text-rendering:optimizeLegibility;background: none;border-top:1px solid #000;border-bottom: 1px solid #000; border-left: none !important; border-left: none!important;border-radius: 0;}
+.verseblock pre{font-family:"Open Standard TT",serif;font-size:1.15rem;color:rgba(0,0,0,1.0);font-weight:300;text-rendering:optimizeLegibility;background: none;border-top:1px solid #000;border-bottom: 1px solid #000; border-left: none !important; border-right: none !important;border-radius: 0;}
 .verseblock pre strong{font-weight:400}
 .verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
 .quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
@@ -405,7 +405,7 @@ dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
 h1,h2,p,td.content,span.alt{letter-spacing:0}
 p strong,td.content strong,div.footnote strong{letter-spacing:0}
 p,blockquote,dt,td.content,span.alt{font-size:1.0rem}
-p{margin-bottom:1.25rem}
+p{margin-bottom:1.25rem;font-size:1.0667rem}
 .sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
 .exampleblock>.content{background:none;border-color:transparent;border-radius: 0;border-left: 2px solid #000;border-right: 2px solid #000}
 .print-only{display:none!important}
