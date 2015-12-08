@@ -249,7 +249,9 @@ table.tableblock {
 table.tableblock td, table.tableblock th {
     border: 1px solid #000000;
 }
-table.tableblock td div.admonitionblock td, table.tableblock th div.admonitionblock td {
+table.tableblock td div.admonitionblock td, table.tableblock th div.admonitionblock td,
+table.tableblock.frame-none td, table.tableblock.frame-none th,
+table.tableblock.grid-none td, table.tableblock.grid-none th {
     border: none;
 }
 table.tableblock > thead > tr:last-child > th,
