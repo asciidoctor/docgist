@@ -189,7 +189,7 @@ table.tableblock #preamble>.sectionbody>.paragraph:first-of-type p{font-size:inh
 .admonitionblock>table td.icon{text-align:center;width:80px}
 .admonitionblock>table td.icon img{max-width:none}
 .admonitionblock>table td.icon .title{font-weight:bold;font-family:"Old Standard TT",serif;text-transform:uppercase}
-.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #ddddd8;color:rgba(0,0,0,.6)}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;}
 .admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
 .exampleblock>.content{border-style:solid;border-width:1px;border-color:#e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;-webkit-border-radius:4px;border-radius:4px}
 .exampleblock>.content>:first-child{margin-top:0}
@@ -249,15 +249,23 @@ table.tableblock {
 table.tableblock td, table.tableblock th {
     border: 1px solid #000000;
 }
+table.tableblock td div.admonitionblock td, table.tableblock th div.admonitionblock td {
+    border: none;
+}
 table.tableblock > thead > tr:last-child > th,
 table.tableblock > thead > tr:last-child > td {
     border: none;
     border-bottom: 2px solid #000000;
 }
+table.tableblock.frame-all > thead > tr:last-child > th,
+table.tableblock.frame-all > thead > tr:last-child > td {
+    border: 1px solid #000000;
+    border-bottom: 2px solid #000000 !important;
+}
 table.tableblock > tfoot > tr:first-child > th,
 table.tableblock > tfoot > tr:first-child > td {
     border: none;
-    border-top: 2px solid #000000;
+    border-top: 2px solid #000000 !important;
 }
 table.tableblock tr:last-child td {
     border-bottom: none;
@@ -381,11 +389,11 @@ div.unbreakable{page-break-inside:avoid}
 .yellow-background{background-color:#fafa00}
 span.icon>.fa{cursor:default}
 .admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;cursor:default}
-.admonitionblock td.icon .icon-note:before{content:"\f05a";color:#19407c}
-.admonitionblock td.icon .icon-tip:before{content:"\f0eb";color:#111}
-.admonitionblock td.icon .icon-warning:before{content:"\f071";color:#bf6900}
-.admonitionblock td.icon .icon-caution:before{content:"\f06d";color:#bf3400}
-.admonitionblock td.icon .icon-important:before{content:"\f06a";color:#bf0000}
+.admonitionblock td.icon .icon-note:before{content:"\f05a";color:#6e8cba}
+.admonitionblock td.icon .icon-tip:before{content:"\f0eb";color:#666}
+.admonitionblock td.icon .icon-warning:before{content:"\f071";color:#d49a55}
+.admonitionblock td.icon .icon-caution:before{content:"\f06d";color:#d67a58}
+.admonitionblock td.icon .icon-important:before{content:"\f06a";color:#e35d5d}
 .conum[data-value]{display:inline-block;color:#fff!important;background-color:rgba(0,0,0,.8);-webkit-border-radius:100px;border-radius:100px;text-align:center;font-size:.753em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Old Standard TT",serif;font-style:normal;font-weight:bold}
 .conum[data-value] *{color:#fff!important}
 .conum[data-value]+b{display:none}
