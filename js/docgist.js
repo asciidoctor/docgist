@@ -495,6 +495,7 @@ function DocGist($) {
             'golo': 'Golo',
             'iconic': 'Iconic',
             'maker': 'Maker',
+            'old-standard': 'Old Standard',
             'readthedocs': 'Read the Docs',
             'riak': 'Riak',
             'rocket-panda': 'Rocket Panda',
