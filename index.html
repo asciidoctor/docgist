@@ -130,6 +130,7 @@
         a.bare:after {
             content: none;
         }
+
         #footer {
             display: none;
         }
@@ -229,7 +230,10 @@
                 <form>
                     <fieldset>
                         <label for="share-url">Copy and share the link!</label> <input class="form-control" type="text"
-                                                                                            id="share-url" autofocus>
+                                                                                       id="share-url" autofocus>
+                        <label> <input type="checkbox" id="short-url-remove-header-footer">
+                            Remove header and footer of the target page.
+                        </label>
                     </fieldset>
                 </form>
             </div>

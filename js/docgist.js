@@ -381,31 +381,66 @@ function DocGist($) {
             'https://twitter.com/intent/tweet?text=' + encodeURIComponent('Check this out: ' + title) + '&url=' + href);
         $('#facebook-share').attr('href', 'http://www.facebook.com/share.php?u=' + href);
         $('#google-plus-share').attr('href', 'https://plus.google.com/share?url=' + href);
-        var $urlField = $('#share-url');
+
+        var $urlField = $('#share-url').click(function () {
+            $(this).select();
+        });
         $shortUrlDialog.modal({'show': false}).on('shown.bs.modal', function () {
             $urlField.select();
         });
+
         $('#google-short-url-share')
             .click(function () {
-                $.ajax({
-                    'type': 'POST',
-                    'url': 'https://www.googleapis.com/urlshortener/v1/url?key=AIzaSyD6ZzkU7DQiYZgWC1azw_DCRvqyszGHKh4',
-                    'data': '{"longUrl": "' + window.location.href + '"}',
-                    'success': function (data) {
-                        if ('id' in data) {
-                            $urlField.val(data.id);
-                            $urlField.select();
-                            $shortUrlDialog.modal('show');
-                        } else {
-                            $urlField.val('An error occurred while creating the short URL.');
-                        }
-                    },
-                    'dataType': 'json',
-                    'crossDomain': true,
-                    'headers': {'Content-Type': 'application/json'}
+                getShortUrl(window.location.href, function (data) {
+                    setUrlField(data);
                 });
                 $shortUrlDialog.modal('show');
             });
+
+        $('#short-url-remove-header-footer').click(function () {
+            if (this.checked) {
+                var url = '?';
+                url += id ? id : DEFAULT_SOURCE;
+                for (var key in urlAttributes) {
+                    if (key !== 'no-header-footer') {
+                        url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(urlAttributes[key]);
+                    }
+                }
+                url += '&no-header-footer';
+                url += window.location.hash;
+                getShortUrl(resolveUrl(url), function (data) {
+                    setUrlField(data);
+                });
+            }
+        });
+
+        function setUrlField(data) {
+            if ('id' in data) {
+                $urlField.val(data.id);
+                $urlField.select();
+                $shortUrlDialog.modal('show');
+            } else {
+                $urlField.val('An error occurred while creating the short URL.');
+            }
+        }
+
+        function resolveUrl(url) {
+            var a = document.createElement('a');
+            a.href = url;
+            return a.href;
+        }
+    }
+
+    function getShortUrl(url, success) {
+        $.ajax({
+            'type': 'POST',
+            'url': 'https://www.googleapis.com/urlshortener/v1/url?key=AIzaSyD6ZzkU7DQiYZgWC1azw_DCRvqyszGHKh4',
+            'data': '{"longUrl": "' + url + '"}',
+            'success': success,
+            'dataType': 'json',
+            'crossDomain': true,
+            'headers': {'Content-Type': 'application/json'}
+        });
     }
 
     function appendMathJax() {
@@ -552,6 +587,7 @@ function DocGist($) {
                         }
                     }
                     url += '&stylesheet=' + name + '.css';
+                    url += window.location.hash;
                     window.location.assign(url);
                     return false;
                 });
