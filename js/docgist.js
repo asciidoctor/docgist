@@ -31,16 +31,19 @@ function DocGist($) {
     var $content = undefined;
     var $footer = undefined;
     var $gistId = undefined;
+    var $shortUrlDialog = undefined;
     var urlAttributes = undefined;
     var id = undefined;
 
     $(document).ready(function () {
-        $content = $('#content');
-        $footer = $('#footer-text');
-        $gistId = $('#gist-id');
         if (top.location != self.location) {
             $('body>div.navbar').css('display', 'none');
         }
+        $shortUrlDialog = $('#share-short-url-form').hide();
+        $content = $('#content');
+        $footer = $('#footer-text');
+        $gistId = $('#gist-id');
+
 
         var gist = new Gist($, $content);
         var urlInfo = getUrlAttributes();
@@ -378,6 +381,31 @@ function DocGist($) {
             'https://twitter.com/intent/tweet?text=' + encodeURIComponent('Check this out: ' + title) + '&url=' + href);
         $('#facebook-share').attr('href', 'http://www.facebook.com/share.php?u=' + href);
         $('#google-plus-share').attr('href', 'https://plus.google.com/share?url=' + href);
+        var $urlField = $('#share-url');
+        $shortUrlDialog.modal({'show': false}).on('shown.bs.modal', function () {
+            $urlField.select();
+        });
+        $('#google-short-url-share')
+            .click(function () {
+                $.ajax({
+                    'type': 'POST',
+                    'url': 'https://www.googleapis.com/urlshortener/v1/url?key=AIzaSyD6ZzkU7DQiYZgWC1azw_DCRvqyszGHKh4',
+                    'data': '{"longUrl": "' + window.location.href + '"}',
+                    'success': function (data) {
+                        if ('id' in data) {
+                            $urlField.val(data.id);
+                            $urlField.select();
+                            $shortUrlDialog.modal('show');
+                        } else {
+                            $urlField.val('An error occurred while creating the short URL.');
+                        }
+                    },
+                    'dataType': 'json',
+                    'crossDomain': true,
+                    'headers': {'Content-Type': 'application/json'}
+                });
+                $shortUrlDialog.modal('show');
+            });
     }
 
     function appendMathJax() {
