@@ -399,16 +399,8 @@ function DocGist($) {
 
         $('#short-url-remove-header-footer').click(function () {
             if (this.checked) {
-                var url = '?';
-                url += id ? id : DEFAULT_SOURCE;
-                for (var key in urlAttributes) {
-                    if (key !== 'no-header-footer') {
-                        url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(urlAttributes[key]);
-                    }
-                }
-                url += '&no-header-footer';
-                url += window.location.hash;
-                getShortUrl(resolveUrl(url), function (data) {
+                var url = getUrlWithAttributes({'no-header-footer': ''}, ['no-header-footer']);
+                getShortUrl(url, function (data) {
                     setUrlField(data);
                 });
             }
@@ -423,12 +415,28 @@ function DocGist($) {
                 $urlField.val('An error occurred while creating the short URL.');
             }
         }
+    }
 
-        function resolveUrl(url) {
-            var a = document.createElement('a');
-            a.href = url;
-            return a.href;
+    function getUrlWithAttributes(toAdd, toRemove) {
+        var url = '?';
+        // we treat the id as separate from the attributes
+        url += id ? id : DEFAULT_SOURCE;
+        // add back existing attributes minus ones we want to get rid of
+        for (var key in urlAttributes) {
+            if ((!(key in toAdd)) && $.inArray(key, toRemove) === -1) {
+                url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(urlAttributes[key]);
+            }
         }
+        // add attributes we want added
+        for (var keyToAdd in toAdd) {
+            url += '&' + encodeURIComponent(keyToAdd) + '=' + encodeURIComponent(toAdd[keyToAdd]);
+        }
+        // always add bach the hash
+        url += window.location.hash;
+        // resolve relative url to absolute
+        var a = document.createElement('a');
+        a.href = url;
+        return a.href;
     }
 
     function getShortUrl(url, success) {
@@ -579,15 +587,7 @@ function DocGist($) {
                 $li.addClass('disabled');
             } else {
                 $a.click(function () {
-                    var url = '?';
-                    url += id ? id : DEFAULT_SOURCE;
-                    for (var key in urlAttributes) {
-                        if (key !== 'stylesdir' && key !== 'stylesheet') {
-                            url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(urlAttributes[key]);
-                        }
-                    }
-                    url += '&stylesheet=' + name + '.css';
-                    url += window.location.hash;
+                    var url = getUrlWithAttributes({'stylesheet': name + '.css'}, ['stylesdir', 'stylesheet']);
                     window.location.assign(url);
                     return false;
                 });
