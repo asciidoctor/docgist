@@ -158,15 +158,18 @@
     </div>
     <div>
         <span id="nav-buttons">
-            <a class="btn btn-success" id="gist-link" href="" target="_blank" style="">
+            <a class="btn btn-success" id="gist-link" href="" target="_blank" style=""
+               title="See the source document rendered on this page">
                 <i class="fa fa-file-text-o"></i> Source
             </a>
-            <a class="btn btn-default" href="https://github.com/asciidoctor/docgist" target="_blank">
+            <a class="btn btn-default" href="https://github.com/asciidoctor/docgist" target="_blank"
+               title="Visit the project site for DocGist, where you can contribute issues or code">
                 <i class="fa fa-code-fork"></i> Project
             </a>
 
             <div class="btn-group">
-                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-target="#">
+                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-target="#"
+                   title="Share this page">
                     <i class="fa fa-share-alt"></i> Share
                     <span class="caret"></span>
                 </a>
@@ -190,11 +193,22 @@
             </div>
 
             <div class="btn-group">
-                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-target="#">
+                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-target="#"
+                   title="Load theme stylesheet">
                     <i class="fa fa-paint-brush"></i> Theme
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu" id="theme-menu">
+                </ul>
+            </div>
+
+            <div class="btn-group">
+                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-target="#"
+                   title="Choose syntax highlighter for source code">
+                    <i class="fa fa-code"></i> Highlighter
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu" id="highlighter-menu">
                 </ul>
             </div>
         </span>

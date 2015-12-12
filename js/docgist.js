@@ -194,6 +194,7 @@ function DocGist($) {
         if (highlighter) {
             applyHighlighting(highlighter, sourceLanguage, hasDarkSourceBlocks);
         }
+        loadHighlightMenu(highlighter);
 
         if (stylesheet === 'style/iconic.css') {
             $('h1').css('margin-bottom', '3rem');
@@ -601,6 +602,41 @@ function DocGist($) {
             } else {
                 $a.click(function () {
                     var url = getUrlWithAttributes({'stylesheet': name + '.css'}, ['stylesdir', 'stylesheet']);
+                    window.location.assign(url);
+                    return false;
+                });
+            }
+        });
+    }
+
+    function loadHighlightMenu(highlighter) {
+        var HIGHLIGHTERS = {
+            'codemirror': 'CodeMirror',
+            'highlightjs': 'highlight.js',
+            'prettify': 'Prettify'
+        };
+        var $LI = $('<li/>');
+        var $A = $('<a href="javascript:;"/>');
+        var $highlighterMenu = $('#highlighter-menu');
+
+        var currentHighlighter = '';
+        if (highlighter) {
+            var highlighterCode = highlighter.toLowerCase().replace('.', '');
+            for (var name in HIGHLIGHTERS) {
+                if (highlighterCode === name) {
+                    currentHighlighter = name;
+                    break;
+                }
+            }
+        }
+        $.each(HIGHLIGHTERS, function (name, descriptiveName) {
+            var $a = $A.clone().text(descriptiveName);
+            var $li = $LI.clone().append($a).appendTo($highlighterMenu);
+            if (name === currentHighlighter) {
+                $li.addClass('disabled');
+            } else {
+                $a.click(function () {
+                    var url = getUrlWithAttributes({'source-highlighter': name}, ['source-highlighter']);
                     window.location.assign(url);
                     return false;
                 });
