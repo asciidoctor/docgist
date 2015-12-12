@@ -1,4 +1,4 @@
-= DocGist
+= icon:pencil-square-o[] DocGist
 
 toc::[]
 
@@ -14,7 +14,7 @@ There's more information on this in the link:./?github-asciidoctor%2Fasciidoctor
 The original idea and code for DocGist came from http://gist.neo4j.org[GraphGist].
 GraphGist is an interactive documentation tool for the Neo4j database and Cypher query language.
 
-== How to use
+== icon:map-o[] How to use
 
 * Create/locate a gist on GitHub (or use a file in Dropbox).
 ** Write text using AsciiDoc syntax in it.
@@ -25,7 +25,7 @@ GraphGist is an interactive documentation tool for the Neo4j database and Cypher
 
 For other possible hosts that can store documents, see <<source-documents>>.
 
-== Images
+== icon:photo[] Images
 
 Relative image URLs are resolved to the same location as the document.
 If the images are located elsewhere, use the `imagesdir` attribute to point out the location.
@@ -41,7 +41,7 @@ Is rendered as:
 
 image::sunset.jpg[]
 
-== Table of contents
+== icon:list[] Table of contents
 
 To add a table of contents, put this in the place you want it to appear:
 
@@ -50,7 +50,7 @@ To add a table of contents, put this in the place you want it to appear:
 toc::[]
 ....
 
-== Source code highlighting
+== icon:code[] Source code highlighting
 
 By default, source code is highlighted using https://codemirror.net/[CodeMirror].
 See the <<codemirror#codemirror,CodeMirror example>> for more information.
@@ -103,9 +103,14 @@ See <<source-language#source-language,Source language>> for how to use it.
   See the <<tabbed-source#tabbed-source,Tabbed source>> example for more information.
 ====
 
-== Math
+== icon:calculator[] Math
 
-Thanks to https://www.mathjax.org/[MathJax] mathematical expressions can be typeset in DocGist documents.
+:url-mathjax: https://www.mathjax.org/
+:url-asciimath: http://docs.mathjax.org/en/latest/asciimath.html
+:url-latex: http://docs.mathjax.org/en/latest/tex.html
+
+Thanks to {url-mathjax}[MathJax] mathematical expressions can be typeset in DocGist documents.
+The content can be written as {url-asciimath}[AsciiMath] or use {url-latex}[TeX/LaTeX] notation.
 
 For block content, do like this:
 
@@ -133,7 +138,63 @@ Water (stem:[H_2O]) is a critical component.
 
 Which renders like this: Water (stem:[H_2O]) is a critical component.
 
-== Tips and tricks
+[TIP]
+There's no need for special delimiters around the expression as the MathJax documentation suggests.
+This is handled automatically by Asciidoctor!
+
+The default notation is AsciiMath, but LaTeX can be used like this:
+
+[source,asciidoc]
+....
+latexmath:[C = \alpha + \beta Y^{\gamma} + \epsilon]
+....
+
+latexmath:[C = \alpha + \beta Y^{\gamma} + \epsilon]
+
+== icon:keyboard-o[] Keyboard shortcuts and more
+
+:url-ui-macros: http://asciidoctor.org/docs/user-manual/#user-interface-macros
+
+This is a common shortcut on Windows systems: kbd:[Ctrl+Alt+Delete].
+
+Here's the source:
+
+[source,asciidoc]
+....
+kbd:[Ctrl+Alt+Delete]
+....
+
+You might want to represent a user interface button like btn:[Save].
+
+Here's how to do it:
+
+[source,asciidoc]
+....
+btn:[Save]
+....
+
+[NOTE]
+Here on DocGist we replace use actual (extra small) buttons from Bootstrap.
+In normal Asciidoctor it would have looked more along the lines of *[ Save ]*.
+
+Yet another nifty feature, representing a menu selection:
+
+menu:File[New...]
+
+Source:
+
+[source,asciidoc]
+....
+menu:File[New...]
+....
+
+[IMPORTANT]
+Representing keyboard shortcuts, buttons, and menu items are experimental features in Aciidoctor.
+DocGist has the `experimental` flag set by default for your convenience!
+
+For the reference documentation, see {url-ui-macros}[User Interface Macros].
+
+== icon:exclamation-circle[] Tips and tricks
 
 Links to other DocGists can use this syntax: `+link:./?5897167[DocGist intro]+` which renders as link:./?5897167[DocGist intro].
 This makes things easier in case you run DocGist locally to fiddle with the "`backend`" (it's a frontend really).
@@ -149,7 +210,7 @@ The URL is a reference to a yUML image.
 yUML is tool for creating UML diagrams online.
 
 [[source-documents]]
-== Source documents
+== icon:file-text-o[] Source documents
 
 DocGist can view documents fetched from a number of different sources.
 It parses the URL to find out how to use it, and tries to be a bit smart to keep DocGist URLs short.

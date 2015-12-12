@@ -11,21 +11,23 @@ function DocGist($) {
     var DEFAULT_HIGHLIGHTER = 'codemirror';
     var UNAVAILABLE_HIGHLIGHTERS = ['coderay', 'pygments', 'source-highlight', 'highlight'];
     var ASCIIDOCTOR_DEFAULT_ATTRIBUTES = {
-        'showtitle': '@',
-        'icons': 'font',
-        'sectanchors': '@',
-        'source-highlighter': DEFAULT_HIGHLIGHTER + '@',
         'coderay-unavailable': '',
-        'pygments-unavailable': '',
-        'platform': 'opal',
-        'platform-opal': '',
-        'env': 'docgist',
         'env-docgist': '',
-        'toc': 'macro',
+        'env': 'docgist',
         'example-caption!': '@',
-        'version-label!': '@',
+        'experimental': '@',
+        'icons': 'font',
+        'platform-opal': '',
+        'platform': 'opal',
+        'pygments-unavailable': '',
+        'sectanchors': '@',
+        'showtitle': '@',
+        'source-highlighter': DEFAULT_HIGHLIGHTER + '@',
+        'stem': '@',
         'stylesdir': 'style@',
-        'stylesheet': 'asciidoctor.css@'
+        'stylesheet': 'asciidoctor.css@',
+        'toc': 'macro',
+        'version-label!': '@'
     };
 
     var $content = undefined;
@@ -198,6 +200,7 @@ function DocGist($) {
         }
 
         appendMathJax();
+        transformButtons($content);
         setPageTitle(doc);
 
         addMetadataToFooter(attributes, urlAttributes);
@@ -296,6 +299,16 @@ function DocGist($) {
         addMetadataItem(['tags', 'keywords'], 'Tags/Keywords', 'tags');
         addMetadataItem(['asciidoctor-version'], 'Powered by', 'bolt', [prepend('Asciidoctor '), wrapInLink('http://asciidoctor.org/')]);
         addMetadataItem(['env'], 'Powered by', 'pencil-square-o', [wrapInLink(window.location.href)]);
+    }
+
+    function transformButtons($content) {
+        var $BUTTON = $('<button class="btn btn-default btn-xs" type="buton"/>');
+        $('b.button', $content).each(function () {
+            var $old = $(this);
+            var text = $old.text();
+            var $new = $BUTTON.clone().text(text);
+            $old.replaceWith($new);
+        });
     }
 
     function tabTheSource($content) {
