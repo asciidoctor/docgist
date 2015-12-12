@@ -119,6 +119,10 @@ function DocGist($) {
             var attributes = doc.attributes;
             var attributeOverrides = {};
 
+            if (existsInObjectOrHash('no-header-footer', attributes, urlAttributes)) {
+                $('body>div.navbar').css('display', 'none');
+            }
+
             var stylesheet = '';
             if (existsInObjectOrHash('stylesheet', attributes, urlAttributes)) {
                 stylesheet = getValueFromObjectOrHash('stylesheet', attributes, urlAttributes);
@@ -132,10 +136,6 @@ function DocGist($) {
                     }
                 }
                 addLinkElement(stylesheet);
-            }
-
-            if (existsInObjectOrHash('no-header-footer', attributes, urlAttributes)) {
-                $('body>div.navbar').css('display', 'none');
             }
 
             if (existsInObjectOrHash('source-highlighter', attributes, urlAttributes)) {
@@ -570,6 +570,7 @@ function DocGist($) {
     }
 
     function loadThemeMenu(stylesheet) {
+        var menuId = 'theme-menu';
         var THEMES = {
             'asciidoctor': 'Asciidoctor',
             'colony': 'Colony',
@@ -586,57 +587,46 @@ function DocGist($) {
             'rocket-panda': 'Rocket Panda',
             'rubygems': 'RubyGems'
         };
-        var $LI = $('<li/>');
-        var $A = $('<a href="javascript:;"/>');
-        var $themeMenu = $('#theme-menu');
-
         var currentStyle = '';
         if (stylesheet && stylesheet.indexOf('style/') === 0) {
             currentStyle = stylesheet.slice(6, -4);
         }
-        $.each(THEMES, function (name, descriptiveName) {
-            var $a = $A.clone().text(descriptiveName);
-            var $li = $LI.clone().append($a).appendTo($themeMenu);
-            if (name === currentStyle) {
-                $li.addClass('disabled');
-            } else {
-                $a.click(function () {
-                    var url = getUrlWithAttributes({'stylesheet': name + '.css'}, ['stylesdir', 'stylesheet']);
-                    window.location.assign(url);
-                    return false;
-                });
-            }
-        });
+        var attribute = 'stylesheet';
+        var attributesToRemove = ['stylesdir'];
+        var valueTransformer = function (name) {
+            return name + '.css';
+        };
+        loadMenu(menuId, THEMES, currentStyle, attribute, attributesToRemove, valueTransformer);
     }
 
     function loadHighlightMenu(highlighter) {
+        var menuId = 'highlighter-menu';
         var HIGHLIGHTERS = {
             'codemirror': 'CodeMirror',
             'highlightjs': 'highlight.js',
             'prettify': 'Prettify'
         };
+        var currentName = highlighter;
+        var attribute = 'source-highlighter';
+        var attributesToRemove = [];
+        loadMenu(menuId, HIGHLIGHTERS, currentName, attribute, attributesToRemove);
+    }
+
+    function loadMenu(menuId, menuItems, currentName, attribute, attributesToRemove, valueTransformer) {
         var $LI = $('<li/>');
         var $A = $('<a href="javascript:;"/>');
-        var $highlighterMenu = $('#highlighter-menu');
+        var $menu = $('#' + menuId);
 
-        var currentHighlighter = '';
-        if (highlighter) {
-            var highlighterCode = highlighter.toLowerCase().replace('.', '');
-            for (var name in HIGHLIGHTERS) {
-                if (highlighterCode === name) {
-                    currentHighlighter = name;
-                    break;
-                }
-            }
-        }
-        $.each(HIGHLIGHTERS, function (name, descriptiveName) {
+        $.each(menuItems, function (name, descriptiveName) {
             var $a = $A.clone().text(descriptiveName);
-            var $li = $LI.clone().append($a).appendTo($highlighterMenu);
-            if (name === currentHighlighter) {
+            var $li = $LI.clone().append($a).appendTo($menu);
+            if (currentName && currentName == name) {
                 $li.addClass('disabled');
             } else {
                 $a.click(function () {
-                    var url = getUrlWithAttributes({'source-highlighter': name}, ['source-highlighter']);
+                    var attributeObject = {};
+                    attributeObject[attribute] = (typeof valueTransformer === 'function') ? valueTransformer(name) : name;
+                    var url = getUrlWithAttributes(attributeObject, attributesToRemove);
                     window.location.assign(url);
                     return false;
                 });
