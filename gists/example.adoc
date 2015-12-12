@@ -1,8 +1,6 @@
 [[docgist]]
 = icon:pencil-square-o[] DocGist
 
-toc::[]
-
 DocGist is a URL proxy tool that converts http://asciidoctor.org/docs/asciidoc-syntax-quick-reference/[AsciiDoc] documents fetched from Gists (http://gist.github.com), GitHub repositories, Dropbox folders and other sources to HTML.
 The conversion to HTML is performed in the browser (client-side) using the https://github.com/asciidoctor/asciidoctor.js[Asciidoctor.js] JavaScript library.
 DocGist can render documents located anywhere, as long as the host permits cross-domain access.
@@ -12,9 +10,6 @@ DocGist uses the https://github.com/asciidoctor/asciidoctor/releases/tag/v1.5.3[
 If you want to use the syntax of older versions, add `:compat-mode:` to the document header or by setting it in the
 btn:[Attributes] menu.
 There's more information on this in the link:./?github-asciidoctor%2Fasciidoctor.org%2F%2Fdocs%2Fmigration.adoc[migration guide].
-
-//The original idea and code for DocGist came from http://gist.neo4j.org[GraphGist].
-//GraphGist is an interactive documentation tool for the Neo4j database and Cypher query language.
 
 [[how-to-use]]
 == icon:map-o[] How to use
@@ -48,12 +43,23 @@ image::sunset.jpg[]
 [[toc-how-to]]
 == icon:list[] Table of contents
 
-To add a table of contents, put this in the place you want it to appear:
+The table of content appears below the header by default.
+You can alter this by setting a different value for the `toc` attribute.
+The available options are found in the btn:[Attributes] menu.
+
+To add a table of contents at any location you want, put this in the place you want it to appear:
 
 [source,asciidoc]
 ....
 toc::[]
 ....
+
+and set the `toc` attribute to `macro` (in the document or via the btn:[Attributes] menu).
+
+There's such a `toc` macro embedded in this document.
+If you set the `toc` attribute to `macro` on this page, the table of contents will appear below this line!
+
+toc::[]
 
 [[source-highlight]]
 == icon:code[] Source code highlighting

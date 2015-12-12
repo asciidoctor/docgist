@@ -31,7 +31,7 @@ function DocGist($) {
         'stylesdir': 'style@',
         'stylesheet': 'asciidoctor.css@',
         'table-caption': '@',
-        'toc': 'macro',
+        'toc': '@',
         'version-label!': '@'
     };
 
@@ -654,7 +654,7 @@ function DocGist($) {
             'numbered': ['', null],
             'stem': ['asciimath', 'latexmath', '', null],
             'table-caption': ['', null],
-
+            'toc': ['', 'macro', 'preamble', null]
         };
         var menuItems = {};
         $.each(ATTRIBUTES, function (key, values) {
