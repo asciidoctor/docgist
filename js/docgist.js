@@ -12,20 +12,25 @@ function DocGist($) {
     var UNAVAILABLE_HIGHLIGHTERS = ['coderay', 'pygments', 'source-highlight', 'highlight'];
     var ASCIIDOCTOR_DEFAULT_ATTRIBUTES = {
         'coderay-unavailable': '',
+        'compat-mode!': '@',
+        'doctype!': '@',
         'env-docgist': '',
         'env': 'docgist',
         'example-caption!': '@',
         'experimental': '@',
         'icons': 'font',
+        'no-highlight!': '@',
+        'numbered!': '@',
         'platform-opal': '',
         'platform': 'opal',
         'pygments-unavailable': '',
         'sectanchors': '@',
         'showtitle': '@',
         'source-highlighter': DEFAULT_HIGHLIGHTER + '@',
-        'stem': '@',
+        'stem': 'asciimath@',
         'stylesdir': 'style@',
         'stylesheet': 'asciidoctor.css@',
+        'table-caption': '@',
         'toc': 'macro',
         'version-label!': '@'
     };
@@ -191,7 +196,7 @@ function DocGist($) {
         }
 
         var hasDarkSourceBlocks = $.inArray(stylesheet, ['style/github.css', 'style/iconic.css', 'style/rubygems.css']) !== -1;
-        if (highlighter) {
+        if (highlighter && !existsInObjectOrHash('no-highlight', attributes, urlAttributes)) {
             applyHighlighting(highlighter, sourceLanguage, hasDarkSourceBlocks);
         }
         loadHighlightMenu(highlighter);
@@ -645,8 +650,9 @@ function DocGist($) {
             'example-caption': ['', null],
             'experimental': ['', null],
             'no-header-footer': [''],
+            'no-highlight': ['', null],
             'numbered': ['', null],
-            'stem': ['asciimath', 'latexmath', null],
+            'stem': ['asciimath', 'latexmath', '', null],
             'table-caption': ['', null],
 
         };
@@ -669,6 +675,31 @@ function DocGist($) {
                 currentNames.push(key);
             }
         });
+        $.each(ASCIIDOCTOR_DEFAULT_ATTRIBUTES, function (key, value) {
+            if (value.slice(-1) === '@') {
+                // check that we don't turn off both variants
+                if (key.slice(-1) === '!' && $.inArray(key.slice(0, -1), currentNames) !== -1) {
+                    return true; // continue
+                }
+                if (key.slice(-1) !== '!' && $.inArray(key, currentNames) !== -1) {
+                    return true; // continue
+                }
+                var found = false;
+                $.each(currentNames, function (ix, entry) {
+                    if (entry.indexOf(key) === 0) {
+                        found = true;
+                        return false; // break
+                    }
+                });
+                if (!found) {
+                    var val = value.slice(0, -1);
+                    currentNames.push(key + '=' + val);
+                    if (val === '') {
+                        currentNames.push(key);
+                    }
+                }
+            }
+        });
         var attributesToRemove = [];
         var attributeAndValueTransformer = function (name) {
             var key, value;
@@ -685,8 +716,24 @@ function DocGist($) {
                 value = pieces.slice(1).join('!=');
             }
             var attributeObject = {};
-            attributeObject[key] = value;
+            if (keyToAdd(key, value)) {
+                attributeObject[key] = value;
+            } else {
+                // this is a hack
+                attributesToRemove.push(key);
+            }
             return attributeObject;
+
+            function keyToAdd(key, value) {
+                if (key in ASCIIDOCTOR_DEFAULT_ATTRIBUTES) {
+                    var defaultValue = ASCIIDOCTOR_DEFAULT_ATTRIBUTES[key];
+                    if (defaultValue.slice(-1) === '@') {
+                        defaultValue = defaultValue.slice(0, -1);
+                    }
+                    return value !== defaultValue;
+                }
+                return true;
+            }
         };
         loadMenu(menuId, menuItems, currentNames, null, attributesToRemove, null, attributeAndValueTransformer);
     }
