@@ -1,3 +1,4 @@
+[[docgist]]
 = icon:pencil-square-o[] DocGist
 
 toc::[]
@@ -8,12 +9,14 @@ DocGist can render documents located anywhere, as long as the host permits cross
 
 [NOTE]
 DocGist uses the https://github.com/asciidoctor/asciidoctor/releases/tag/v1.5.3[latest release (1.5.3)] of Asciidoctor.
-If you want to use the syntax of older versions, add `:compat-mode:` to the document header.
+If you want to use the syntax of older versions, add `:compat-mode:` to the document header or by setting it in the
+btn:[Attributes] menu.
 There's more information on this in the link:./?github-asciidoctor%2Fasciidoctor.org%2F%2Fdocs%2Fmigration.adoc[migration guide].
 
-The original idea and code for DocGist came from http://gist.neo4j.org[GraphGist].
-GraphGist is an interactive documentation tool for the Neo4j database and Cypher query language.
+//The original idea and code for DocGist came from http://gist.neo4j.org[GraphGist].
+//GraphGist is an interactive documentation tool for the Neo4j database and Cypher query language.
 
+[[how-to-use]]
 == icon:map-o[] How to use
 
 * Create/locate a gist on GitHub (or use a file in Dropbox).
@@ -25,6 +28,7 @@ GraphGist is an interactive documentation tool for the Neo4j database and Cypher
 
 For other possible hosts that can store documents, see <<source-documents>>.
 
+[[images]]
 == icon:photo[] Images
 
 Relative image URLs are resolved to the same location as the document.
@@ -41,6 +45,7 @@ Is rendered as:
 
 image::sunset.jpg[]
 
+[[toc-how-to]]
 == icon:list[] Table of contents
 
 To add a table of contents, put this in the place you want it to appear:
@@ -50,6 +55,7 @@ To add a table of contents, put this in the place you want it to appear:
 toc::[]
 ....
 
+[[source-highlight]]
 == icon:code[] Source code highlighting
 
 By default, source code is highlighted using https://codemirror.net/[CodeMirror].
@@ -103,6 +109,7 @@ See <<source-language#source-language,Source language>> for how to use it.
   See the <<tabbed-source#tabbed-source,Tabbed source>> example for more information.
 ====
 
+[[math]]
 == icon:calculator[] Math
 
 :url-mathjax: https://www.mathjax.org/
@@ -151,6 +158,7 @@ latexmath:[C = \alpha + \beta Y^{\gamma} + \epsilon]
 
 latexmath:[C = \alpha + \beta Y^{\gamma} + \epsilon]
 
+[[ui-macros]]
 == icon:keyboard-o[] Keyboard shortcuts and more
 
 :url-ui-macros: http://asciidoctor.org/docs/user-manual/#user-interface-macros
@@ -174,10 +182,10 @@ btn:[Save]
 ....
 
 [NOTE]
-Here on DocGist we replace use actual (extra small) buttons from Bootstrap.
+Here on DocGist we use actual (extra small) buttons from Bootstrap.
 In normal Asciidoctor it would have looked more along the lines of *[ Save ]*.
 
-Yet another nifty feature, representing a menu selection:
+Yet another nifty feature, representing a menu item:
 
 menu:File[New...]
 
@@ -194,6 +202,7 @@ DocGist has the `experimental` flag set by default for your convenience!
 
 For the reference documentation, see {url-ui-macros}[User Interface Macros].
 
+[[tips]]
 == icon:exclamation-circle[] Tips and tricks
 
 Links to other DocGists can use this syntax: `+link:./?5897167[DocGist intro]+` which renders as link:./?5897167[DocGist intro].

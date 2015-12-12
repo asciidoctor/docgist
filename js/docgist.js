@@ -200,8 +200,12 @@ function DocGist($) {
             $('h1').css('margin-bottom', '3rem');
         }
 
-        appendMathJax();
-        transformButtons($content);
+        if (!existsInObjectOrHash('stem!', attributes, urlAttributes)) {
+            appendMathJax();
+        }
+        if (!existsInObjectOrHash('experimental!', attributes, urlAttributes)) {
+            transformButtons($content);
+        }
         setPageTitle(doc);
 
         addMetadataToFooter(attributes, urlAttributes);
@@ -223,8 +227,9 @@ function DocGist($) {
             });
         }
 
-        loadThemeMenu(stylesheet);
         share();
+        loadThemeMenu(stylesheet);
+        loadAttributesMenu();
     }
 
     function addMetadataToFooter(attributes, urlAttributes) {
@@ -437,7 +442,7 @@ function DocGist($) {
         url += id ? id : DEFAULT_SOURCE;
         // add back existing attributes minus ones we want to get rid of
         for (var key in urlAttributes) {
-            if ((!(key in toAdd)) && $.inArray(key, toRemove) === -1) {
+            if (keyToKeep(key)) {
                 url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(urlAttributes[key]);
             }
         }
@@ -451,6 +456,24 @@ function DocGist($) {
         var a = document.createElement('a');
         a.href = url;
         return a.href;
+
+        function keyToKeep(key) {
+            if (key in toAdd || $.inArray(key, toRemove) !== -1) {
+                return false;
+            }
+            if (key.slice(-1) === '!') {
+                var keyWithoutNegation = key.slice(0, -1);
+                if (keyWithoutNegation in toAdd || $.inArray(keyWithoutNegation, toRemove) !== -1) {
+                    return false;
+                }
+            } else {
+                var keyPlusNegation = key + '!';
+                if (keyPlusNegation in toAdd || $.inArray(keyPlusNegation, toRemove) !== -1) {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 
     function getShortUrl(url, success) {
@@ -527,7 +550,7 @@ function DocGist($) {
         element.href = url;
         var linkElements = document.getElementsByTagName('link');
         var last = linkElements[linkElements.length - 1];
-        last.parentNode.insertBefore(element, last.nextSibling);
+        last.parentNode.insertBefore(element, last);
     }
 
     function highlightUsingPrettify(hasDarkSourceBlocks) {
@@ -591,12 +614,13 @@ function DocGist($) {
         if (stylesheet && stylesheet.indexOf('style/') === 0) {
             currentStyle = stylesheet.slice(6, -4);
         }
+        var currentStyles = currentStyle ? [currentStyle] : [];
         var attribute = 'stylesheet';
         var attributesToRemove = ['stylesdir'];
         var valueTransformer = function (name) {
             return name + '.css';
         };
-        loadMenu(menuId, THEMES, currentStyle, attribute, attributesToRemove, valueTransformer);
+        loadMenu(menuId, THEMES, currentStyles, attribute, attributesToRemove, valueTransformer);
     }
 
     function loadHighlightMenu(highlighter) {
@@ -606,13 +630,68 @@ function DocGist($) {
             'highlightjs': 'highlight.js',
             'prettify': 'Prettify'
         };
-        var currentName = highlighter;
+        var currentNames = highlighter ? [highlighter] : [];
         var attribute = 'source-highlighter';
         var attributesToRemove = [];
-        loadMenu(menuId, HIGHLIGHTERS, currentName, attribute, attributesToRemove);
+        loadMenu(menuId, HIGHLIGHTERS, currentNames, attribute, attributesToRemove);
     }
 
-    function loadMenu(menuId, menuItems, currentName, attribute, attributesToRemove, valueTransformer) {
+    function loadAttributesMenu() {
+        var menuId = 'attributes-menu';
+        // null is used to unset values
+        var ATTRIBUTES = {
+            'compat-mode': ['', null],
+            'doctype': ['article', 'book', null],
+            'example-caption': ['', null],
+            'experimental': ['', null],
+            'no-header-footer': [''],
+            'numbered': ['', null],
+            'stem': ['asciimath', 'latexmath', null],
+            'table-caption': ['', null],
+
+        };
+        var menuItems = {};
+        $.each(ATTRIBUTES, function (key, values) {
+            $.each(values, function (ix, value) {
+                var isNegated = value === null;
+                var isEmpty = value === '';
+                if (isNegated) {
+                    menuItems[key + '!='] = ':' + key + '!:';
+                } else {
+                    menuItems[key + '=' + value] = ':' + key + (isEmpty ? ':' : ': ' + value);
+                }
+            });
+        });
+        var currentNames = [];
+        $.each(urlAttributes, function (key, value) {
+            currentNames.push(key + '=' + value);
+            if (value === '') {
+                currentNames.push(key);
+            }
+        });
+        var attributesToRemove = [];
+        var attributeAndValueTransformer = function (name) {
+            var key, value;
+            var pieces = name.split('!=');
+            if (pieces.length < 2) {
+                pieces = name.split('=');
+                if (pieces.length < 2) {
+                    return {};
+                }
+                key = pieces[0];
+                value = pieces.slice(1).join('=');
+            } else {
+                key = pieces[0] + '!';
+                value = pieces.slice(1).join('!=');
+            }
+            var attributeObject = {};
+            attributeObject[key] = value;
+            return attributeObject;
+        };
+        loadMenu(menuId, menuItems, currentNames, null, attributesToRemove, null, attributeAndValueTransformer);
+    }
+
+    function loadMenu(menuId, menuItems, currentNames, attribute, attributesToRemove, valueTransformer, attributeAndValueTransformer) {
         var $LI = $('<li/>');
         var $A = $('<a href="javascript:;"/>');
         var $menu = $('#' + menuId);
@@ -620,12 +699,16 @@ function DocGist($) {
         $.each(menuItems, function (name, descriptiveName) {
             var $a = $A.clone().text(descriptiveName);
             var $li = $LI.clone().append($a).appendTo($menu);
-            if (currentName && currentName == name) {
+            if ($.inArray(name, currentNames) !== -1) {
                 $li.addClass('disabled');
             } else {
                 $a.click(function () {
                     var attributeObject = {};
-                    attributeObject[attribute] = (typeof valueTransformer === 'function') ? valueTransformer(name) : name;
+                    if (typeof attributeAndValueTransformer === 'function') {
+                        attributeObject = attributeAndValueTransformer(name);
+                    } else {
+                        attributeObject[attribute] = (typeof valueTransformer === 'function') ? valueTransformer(name) : name;
+                    }
                     var url = getUrlWithAttributes(attributeObject, attributesToRemove);
                     window.location.assign(url);
                     return false;
