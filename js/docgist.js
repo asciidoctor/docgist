@@ -32,6 +32,7 @@ function DocGist($) {
         'stylesheet': 'asciidoctor.css@',
         'table-caption': '@',
         'toc': '@',
+        'toclevels': '2@',
         'version-label!': '@'
     };
 
@@ -203,6 +204,7 @@ function DocGist($) {
 
         if (stylesheet === 'style/iconic.css') {
             $('h1').css('margin-bottom', '3rem');
+            $('.paragraph.lead > p, #preamble > .sectionbody > .paragraph:first-of-type p').css('color', 'inherit');
         }
 
         if (!existsInObjectOrHash('stem!', attributes, urlAttributes)) {
@@ -597,6 +599,22 @@ function DocGist($) {
         });
     }
 
+    function createAttributeAndValueTransformer(attribute, attributesToRemove, sliceMinus, valueTransformer) {
+        return function (name) {
+            // -5 slice to remove the @ after the default value
+            var sliceRemove = typeof sliceMinus === 'number' ? sliceMinus : -1;
+            if (name === ASCIIDOCTOR_DEFAULT_ATTRIBUTES[attribute].slice(0, sliceRemove)) {
+                // this a hack
+                attributesToRemove.push(attribute);
+                return {};
+            } else {
+                var attributeObject = {};
+                attributeObject[attribute] = typeof valueTransformer === 'function' ? valueTransformer(name) : name;
+                return attributeObject;
+            }
+        };
+    }
+
     function loadThemeMenu(stylesheet) {
         var menuId = 'theme-menu';
         var THEMES = {
@@ -623,9 +641,10 @@ function DocGist($) {
         var attribute = 'stylesheet';
         var attributesToRemove = ['stylesdir'];
         var valueTransformer = function (name) {
-            return name + '.css';
+            return name + '.css'
         };
-        loadMenu(menuId, THEMES, currentStyles, attribute, attributesToRemove, valueTransformer);
+        var attributeAndValueTransformer = createAttributeAndValueTransformer(attribute, attributesToRemove, -5, valueTransformer);
+        loadMenu(menuId, THEMES, currentStyles, attribute, attributesToRemove, undefined, attributeAndValueTransformer);
     }
 
     function loadHighlightMenu(highlighter) {
@@ -638,7 +657,8 @@ function DocGist($) {
         var currentNames = highlighter ? [highlighter] : [];
         var attribute = 'source-highlighter';
         var attributesToRemove = [];
-        loadMenu(menuId, HIGHLIGHTERS, currentNames, attribute, attributesToRemove);
+        var attributeAndValueTransformer = createAttributeAndValueTransformer(attribute, attributesToRemove);
+        loadMenu(menuId, HIGHLIGHTERS, currentNames, attribute, attributesToRemove, undefined, attributeAndValueTransformer);
     }
 
     function loadAttributesMenu() {
@@ -654,7 +674,8 @@ function DocGist($) {
             'numbered': ['', null],
             'stem': ['asciimath', 'latexmath', '', null],
             'table-caption': ['', null],
-            'toc': ['', 'macro', 'preamble', null]
+            'toc': ['', 'macro', 'preamble', null],
+            'toclevels': ['1', '2', '3', '4']
         };
         var menuItems = {};
         $.each(ATTRIBUTES, function (key, values) {
