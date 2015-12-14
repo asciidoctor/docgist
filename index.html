@@ -4,6 +4,18 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 <link rel="icon" href="favicon.ico">
 
+<script>
+    (function () {
+        var f = function () {
+        };
+        if (!window.console) {
+            window.console = {
+                log: f, info: f, warn: f, debug: f, error: f
+            };
+        }
+    }());
+</script>
+
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 
 <!-- Bootstrap -->
@@ -37,18 +49,6 @@
 <link rel="stylesheet"
       href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic|Noto+Serif:400,400italic,700,700italic|Droid+Sans+Mono:400">
 <link rel="stylesheet" href="style/docgist-extra.css">
-
-<script>
-    (function () {
-        var f = function () {
-        };
-        if (!window.console) {
-            window.console = {
-                log: f, info: f, warn: f, debug: f, error: f
-            };
-        }
-    }());
-</script>
 
 <body>
 <div class="navbar navbar-default">
