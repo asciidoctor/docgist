@@ -35,11 +35,33 @@ function DocGist($) {
         'toclevels': '2@',
         'version-label!': '@'
     };
+    var THEMES = {
+        'asciidoctor': 'Asciidoctor',
+        'colony': 'Colony',
+        'foundation': 'Foundation',
+        'foundation-lime': 'Foundation (Lime)',
+        'foundation-potion': 'Foundation (Potion)',
+        'github': 'GitHub',
+        'golo': 'Golo',
+        'iconic': 'Iconic',
+        'maker': 'Maker',
+        'old-standard': 'Old Standard',
+        'readthedocs': 'Read the Docs',
+        'riak': 'Riak',
+        'rocket-panda': 'Rocket Panda',
+        'rubygems': 'RubyGems'
+    };
+    var THEMES_WITH_DARK_SOURCE_BLOCKS = [
+        'style/github.css',
+        'style/iconic.css',
+        'style/rubygems.css'
+    ];
 
     var $content = undefined;
     var $footer = undefined;
     var $gistId = undefined;
     var $shortUrlDialog = undefined;
+    var $editor = undefined;
     var urlAttributes = undefined;
     var id = undefined;
 
@@ -51,6 +73,7 @@ function DocGist($) {
         $content = $('#content');
         $footer = $('#footer-text');
         $gistId = $('#gist-id');
+        $editor = $('#editor');
 
 
         var gist = new Gist($, $content);
@@ -112,76 +135,95 @@ function DocGist($) {
         }
     }
 
-    function renderContent(content, options) {
-        if ('sourceUrl' in options) {
-            $('#gist-link').attr('href', options['sourceUrl']);
-        }
-        $content.empty();
-        var doc, html = undefined;
+    function preProcess(content, options) {
+        var preOptions = {};
         var highlighter = undefined;
         var sourceLanguage = undefined;
-        try {
-            doc = Opal.Asciidoctor.$load(content, getAsciidoctorOptions({'parse_header_only': 'true'}));
-            var attributes = doc.attributes;
-            var attributeOverrides = {};
+        var doc = Opal.Asciidoctor.$load(content, getAsciidoctorOptions({'parse_header_only': 'true'}));
+        var attributes = doc.attributes;
+        var attributeOverrides = {};
+        preOptions['attributes'] = attributes;
+        preOptions['document'] = doc;
 
-            if (existsInObjectOrHash('no-header-footer', attributes, urlAttributes)) {
-                $('body>div.navbar').css('display', 'none');
-            }
+        if (existsInObjectOrHash('no-header-footer', attributes, urlAttributes)) {
+            $('body>div.navbar').css('display', 'none');
+        }
 
-            var stylesheet = '';
-            if (existsInObjectOrHash('stylesheet', attributes, urlAttributes)) {
-                stylesheet = getValueFromObjectOrHash('stylesheet', attributes, urlAttributes);
-                if (existsInObjectOrHash('stylesdir', attributes, urlAttributes)) {
-                    var stylesdir = getValueFromObjectOrHash('stylesdir', attributes, urlAttributes);
-                    if (stylesdir) {
-                        if (stylesdir.slice(-1) !== '/') {
-                            stylesdir += '/';
-                        }
-                        stylesheet = stylesdir + stylesheet;
+        var stylesheet = '';
+        if (existsInObjectOrHash('stylesheet', attributes, urlAttributes)) {
+            stylesheet = getValueFromObjectOrHash('stylesheet', attributes, urlAttributes);
+            if (existsInObjectOrHash('stylesdir', attributes, urlAttributes)) {
+                var stylesdir = getValueFromObjectOrHash('stylesdir', attributes, urlAttributes);
+                if (stylesdir) {
+                    if (stylesdir.slice(-1) !== '/') {
+                        stylesdir += '/';
                     }
+                    stylesheet = stylesdir + stylesheet;
                 }
-                addLinkElement(stylesheet);
             }
+            addLinkElement(stylesheet);
+        }
+        preOptions['stylesheet'] = stylesheet;
+        preOptions['hasDarkSourceBlocks'] = $.inArray('stylesheet', THEMES_WITH_DARK_SOURCE_BLOCKS) !== -1;
 
-            if (existsInObjectOrHash('source-highlighter', attributes, urlAttributes)) {
-                highlighter = getValueFromObjectOrHash('source-highlighter', attributes, urlAttributes).toLowerCase();
-                if ($.inArray(highlighter, UNAVAILABLE_HIGHLIGHTERS) !== -1) {
-                    console.log('Syntax highlighter not supported by DocGist: "' + highlighter + '", using "' + DEFAULT_HIGHLIGHTER + '" instead.');
-                    attributeOverrides['source-highlighter'] = DEFAULT_HIGHLIGHTER;
-                    highlighter = DEFAULT_HIGHLIGHTER;
-                }
-            } else {
+
+        if (existsInObjectOrHash('source-highlighter', attributes, urlAttributes)) {
+            highlighter = getValueFromObjectOrHash('source-highlighter', attributes, urlAttributes).toLowerCase();
+            if ($.inArray(highlighter, UNAVAILABLE_HIGHLIGHTERS) !== -1) {
+                console.log('Syntax highlighter not supported by DocGist: "' + highlighter + '", using "' + DEFAULT_HIGHLIGHTER + '" instead.');
                 attributeOverrides['source-highlighter'] = DEFAULT_HIGHLIGHTER;
                 highlighter = DEFAULT_HIGHLIGHTER;
             }
+        } else {
+            attributeOverrides['source-highlighter'] = DEFAULT_HIGHLIGHTER;
+            highlighter = DEFAULT_HIGHLIGHTER;
+        }
+        preOptions['highlighter'] = highlighter;
 
-            if (existsInObjectOrHash('source-language', attributes, urlAttributes)) {
-                sourceLanguage = getValueFromObjectOrHash('source-language', attributes, urlAttributes).toLowerCase();
-            } else if (existsInObjectOrHash('language', attributes, urlAttributes)) {
-                sourceLanguage = getValueFromObjectOrHash('language', attributes, urlAttributes).toLowerCase();
-            }
+        if (existsInObjectOrHash('source-language', attributes, urlAttributes)) {
+            sourceLanguage = getValueFromObjectOrHash('source-language', attributes, urlAttributes).toLowerCase();
+        } else if (existsInObjectOrHash('language', attributes, urlAttributes)) {
+            sourceLanguage = getValueFromObjectOrHash('language', attributes, urlAttributes).toLowerCase();
+        }
+        preOptions['sourceLanguage'] = sourceLanguage;
 
-            if ('imageBaseLocation' in options || 'siteBaseLocation' in options) {
-                if (existsInObjectOrHash('imagesdir', attributes, urlAttributes)) {
-                    // only alter relative values, not URLs
-                    var imagesdir = getValueFromObjectOrHash('imagesdir', attributes, urlAttributes);
-                    if (imagesdir.slice(-1) === '/') {
-                        // root-relative URL
-                        if ('siteBaseLocation' in options) {
-                            attributeOverrides['imagesdir'] = options['siteBaseLocation'] + imagesdir;
-                        }
-                    } else if ('imageBaseLocation' in options && imagesdir.substr(0, 4) !== 'http') {
-                        // relative URL
-                        attributeOverrides['imagesdir'] = options['imageBaseLocation'] + '/' + imagesdir;
+        if ('imageBaseLocation' in options || 'siteBaseLocation' in options) {
+            if (existsInObjectOrHash('imagesdir', attributes, urlAttributes)) {
+                // only alter relative values, not URLs
+                var imagesdir = getValueFromObjectOrHash('imagesdir', attributes, urlAttributes);
+                if (imagesdir.slice(-1) === '/') {
+                    // root-relative URL
+                    if ('siteBaseLocation' in options) {
+                        attributeOverrides['imagesdir'] = options['siteBaseLocation'] + imagesdir;
                     }
                 } else if ('imageBaseLocation' in options) {
                     // default to the same location as the document
                     attributeOverrides['imagesdir'] = options['imageBaseLocation'];
+                } else if ('imageBaseLocation' in options && imagesdir.substr(0, 4) !== 'http') {
+                    // relative URL
+                    attributeOverrides['imagesdir'] = options['imageBaseLocation'] + '/' + imagesdir;
                 }
+            } else if ('imageBaseLocation' in options) {
+                // default to the same location as the document
+                attributeOverrides['imagesdir'] = options['imageBaseLocation'];
             }
+        }
 
-            html = Opal.Asciidoctor.$convert(content, getAsciidoctorOptions(attributeOverrides, urlAttributes));
+        preOptions['asciidoctorOptions'] = getAsciidoctorOptions(attributeOverrides, urlAttributes);
+        return preOptions;
+    }
+
+    function renderContent(content, options) {
+        if ('sourceUrl' in options) {
+            $('#gist-link').attr('href', options['sourceUrl']);
+        }
+        //$content.empty();
+        var html = undefined;
+        var preOptions, attributes = undefined;
+        try {
+            preOptions = preProcess(content, options);
+            attributes = preOptions['attributes'];
+            html = Opal.Asciidoctor.$convert(content, preOptions['asciidoctorOptions']);
         }
         catch (e) {
             errorMessage(e.name + ':' + '<p>' + e.message + '</p>');
@@ -190,32 +232,39 @@ function DocGist($) {
         $content.html(html);
         $gistId.val('');
 
-        tabTheSource($content);
+        postProcess($content, options, preOptions);
+
+        if (!existsInObjectOrHash('stem!', attributes, urlAttributes)) {
+            appendMathJax();
+        }
+
+        addMetadataToFooter(attributes, urlAttributes);
+        share();
+        loadHighlightMenu(preOptions['highlighter']);
+        loadThemeMenu(preOptions['stylesheet']);
+        loadAttributesMenu();
+
+        if (existsInObjectOrHash('edit', attributes, urlAttributes)) {
+            loadEditor(content, $content, options, preOptions);
+        }
+    }
+
+    function postProcess($content, options, preOptions) {
+        var attributes = preOptions['attributes'];
 
         if ('imageContentReplacer' in options) {
             options['imageContentReplacer']($content);
         }
 
-        var hasDarkSourceBlocks = $.inArray(stylesheet, ['style/github.css', 'style/iconic.css', 'style/rubygems.css']) !== -1;
-        if (highlighter && !existsInObjectOrHash('no-highlight', attributes, urlAttributes)) {
-            applyHighlighting(highlighter, sourceLanguage, hasDarkSourceBlocks);
-        }
-        loadHighlightMenu(highlighter);
-
-        if (stylesheet === 'style/iconic.css') {
-            $('h1').css('margin-bottom', '3rem');
-            $('.paragraph.lead > p, #preamble > .sectionbody > .paragraph:first-of-type p').css('color', 'inherit');
-        }
-
-        if (!existsInObjectOrHash('stem!', attributes, urlAttributes)) {
-            appendMathJax();
-        }
         if (!existsInObjectOrHash('experimental!', attributes, urlAttributes)) {
             transformButtons($content);
         }
-        setPageTitle(doc);
 
-        addMetadataToFooter(attributes, urlAttributes);
+        if ('highlighter' in preOptions && !existsInObjectOrHash('no-highlight', attributes, urlAttributes)) {
+            applyHighlighting(preOptions['highlighter'], preOptions['sourceLanguage'], preOptions['hasDarkSourceBlocks']);
+        }
+
+        tabTheSource($content);
 
         // fix root-relative locations
         if ('siteBaseLocation' in options) {
@@ -234,9 +283,50 @@ function DocGist($) {
             });
         }
 
-        share();
-        loadThemeMenu(stylesheet);
-        loadAttributesMenu();
+        if (preOptions['stylesheet'] === 'style/iconic.css') {
+            $('h1').css('margin-bottom', '3rem');
+            $('.paragraph.lead > p, #preamble > .sectionbody > .paragraph:first-of-type p').css('color', 'inherit');
+        }
+
+        setPageTitle(preOptions['document']);
+    }
+
+    function loadEditor(content, $content, options, preOptions) {
+        var asciidoctorOptions = preOptions['asciidoctorOptions'];
+        $('#content-wrapper,#editor-wrapper').addClass('editing');
+        $('#main-menu,#footer').hide();
+        $editor.val(content);
+        var cm = CodeMirror.fromTextArea($editor.get(0), {
+            'mode': 'asciidoc',
+            'theme': 'elegant',
+            'lineWrapping': true,
+            'autofocus': true,
+            'lineNumbers': true
+        });
+        var timeout = undefined;
+        var html = undefined;
+        var startTime = undefined;
+        var timeDiff = 500;
+        var MAGIC_PERFORMANCE_FACTOR = 2;
+        cm.on('changes', function () {
+            if (typeof timeout === 'undefined') {
+                var wait = timeDiff * MAGIC_PERFORMANCE_FACTOR;
+                timeout = setTimeout(function () {
+                    clearTimeout(timeout);
+                    timeout = undefined;
+                    startTime = performance.now();
+                    try {
+                        html = Opal.Asciidoctor.$convert(cm.getValue(), asciidoctorOptions);
+                    }
+                    catch (e) {
+                        errorMessage(e.name + ':' + '<p>' + e.message + '</p>');
+                    }
+                    $content.html(html);
+                    postProcess($content, options, preOptions);
+                    timeDiff = performance.now() - startTime;
+                }, wait);
+            }
+        });
     }
 
     function addMetadataToFooter(attributes, urlAttributes) {
@@ -617,22 +707,6 @@ function DocGist($) {
 
     function loadThemeMenu(stylesheet) {
         var menuId = 'theme-menu';
-        var THEMES = {
-            'asciidoctor': 'Asciidoctor',
-            'colony': 'Colony',
-            'foundation': 'Foundation',
-            'foundation-lime': 'Foundation (Lime)',
-            'foundation-potion': 'Foundation (Potion)',
-            'github': 'GitHub',
-            'golo': 'Golo',
-            'iconic': 'Iconic',
-            'maker': 'Maker',
-            'old-standard': 'Old Standard',
-            'readthedocs': 'Read the Docs',
-            'riak': 'Riak',
-            'rocket-panda': 'Rocket Panda',
-            'rubygems': 'RubyGems'
-        };
         var currentStyle = '';
         if (stylesheet && stylesheet.indexOf('style/') === 0) {
             currentStyle = stylesheet.slice(6, -4);

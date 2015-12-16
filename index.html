@@ -14,6 +14,11 @@
             };
         }
     }());
+    window.performance = (window.performance || {
+        'now': function now() {
+            return Date.now();
+        }
+    });
 </script>
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
@@ -51,7 +56,7 @@
 <link rel="stylesheet" href="style/docgist-extra.css">
 
 <body>
-<div class="navbar navbar-default">
+<div id="main-menu" class="navbar navbar-default">
     <div class="navbar-header">
         <a class="navbar-brand" href="./">
             <i class="fa fa-pencil-square-o"></i> DocGist
@@ -135,9 +140,17 @@
         </form>
     </div>
 </div>
-<div id="content">
-    <img alt="loading" src="images/loading.gif" style="margin: 5em;">
+
+<div id="editor-wrapper">
+    <textarea id="editor" style="display: none;"></textarea>
 </div>
+
+<div id="content-wrapper">
+    <div id="content">
+        <img alt="loading" src="images/loading.gif" style="margin: 5em;">
+    </div>
+</div>
+
 <div id="footer">
     <div id="footer-text"></div>
 </div>
