@@ -1,0 +1,6 @@
+== Included file
+
+NOTE: Not much to read.
+
+include::../includes.adoc[]
+

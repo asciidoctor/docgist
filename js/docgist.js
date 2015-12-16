@@ -276,10 +276,17 @@ function DocGist($) {
             });
         }
 
-        if ('interXrefReplacer' in options) {
+        if ('interXrefReplacer' in options || 'includeReplacer' in options) {
             $('a[href]', $content).each(function () {
                 var href = this.getAttribute('href');
-                options['interXrefReplacer'](this, href);
+                if (href.length) {
+                    if ('interXrefReplacer' in options) {
+                        options['interXrefReplacer'](this, href);
+                    }
+                    if ('includeReplacer' in options) {
+                        options['includeReplacer'](this, href);
+                    }
+                }
             });
         }
 

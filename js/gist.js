@@ -339,6 +339,9 @@ function Gist($, $content) {
                     'siteBaseLocation': rootdir,
                     'interXrefReplacer': function (element, href) {
                         interXrefReplacer('github-' + gist, element, href);
+                    },
+                    'includeReplacer': function (element, href) {
+                        includeReplacer('github-' + gist, element, href);
                     }
                 });
             },
@@ -354,6 +357,9 @@ function Gist($, $content) {
         fetchDropboxFile(id, success, error, DROPBOX_PUBLIC_BASE_URL, {
             'interXrefReplacer': function (element, href) {
                 interXrefReplacer('dropbox-' + id, element, href);
+            },
+            'includeReplacer': function (element, href) {
+                includeReplacer('dropbox-' + id, element, href);
             }
         });
     }
@@ -433,6 +439,9 @@ function Gist($, $content) {
         fetchFromUrl(id, success, error, {
             'interXrefReplacer': function (element, href) {
                 interXrefReplacer(id, element, href);
+            },
+            'includeReplacer': function (element, href) {
+                includeReplacer(id, element, href);
             }
         });
     }
@@ -456,6 +465,22 @@ function Gist($, $content) {
         });
     }
 
+    function includeReplacer(id, element, href) {
+        if (includeFilter(href) && $(element).hasClass('bare')) {
+            var base = removeDocumentNameFromUrl(id) + '/';
+            var document = './?' + encodeURIComponent(base + href);
+            element.setAttribute('href', document);
+        }
+    }
+
+    function includeFilter(href) {
+        if (href.charAt(0) === '/' || href.slice(0, 7) === 'http://' || href.slice(0, 8) === 'https://') {
+            return false;
+        }
+        var ext = href.split('.').pop();
+        return $.inArray(ext, ['asciidoc', 'adoc', 'ad', 'txt']) !== -1;
+    }
+
     function interXrefReplacer(id, element, href) {
         if (interdocumentXrefFilter(href)) {
             var parts = href.split('#');
@@ -476,7 +501,7 @@ function Gist($, $content) {
     }
 
     function interdocumentXrefFilter(href) {
-        return (href && href.indexOf('#') > 0 && './?'.indexOf(href.charAt(0)) === -1 && href.indexOf('http://') === -1 && href.indexOf('https://') === -1);
+        return (href.indexOf('#') > 0 && './?'.indexOf(href.charAt(0)) === -1 && href.indexOf('http://') === -1 && href.indexOf('https://') === -1);
     }
 
     function getExtension(url) {
