@@ -319,7 +319,12 @@ function DocGist($) {
 
         function loadNewEditor() {
             window.history.replaceState('?' + id, null, '?' + id);
-            id = 'fp-' + uuid.v4();
+            var buffer = new Array(16);
+            uuid.v4(null, buffer);
+            var base62 = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            var bs62 = baseX(base62);
+            var tmpId = bs62.encode(buffer);
+            id = 'fp-' + tmpId;
             window.history.pushState('?' + id, null, '?' + id);
             loadEditor($content, options, preOptions);
         }
@@ -348,7 +353,8 @@ function DocGist($) {
                 console.log('Login Failed!', error);
             } else {
                 var firepad = Firepad.fromCodeMirror(firebase, cm, {
-                    'defaultText': '= DocGist collaborative AsciiDoc editor\n\nShare the URL for others to edit!',
+                    'defaultText': '= DocGist collaborative AsciiDoc editor\n\n' +
+                    'TIP: Share the URL with others to collaborate!',
                     'userId': authData.uid
                 });
                 firepad.on('ready', function () {
@@ -362,7 +368,7 @@ function DocGist($) {
         var timeout = undefined;
         var html = undefined;
         var startTime = undefined;
-        var timeDiff = 500;
+        var timeDiff = 1;
         var MAGIC_PERFORMANCE_FACTOR = 2;
         cm.on('changes', function () {
             if (typeof timeout === 'undefined') {
