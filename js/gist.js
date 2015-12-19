@@ -120,7 +120,8 @@ function Gist($, $content) {
         'epsp-': fetchSecureEtherpadPDirFile,
         'epspp-': fetchSecureEtherpadPadPDirFile,
         'epsep-': fetchSecureEtherpadPadEtherpadDirFile,
-        'epp-': fetchEtherpadPDirFile
+        'epp-': fetchEtherpadPDirFile,
+        'fp-': fetchFirepad
     };
 
     return {'getGistAndRenderPage': getGistAndRenderPage, 'readSourceId': readSourceId};
@@ -433,6 +434,15 @@ function Gist($, $content) {
             'siteBaseLocation': false
         };
         fetchFromUrl(url, success, error, options);
+    }
+
+    function fetchFirepad(id, success, error) {
+        var fetchId = id.slice(3);
+        var headless = new Firepad.Headless('https://sweltering-fire-785.firebaseio.com/' + fetchId);
+        headless.getText(function (text) {
+            headless.dispose();
+            success(text, {'firepad': true});
+        });
     }
 
     function fetchAnyUrl(id, success, error) {

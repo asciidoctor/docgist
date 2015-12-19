@@ -21,7 +21,7 @@
     });
 </script>
 
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 
 <!-- Bootstrap -->
 <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
@@ -43,6 +43,9 @@
     CodeMirror.modeURL = '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.9.0/mode/%N/%N.min.js';
 </script>
 
+<script src="https://cdn.firebase.com/js/client/2.2.4/firebase.js"></script>
+<script src="https://cdn.firebase.com/libs/firepad/1.2.0/firepad.min.js"></script>
+
 <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/styles/default.min.css" rel="stylesheet">
 <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/highlight.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/languages/asciidoc.min.js"></script>
@@ -50,6 +53,7 @@
 <script src="js/base64.js"></script>
 <script src="js/gist.js"></script>
 <script src="js/docgist.js"></script>
+<script src="js/uuid-1.4.7.js"></script>
 
 <link rel="stylesheet"
       href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic|Noto+Serif:400,400italic,700,700italic|Droid+Sans+Mono:400">
@@ -64,7 +68,7 @@
     </div>
     <div>
         <span id="nav-buttons">
-            <a class="btn btn-success" id="gist-link" href="" target="_blank" style=""
+            <a class="btn btn-default" id="gist-link" href="javascript:;" target="_blank" style=""
                title="See the source document rendered on this page">
                 <i class="fa fa-file-text-o"></i> Source
             </a>
@@ -127,6 +131,28 @@
                 <ul class="dropdown-menu" id="attributes-menu">
                 </ul>
             </div>
+
+            <div class="btn-group">
+                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-target="#" id="new-menu"
+                   title="Create a new document">
+                    <i class="fa fa-plus"></i> New
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a id="new-empty" href="javascript:;" data-toggle="tooltip">
+                        <i class="fa fa-fw fa-file-o"></i> New empty document
+                    </a></li>
+                    <li><a id="new-copy" href="javascript:;" data-toggle="tooltip">
+                        <i class="fa fa-fw fa-files-o"></i> New copy of current document
+                    </a></li>
+                </ul>
+            </div>
+
+            <a class="btn btn-default" id="edit-button" href="javascript:;" style="display: none;"
+               title="Edit this page">
+                <i class="fa fa-pencil"></i> Edit
+            </a>
+
         </span>
 
         <form class="navbar-form pull-right">

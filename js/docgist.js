@@ -216,6 +216,8 @@ function DocGist($) {
     function renderContent(content, options) {
         if ('sourceUrl' in options) {
             $('#gist-link').attr('href', options['sourceUrl']);
+        } else {
+            $('#gist-link').addClass('disabled');
         }
         //$content.empty();
         var html = undefined;
@@ -243,9 +245,12 @@ function DocGist($) {
         loadHighlightMenu(preOptions['highlighter']);
         loadThemeMenu(preOptions['stylesheet']);
         loadAttributesMenu();
+        loadNewMenu(content, $content, options, preOptions);
 
-        if (existsInObjectOrHash('edit', attributes, urlAttributes)) {
-            loadEditor(content, $content, options, preOptions);
+        if ('firepad' in options) {
+            $('#edit-button').show().click(function () {
+                loadEditor($content, options, preOptions);
+            });
         }
     }
 
@@ -298,17 +303,56 @@ function DocGist($) {
         setPageTitle(preOptions['document']);
     }
 
-    function loadEditor(content, $content, options, preOptions) {
+    function loadNewMenu(content, $content, options, preOptions) {
+        $('#new-empty').click(function () {
+            loadNewEditor();
+        });
+        $('#new-copy').click(function () {
+            options['new-firepad-content'] = content;
+            loadNewEditor();
+        });
+
+        function loadNewEditor() {
+            window.history.replaceState('?' + id, null, '?' + id);
+            id = 'fp-' + uuid.v4();
+            window.history.pushState('?' + id, null, '?' + id);
+            loadEditor($content, options, preOptions);
+        }
+
+        window.onpopstate = function(event) {
+            if ('state' in event && typeof event.state === 'string') {
+                window.location.assign(event.state);
+            }
+        };
+    }
+
+    function loadEditor($content, options, preOptions) {
         var asciidoctorOptions = preOptions['asciidoctorOptions'];
         $('#content-wrapper,#editor-wrapper').addClass('editing');
         $('#main-menu,#footer').hide();
-        $editor.val(content);
         var cm = CodeMirror.fromTextArea($editor.get(0), {
             'mode': 'asciidoc',
             'theme': 'elegant',
             'lineWrapping': true,
             'autofocus': true,
             'lineNumbers': true
+        });
+        var firebase = new Firebase('https://sweltering-fire-785.firebaseio.com/' + id.slice(3));
+        firebase.authAnonymously(function (error, authData) {
+            if (error) {
+                console.log('Login Failed!', error);
+            } else {
+                var firepad = Firepad.fromCodeMirror(firebase, cm, {
+                    'defaultText': '= DocGist collaborative AsciiDoc editor\n\nShare the URL for others to edit!',
+                    'userId': authData.uid
+                });
+                firepad.on('ready', function () {
+                    if ('new-firepad-content' in options && firepad.isHistoryEmpty()) {
+                        firepad.setText(options['new-firepad-content']);
+                    }
+                    $('a.powered-by-firepad').remove();
+                });
+            }
         });
         var timeout = undefined;
         var html = undefined;
