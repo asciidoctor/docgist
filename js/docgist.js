@@ -261,6 +261,11 @@ function DocGist($) {
             options['imageContentReplacer']($content);
         }
 
+        var $toc = $('#toc');
+        if ($toc.children('ul').length === 0) {
+            $toc.hide();
+        }
+
         if (!existsInObjectOrHash('experimental!', attributes, urlAttributes)) {
             transformButtons($content);
         }
@@ -319,7 +324,7 @@ function DocGist($) {
             loadEditor($content, options, preOptions);
         }
 
-        window.onpopstate = function(event) {
+        window.onpopstate = function (event) {
             if ('state' in event && typeof event.state === 'string') {
                 window.location.assign(event.state);
             }
