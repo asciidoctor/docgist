@@ -33,6 +33,13 @@ div.alert {
     font-size: 1.125rem;
 }
 
+.comment {
+    background: #fff3b8;
+    padding-left: 4px;
+    padding-right: 4px;
+    border-radius: 4px;
+}
+
 /* fix bootstrap asiciidoctor clashes */
 .listingblock pre.highlightjs {
     padding: 1em;
@@ -104,7 +111,7 @@ pre.highlight code.hljs {
     width: 50%;
     height: auto;
     overflow: auto;
-    box-shadow: -10px 2px 6px 10px rgba(0,0,0,0.4);
+    box-shadow: -10px 2px 6px 10px rgba(0, 0, 0, 0.4);
 }
 
 #editor-wrapper .CodeMirror {

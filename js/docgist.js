@@ -25,6 +25,7 @@ function DocGist($) {
         'platform': 'opal',
         'pygments-unavailable': '',
         'sectanchors': '@',
+        'showcomments': '@',
         'showtitle': '@',
         'source-highlighter': DEFAULT_HIGHLIGHTER + '@',
         'stem': 'asciimath@',
@@ -261,7 +262,7 @@ function DocGist($) {
             options['imageContentReplacer']($content);
         }
 
-        $('div.toc').each(function(){
+        $('div.toc').each(function () {
             var $toc = $(this);
             if ($toc.children('ul').length === 0) {
                 $toc.hide();
@@ -367,7 +368,9 @@ function DocGist($) {
                 });
             }
         });
+        var showcomments = existsInObjectOrHash('showcomments', preOptions['attributes'], urlAttributes);
         var timeout = undefined;
+        var content = undefined;
         var html = undefined;
         var startTime = undefined;
         var timeDiff = 1;
@@ -379,8 +382,12 @@ function DocGist($) {
                     clearTimeout(timeout);
                     timeout = undefined;
                     startTime = performance.now();
+                    content = cm.getValue();
+                    if (showcomments) {
+                        content = content.replace(/^\/\/\s*?(.*)/gm, '[.comment]##$1##');
+                    }
                     try {
-                        html = Opal.Asciidoctor.$convert(cm.getValue(), asciidoctorOptions);
+                        html = Opal.Asciidoctor.$convert(content, asciidoctorOptions);
                     }
                     catch (e) {
                         errorMessage(e.name + ':' + '<p>' + e.message + '</p>');
