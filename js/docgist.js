@@ -261,10 +261,12 @@ function DocGist($) {
             options['imageContentReplacer']($content);
         }
 
-        var $toc = $('#toc');
-        if ($toc.children('ul').length === 0) {
-            $toc.hide();
-        }
+        $('div.toc').each(function(){
+            var $toc = $(this);
+            if ($toc.children('ul').length === 0) {
+                $toc.hide();
+            }
+        });
 
         if (!existsInObjectOrHash('experimental!', attributes, urlAttributes)) {
             transformButtons($content);
