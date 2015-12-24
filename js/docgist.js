@@ -105,7 +105,7 @@ function DocGist($) {
             pl = /\+/g,  // Regex for replacing addition symbol with a space
             search = /([^&=]+)=?([^&]*)/g,
             decode = function (s) {
-                return decodeURIComponent(s.replace(pl, " "));
+                return decodeURIComponent(s.replace(pl, ' '));
             },
             query = window.location.search.substring(1);
 
@@ -123,6 +123,8 @@ function DocGist($) {
     function existsInObjectOrHash(key, hash, object) {
         if (key in object) {
             return true;
+        } else if ((key + '!') in object) {
+            return false;
         } else {
             return hash['$has_key?'](key);
         }
@@ -262,6 +264,9 @@ function DocGist($) {
             options['imageContentReplacer']($content);
         }
 
+        // not only going by id here is due to
+        // https://github.com/asciidoctor/asciidoctor/issues/1582
+        // a fix should be in 1.5.4
         $('div.toc').each(function () {
             var $toc = $(this);
             if ($toc.children('ul').length === 0) {
@@ -384,7 +389,13 @@ function DocGist($) {
                     startTime = performance.now();
                     content = cm.getValue();
                     if (showcomments) {
-                        content = content.replace(/^\/\/\s*?(.*)/gm, '[.comment]##$1##');
+                        content = content.replace(/^\/\/\s*?(\w*?):\s*(.*)/gm, function (match, name, comment) {
+                            if (name) {
+                                return '[.comment]#_' + name + '_ ' + comment + '#';
+                            } else {
+                                return '[.comment]#' + comment + '#';
+                            }
+                        });
                     }
                     try {
                         html = Opal.Asciidoctor.$convert(content, asciidoctorOptions);
