@@ -346,7 +346,8 @@ function DocGist($) {
 
     function loadEditor($content, options, preOptions) {
         var asciidoctorOptions = preOptions['asciidoctorOptions'];
-        $('#content-wrapper,#editor-wrapper').addClass('editing');
+        var $contentWrapper = $('#content-wrapper').addClass('editing');
+        $('#editor-wrapper').addClass('editing');
         $('#main-menu,#footer').hide();
         var cm = CodeMirror.fromTextArea($editor.get(0), {
             'mode': 'asciidoc',
@@ -374,6 +375,9 @@ function DocGist($) {
             }
         });
         var showcomments = existsInObjectOrHash('showcomments', preOptions['attributes'], urlAttributes);
+        if (showcomments) {
+            $contentWrapper.addClass('showcomments');
+        }
         var timeout = undefined;
         var content = undefined;
         var html = undefined;
@@ -391,7 +395,7 @@ function DocGist($) {
                     if (showcomments) {
                         content = content.replace(/^\/\/\s*?(\w*?):\s*(.*)/gm, function (match, name, comment) {
                             if (name) {
-                                return '[.comment]#_' + name + '_ ' + comment + '#';
+                                return '[.commenter]#' + name + '# [.comment]#[.commenter]_' + name + '_ ' + comment + '#';
                             } else {
                                 return '[.comment]#' + comment + '#';
                             }
