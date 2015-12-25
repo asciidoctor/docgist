@@ -147,6 +147,7 @@ pre.highlight code.hljs {
     border: solid 1px #cccccc;
     margin-left: 2px;
     font-size: 0.945em;
+    max-width: 33%;
 }
 
 span.commenter, em.commenter {
