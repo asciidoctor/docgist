@@ -33,6 +33,14 @@ div.alert {
     font-size: 1.125rem;
 }
 
+/* Fixes for the default Asciidoctor styling */
+
+.quoteblock blockquote em,
+.quoteblock blockquote p em,
+p aside em {
+    font-style: normal;
+}
+
 /* fix bootstrap asiciidoctor clashes */
 .listingblock pre.highlightjs {
     padding: 1em;
