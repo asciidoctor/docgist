@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
 <meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
 <link rel="icon" href="favicon.ico">
+<title>DocGist</title>
 
 <script>
     (function () {
@@ -56,116 +57,135 @@
 <script src="js/uuid-1.4.7.js"></script>
 
 <link rel="stylesheet"
-      href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic|Noto+Serif:400,400italic,700,700italic|Droid+Sans+Mono:400">
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400">
 <link rel="stylesheet" href="style/docgist-extra.css">
 
 <body>
-<div id="main-menu" class="navbar navbar-default">
-    <div class="navbar-header">
-        <a class="navbar-brand" href="./">
-            <i class="fa fa-pencil-square-o"></i> DocGist
-        </a>
+<nav id="main-menu" class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#main-menu-items"
+                    aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="./">
+                <i class="fa fa-pencil-square-o"></i> DocGist
+            </a>
+        </div>
+        <div class="collapse navbar-collapse" id="main-menu-items">
+            <ul class="nav navbar-nav" id="navbar-buttons">
+                <li id="source-button">
+                    <a class="btn btn-default navbar-btn disabled" id="gist-link" href="javascript:;" target="_blank"
+                       style=""
+                       title="See the source document rendered on this page">
+                        <i class="fa fa-file-text-o"></i> Source
+                    </a>
+                </li>
+                <li id="project-button">
+                    <a class="btn btn-default navbar-btn" href="https://github.com/asciidoctor/docgist" target="_blank"
+                       title="Visit the project site for DocGist, where you can contribute issues or code">
+                        <i class="fa fa-code-fork"></i> Project
+                    </a>
+                </li>
+
+                <li class="dropdown">
+                    <a class="btn btn-default navbar-btn dropdown-toggle" data-toggle="dropdown" data-target="#"
+                       title="Share this page">
+                        <i class="fa fa-share-alt"></i> Share
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a id="twitter-share" href="" target="_blank" data-toggle="tooltip" title="Tweet">
+                            <i class="fa fa-fw fa-twitter-square"></i> Twitter
+                        </a></li>
+                        <li><a id="facebook-share" href="" target="_blank" data-toggle="tooltip"
+                               title="Share link on Facebook">
+                            <i class="fa fa-fw fa-facebook-square"></i> Facebook
+                        </a></li>
+                        <li><a id="google-plus-share" href="" target="_blank" data-toggle="tooltip"
+                               title="Share link on Google+">
+                            <i class="fa fa-fw fa-google-plus-square"></i> Google+
+                        </a></li>
+                        <li><a id="google-short-url-share" href="javascript:;" data-toggle="tooltip"
+                               title="Get a short link to this page">
+                            <i class="fa fa-fw fa-link"></i> Short URL
+                        </a></li>
+                    </ul>
+                </li>
+
+                <li class="dropdown" id="theme-button">
+                    <a class="btn btn-default navbar-btn dropdown-toggle" data-toggle="dropdown" data-target="#"
+                       title="Load theme stylesheet">
+                        <i class="fa fa-paint-brush"></i> Theme
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" id="theme-menu">
+                    </ul>
+                </li>
+
+                <li class="dropdown" id="highlighter-button">
+                    <a class="btn btn-default navbar-btn dropdown-toggle" data-toggle="dropdown" data-target="#"
+                       title="Choose syntax highlighter for source code">
+                        <i class="fa fa-code"></i> Highlight
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" id="highlighter-menu">
+                    </ul>
+                </li>
+
+                <li class="dropdown" id="attributes-button">
+                    <a class="btn btn-default navbar-btn dropdown-toggle" data-toggle="dropdown" data-target="#"
+                       title="Attributes to set or unset">
+                        <i class="fa fa-cog"></i> Attributes
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" id="attributes-menu">
+                    </ul>
+                </li>
+
+                <li class="dropdown">
+                    <a class="btn btn-default navbar-btn dropdown-toggle" data-toggle="dropdown" data-target="#"
+                       id="new-menu"
+                       title="Create a new document">
+                        <i class="fa fa-plus"></i> New
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a id="new-empty" href="javascript:;" data-toggle="tooltip">
+                            <i class="fa fa-fw fa-file-o"></i> New empty document
+                        </a></li>
+                        <li><a id="new-copy" href="javascript:;" data-toggle="tooltip">
+                            <i class="fa fa-fw fa-files-o"></i> New copy of current document
+                        </a></li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a class="btn btn-default navbar-btn disabled" id="edit-button" href="javascript:;"
+                       title="Edit this page">
+                        <i class="fa fa-pencil"></i> Edit
+                    </a>
+                </li>
+
+                <li>
+                    <form class="navbar-form navbar-right">
+                        <div class="input-group">
+                          <span class="input-group-addon">
+                            <i class="fa fa-link"></i>
+                          </span>
+                            <input type="text" class="span2 form-control" id="gist-id"
+                                   placeholder="GitHub Gist/File / Dropbox URL">
+                        </div>
+                    </form>
+                </li>
+
+            </ul>
+        </div>
     </div>
-    <div>
-        <span id="nav-buttons">
-            <a class="btn btn-default" id="gist-link" href="javascript:;" target="_blank" style=""
-               title="See the source document rendered on this page">
-                <i class="fa fa-file-text-o"></i> Source
-            </a>
-            <a class="btn btn-default" href="https://github.com/asciidoctor/docgist" target="_blank"
-               title="Visit the project site for DocGist, where you can contribute issues or code">
-                <i class="fa fa-code-fork"></i> Project
-            </a>
-
-            <div class="btn-group">
-                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-target="#"
-                   title="Share this page">
-                    <i class="fa fa-share-alt"></i> Share
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a id="twitter-share" href="" target="_blank" data-toggle="tooltip" title="Tweet">
-                        <i class="fa fa-fw fa-twitter-square"></i> Twitter
-                    </a></li>
-                    <li><a id="facebook-share" href="" target="_blank" data-toggle="tooltip"
-                           title="Share link on Facebook">
-                        <i class="fa fa-fw fa-facebook-square"></i> Facebook
-                    </a></li>
-                    <li><a id="google-plus-share" href="" target="_blank" data-toggle="tooltip"
-                           title="Share link on Google+">
-                        <i class="fa fa-fw fa-google-plus-square"></i> Google+
-                    </a></li>
-                    <li><a id="google-short-url-share" href="javascript:;" data-toggle="tooltip"
-                           title="Get a short link to this page">
-                        <i class="fa fa-fw fa-link"></i> Short URL
-                    </a></li>
-                </ul>
-            </div>
-
-            <div class="btn-group">
-                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-target="#"
-                   title="Load theme stylesheet">
-                    <i class="fa fa-paint-brush"></i> Theme
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu" id="theme-menu">
-                </ul>
-            </div>
-
-            <div class="btn-group">
-                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-target="#"
-                   title="Choose syntax highlighter for source code">
-                    <i class="fa fa-code"></i> Highlighter
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu" id="highlighter-menu">
-                </ul>
-            </div>
-
-            <div class="btn-group">
-                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-target="#"
-                   title="Attributes to set or unset">
-                    <i class="fa fa-cog"></i> Attributes
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu" id="attributes-menu">
-                </ul>
-            </div>
-
-            <div class="btn-group">
-                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-target="#" id="new-menu"
-                   title="Create a new document">
-                    <i class="fa fa-plus"></i> New
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a id="new-empty" href="javascript:;" data-toggle="tooltip">
-                        <i class="fa fa-fw fa-file-o"></i> New empty document
-                    </a></li>
-                    <li><a id="new-copy" href="javascript:;" data-toggle="tooltip">
-                        <i class="fa fa-fw fa-files-o"></i> New copy of current document
-                    </a></li>
-                </ul>
-            </div>
-
-            <a class="btn btn-default" id="edit-button" href="javascript:;" style="display: none;"
-               title="Edit this page">
-                <i class="fa fa-pencil"></i> Edit
-            </a>
-
-        </span>
-
-        <form class="navbar-form pull-right">
-            <div class="input-group">
-          <span class="input-group-addon">
-            <i class="fa fa-link"></i>
-          </span>
-                <input type="text" class="span2 form-control" id="gist-id"
-                       placeholder="GitHub Gist/File / Dropbox URL">
-            </div>
-        </form>
-    </div>
-</div>
+</nav>
 
 <div id="editor-wrapper">
     <textarea id="editor" style="display: none;"></textarea>

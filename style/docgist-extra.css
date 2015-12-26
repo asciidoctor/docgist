@@ -4,7 +4,7 @@
 }
 
 #gist-id {
-    width: 20em;
+    width: 18em;
     height: auto;
 }
 
@@ -16,13 +16,20 @@
     box-sizing: content-box;
 }
 
+/*
 div.navbar-header {
-    height: 52px;
+    height: 50px;
 }
 
 #nav-buttons {
     margin: 8px 0;
     display: inline-block;
+}
+*/
+
+.navbar-brand {
+    height: 35px;
+    padding: 12px 12px 0 12px;
 }
 
 .dropdown-menu > li > a {
@@ -110,13 +117,12 @@ pre.highlight code.hljs {
 
 #editor-wrapper.editing {
     position: fixed;
-    top: 0;
+    top: 52px;
     left: 0;
     bottom: 0;
     width: 50%;
     height: auto;
     overflow: auto;
-    box-shadow: -10px 2px 6px 10px rgba(0, 0, 0, 0.4);
 }
 
 #editor-wrapper .CodeMirror {
@@ -131,7 +137,7 @@ pre.highlight code.hljs {
 
 #content-wrapper.editing {
     position: fixed;
-    top: 0;
+    top: 52px;
     right: 0;
     left: 50%;
     bottom: 0;
@@ -186,5 +192,53 @@ span.commenter:after, em.commenter:after {
 
     #footer {
         display: none;
+    }
+}
+
+@media screen and (max-width: 89em) {
+    #gist-id {
+        width: 12em;
+    }
+}
+
+@media screen and (max-width: 82em) {
+    #project-button, #source-button {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 78em) {
+    #gist-id {
+        width: 6em;
+    }
+}
+
+@media screen and (max-width: 72em) {
+    #theme-button, #highlighter-button, #attributes-button {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 767px) {
+    #project-button, #source-button, #theme-button, #highlighter-button, #attributes-button {
+        display: block;
+    }
+    #gist-id {
+        width: 16em;
+    }
+}
+
+@media (min-width: 768px) {
+    .navbar-nav > li > a {
+        padding-top: 6px;
+        padding-bottom: 6px;
+    }
+}
+
+@media (max-width: 768px) {
+    #navbar-buttons, #main-menu-items {
+        background: #f8f8f8;
+        z-index: 1000;
+        position: fixed;
     }
 }

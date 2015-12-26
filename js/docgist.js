@@ -218,9 +218,7 @@ function DocGist($) {
 
     function renderContent(content, options) {
         if ('sourceUrl' in options) {
-            $('#gist-link').attr('href', options['sourceUrl']);
-        } else {
-            $('#gist-link').addClass('disabled');
+            $('#gist-link').attr('href', options['sourceUrl']).removeClass('disabled');
         }
         //$content.empty();
         var html = undefined;
@@ -251,7 +249,7 @@ function DocGist($) {
         loadNewMenu(content, $content, options, preOptions);
 
         if ('firepad' in options) {
-            $('#edit-button').show().click(function () {
+            $('#edit-button').removeClass('disabled').click(function () {
                 loadEditor($content, options, preOptions);
             });
         }
@@ -348,7 +346,7 @@ function DocGist($) {
         var asciidoctorOptions = preOptions['asciidoctorOptions'];
         var $contentWrapper = $('#content-wrapper').addClass('editing');
         $('#editor-wrapper').addClass('editing');
-        $('#main-menu,#footer').hide();
+        $('#footer').hide(); // #main-menu
         var cm = CodeMirror.fromTextArea($editor.get(0), {
             'mode': 'asciidoc',
             'theme': 'elegant',
