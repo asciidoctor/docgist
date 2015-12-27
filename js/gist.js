@@ -441,7 +441,7 @@ function Gist($, $content) {
         var headless = new Firepad.Headless('https://sweltering-fire-785.firebaseio.com/' + fetchId);
         headless.getText(function (text) {
             headless.dispose();
-            success(text, {'firepad': true});
+            success(text, {'editor': 'firepad'});
         });
     }
 

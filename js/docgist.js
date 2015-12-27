@@ -63,6 +63,8 @@ function DocGist($) {
     var $gistId = undefined;
     var $shortUrlDialog = undefined;
     var $editor = undefined;
+    var $editButton = undefined;
+    var $footerWrapper = undefined;
     var urlAttributes = undefined;
     var id = undefined;
 
@@ -75,6 +77,8 @@ function DocGist($) {
         $footer = $('#footer-text');
         $gistId = $('#gist-id');
         $editor = $('#editor');
+        $editButton = $('#edit-button');
+        $footerWrapper = $('#footer');
 
 
         var gist = new Gist($, $content);
@@ -246,12 +250,38 @@ function DocGist($) {
         loadHighlightMenu(preOptions['highlighter']);
         loadThemeMenu(preOptions['stylesheet']);
         loadAttributesMenu();
-        loadNewMenu(content, $content, options, preOptions);
 
-        if ('firepad' in options) {
-            $('#edit-button').removeClass('disabled').click(function () {
-                loadEditor($content, options, preOptions);
+        var editor = new Editor($content, preOptions);
+
+        loadNewMenu(content, options, setupEditMode);
+
+        if ('editor' in options) {
+            setupEditMode(options);
+        }
+
+        function setupEditMode(optionsToUse, click) {
+            var editorModeInProgress = false;
+            $editButton.removeClass('disabled').click(function () {
+                if (!editorModeInProgress) {
+                    editorModeInProgress = true;
+                    if ($editButton.hasClass('active')) {
+                        $editButton.removeClass('active');
+                        editor.unload(optionsToUse, editorModeDone);
+                    } else {
+                        $editButton.addClass('active');
+                        editor.load(optionsToUse, editorModeDone);
+                    }
+                } else {
+                    // ignore clicks until we're done
+                }
+
+                function editorModeDone() {
+                    editorModeInProgress = false;
+                }
             });
+            if (click) {
+                $editButton.click();
+            }
         }
     }
 
@@ -314,7 +344,7 @@ function DocGist($) {
         setPageTitle(preOptions['document']);
     }
 
-    function loadNewMenu(content, $content, options, preOptions) {
+    function loadNewMenu(content, options, setupFunc) {
         $('#new-empty').click(function () {
             loadNewEditor();
         });
@@ -324,7 +354,8 @@ function DocGist($) {
         });
 
         function loadNewEditor() {
-            window.history.replaceState('?' + id, null, '?' + id);
+            var myId = id ? id : '';
+            window.history.replaceState('?' + myId, null, '?' + myId);
             var buffer = new Array(16);
             uuid.v4(null, buffer);
             var base62 = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -332,7 +363,7 @@ function DocGist($) {
             var tmpId = bs62.encode(buffer);
             id = 'fp-' + tmpId;
             window.history.pushState('?' + id, null, '?' + id);
-            loadEditor($content, options, preOptions);
+            setupFunc(options, true);
         }
 
         window.onpopstate = function (event) {
@@ -342,75 +373,116 @@ function DocGist($) {
         };
     }
 
-    function loadEditor($content, options, preOptions) {
+    function Editor($content, preOptions) {
         var asciidoctorOptions = preOptions['asciidoctorOptions'];
-        var $contentWrapper = $('#content-wrapper').addClass('editing');
-        $('#editor-wrapper').addClass('editing');
-        $('#footer').hide(); // #main-menu
-        var cm = CodeMirror.fromTextArea($editor.get(0), {
-            'mode': 'asciidoc',
-            'theme': 'elegant',
-            'lineWrapping': true,
-            'autofocus': true,
-            'lineNumbers': true
-        });
-        var firebase = new Firebase('https://sweltering-fire-785.firebaseio.com/' + id.slice(3));
-        firebase.authAnonymously(function (error, authData) {
-            if (error) {
-                console.log('Login Failed!', error);
-            } else {
-                var firepad = Firepad.fromCodeMirror(firebase, cm, {
-                    'defaultText': '= DocGist collaborative AsciiDoc editor\n\n' +
-                    'TIP: Share the URL with others to collaborate!',
-                    'userId': authData.uid
-                });
-                firepad.on('ready', function () {
-                    if ('new-firepad-content' in options && firepad.isHistoryEmpty()) {
-                        firepad.setText(options['new-firepad-content']);
-                    }
-                    $('a.powered-by-firepad').remove();
-                });
-            }
-        });
+        var $contentWrapper = $('#content-wrapper');
+        var $editorWrapper = $('#editor-wrapper');
         var showcomments = existsInObjectOrHash('showcomments', preOptions['attributes'], urlAttributes);
-        if (showcomments) {
-            $contentWrapper.addClass('showcomments');
-        }
-        var timeout = undefined;
+        var firebase = undefined;
+        var firepad = undefined;
         var content = undefined;
-        var html = undefined;
         var startTime = undefined;
-        var timeDiff = 1;
-        var MAGIC_PERFORMANCE_FACTOR = 2;
-        cm.on('changes', function () {
-            if (typeof timeout === 'undefined') {
-                var wait = timeDiff * MAGIC_PERFORMANCE_FACTOR;
-                timeout = setTimeout(function () {
-                    clearTimeout(timeout);
-                    timeout = undefined;
-                    startTime = performance.now();
-                    content = cm.getValue();
-                    if (showcomments) {
-                        content = content.replace(/^\/\/\s*?(\w*?):\s*(.*)/gm, function (match, name, comment) {
-                            if (name) {
-                                return '[.commenter]#' + name + '# [.comment]#[.commenter]_' + name + '_ ' + comment + '#';
-                            } else {
-                                return '[.comment]#' + comment + '#';
-                            }
-                        });
-                    }
-                    try {
-                        html = Opal.Asciidoctor.$convert(content, asciidoctorOptions);
-                    }
-                    catch (e) {
-                        errorMessage(e.name + ':' + '<p>' + e.message + '</p>');
-                    }
-                    $content.html(html);
-                    postProcess($content, options, preOptions);
-                    timeDiff = performance.now() - startTime;
-                }, wait);
+        var cm = undefined;
+        var html = undefined;
+
+        function load(options, doneFunc) {
+            $contentWrapper.addClass('editing');
+            $editorWrapper.addClass('editing');
+            $footerWrapper.hide();
+            cm = CodeMirror.fromTextArea($editor.get(0), {
+                'mode': 'asciidoc',
+                'theme': 'elegant',
+                'lineWrapping': true,
+                'autofocus': true,
+                'lineNumbers': true
+            });
+            Firebase.goOnline();
+            firebase = new Firebase('https://sweltering-fire-785.firebaseio.com/' + id.slice(3));
+            firebase.authAnonymously(function (error, authData) {
+                if (error) {
+                    console.log('Login Failed!', error);
+                } else {
+                    firepad = Firepad.fromCodeMirror(firebase, cm, {
+                        'defaultText': '= DocGist collaborative AsciiDoc editor\n\n' +
+                        'TIP: Share the URL with others to collaborate!',
+                        'userId': authData.uid
+                    });
+                    firepad.on('ready', function () {
+                        if ('new-firepad-content' in options && firepad.isHistoryEmpty()) {
+                            firepad.setText(options['new-firepad-content']);
+                        }
+                        $('a.powered-by-firepad').remove();
+                        if (typeof doneFunc === 'function') {
+                            doneFunc();
+                        }
+                    });
+                }
+            });
+            if (showcomments) {
+                $contentWrapper.addClass('showcomments');
             }
-        });
+            var timeout = undefined;
+            var timeDiff = 1;
+            var MAGIC_PERFORMANCE_FACTOR = 2;
+            cm.on('changes', function () {
+                if (typeof timeout === 'undefined') {
+                    var wait = timeDiff * MAGIC_PERFORMANCE_FACTOR;
+                    timeout = setTimeout(function () {
+                        clearTimeout(timeout);
+                        timeout = undefined;
+                        timeDiff = renderEditorContent(showcomments, options);
+                    }, wait);
+                }
+            });
+        }
+
+        function renderEditorContent(showcomments, options) {
+            startTime = performance.now();
+            content = cm.getValue();
+            if (showcomments) {
+                content = content.replace(/^\/\/\s*?(\w*?):\s*(.*)/gm, function (match, name, comment) {
+                    if (name) {
+                        return '[.commenter]#' + name + '# [.comment]#[.commenter]_' + name + '_ ' + comment + '#';
+                    } else {
+                        return '[.comment]#' + comment + '#';
+                    }
+                });
+            }
+            try {
+                html = Opal.Asciidoctor.$convert(content, asciidoctorOptions);
+            }
+            catch (e) {
+                errorMessage(e.name + ':' + '<p>' + e.message + '</p>');
+            }
+            $content.html(html);
+            postProcess($content, options, preOptions);
+            return performance.now() - startTime;
+        }
+
+        function unload(options, doneFunc) {
+            if (showcomments) {
+                renderEditorContent(false, options);
+            }
+            if (firepad) {
+                firepad.dispose();
+                firepad = undefined;
+                Firebase.goOffline();
+                firebase = undefined;
+            }
+            $contentWrapper.removeClass('editing');
+            $contentWrapper.removeClass('showcomments');
+            $editorWrapper.removeClass('editing');
+            $editorWrapper.children('.CodeMirror').remove();
+            $footerWrapper.show();
+            if (typeof doneFunc === 'function') {
+                doneFunc();
+            }
+        }
+
+        return {
+            'load': load,
+            'unload': unload
+        }
     }
 
     function addMetadataToFooter(attributes, urlAttributes) {
