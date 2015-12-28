@@ -5,10 +5,11 @@ DocGist is a URL proxy tool that converts http://asciidoctor.org/docs/asciidoc-s
 The conversion to HTML is performed in the browser (client-side) using the https://github.com/asciidoctor/asciidoctor.js[Asciidoctor.js] JavaScript library.
 DocGist can render documents located anywhere, as long as the host permits cross-domain access.
 
+The DocGist project is found at https://github.com/asciidoctor/docgist where you can get the code, file issues and contribute.
+
 [NOTE]
 DocGist uses the https://github.com/asciidoctor/asciidoctor/releases/tag/v1.5.3[latest release (1.5.3)] of Asciidoctor.
-If you want to use the syntax of older versions, add `:compat-mode:` to the document header or by setting it in the
-btn:[Attributes] menu.
+If you want to use the syntax of older versions, add `:compat-mode:` to the document header or by setting it in the btn:[Attributes] menu.
 There's more information on this in the link:./?github-asciidoctor%2Fasciidoctor.org%2F%2Fdocs%2Fmigration.adoc[migration guide].
 
 [[basic]]

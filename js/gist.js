@@ -257,17 +257,70 @@ function Gist($, $content) {
                 var content = file.content;
                 var link = data.html_url;
                 var svgs = extractImagesFromGithubGist(data.files);
+                var options = {
+                    'sourceUrl': link,
+                    'editor': 'gist',
+                    'gist-content': content,
+                    'gist-filename': file.filename,
+                    'gist-owner': data.owner.login,
+                    'save': save
+                };
                 if (svgs) {
                     var magicPath = '__images__';
-                    success(content, {
-                        'sourceUrl': link,
-                        'imageBaseLocation': magicPath,
-                        'imageContentReplacer': function replaceImages($content) {
-                            addGithubImagesToContent($content, magicPath, svgs);
-                        }
-                    });
+                    options['imageBaseLocation'] = magicPath;
+                    options['imageContentReplacer'] = function replaceImages($content) {
+                        addGithubImagesToContent($content, magicPath, svgs);
+                    };
+                    success(content, options);
                 } else {
-                    success(content, {'sourceUrl': link});
+                    success(content, options);
+                }
+
+                function save(ghUsername, ghToken, content, resultFunc) {
+                    if (ghUsername === options['gist-owner']) {
+                        saveAsOwner();
+                    } else {
+                        $.ajax({
+                            'url': url + '/forks',
+                            'method': 'POST',
+                            'headers': {
+                                'Authorization': 'token ' + ghToken,
+                                'Accept': 'application/vnd.github.v3+json'
+                            },
+                            'success': function (data) {
+                                url = 'https://api.github.com/gists/' + data.id;
+                                options['gist-owner'] = ghUsername;
+                                saveAsOwner();
+                                resultFunc({'newId': data.id, 'sourceUrl': data.html_url});
+                            },
+                            'error': function (xhr, status, errorMessage) {
+                                console.log('error while forking', errorMessage);
+                            }
+                        });
+                    }
+
+                    function saveAsOwner() {
+                        var dataToSend = {'files': {}};
+                        dataToSend.files[options['gist-filename']] = {
+                            'content': content
+                        };
+                        dataToSend = JSON.stringify(dataToSend);
+                        $.ajax({
+                            'url': url,
+                            'method': 'PATCH',
+                            'data': dataToSend,
+                            'headers': {
+                                'Authorization': 'token ' + ghToken,
+                                'Accept': 'application/vnd.github.v3+json'
+                            },
+                            'success': function (data) {
+                                console.log('success saving gist');
+                            },
+                            'error': function (xhr, status, errorMessage) {
+                                console.log('error', errorMessage);
+                            }
+                        });
+                    }
                 }
             },
             'dataType': 'json',

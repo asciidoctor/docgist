@@ -64,6 +64,7 @@ function DocGist($) {
     var $shortUrlDialog = undefined;
     var $editor = undefined;
     var $editButton = undefined;
+    var $saveButton = undefined;
     var $footerWrapper = undefined;
     var urlAttributes = undefined;
     var id = undefined;
@@ -78,6 +79,7 @@ function DocGist($) {
         $gistId = $('#gist-id');
         $editor = $('#editor');
         $editButton = $('#edit-button');
+        $saveButton = $('#save-button');
         $footerWrapper = $('#footer');
 
 
@@ -283,6 +285,12 @@ function DocGist($) {
                 $editButton.click();
             }
         }
+
+        if ('save' in options) {
+            $saveButton.removeClass('disabled').click(function () {
+                editor.save(options);
+            });
+        }
     }
 
     function postProcess($content, options, preOptions) {
@@ -355,14 +363,12 @@ function DocGist($) {
 
         function loadNewEditor() {
             var myId = id ? id : '';
-            window.history.replaceState('?' + myId, null, '?' + myId);
             var buffer = new Array(16);
             uuid.v4(null, buffer);
             var base62 = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
             var bs62 = baseX(base62);
             var tmpId = bs62.encode(buffer);
-            id = 'fp-' + tmpId;
-            window.history.pushState('?' + id, null, '?' + id);
+            historyTransition(myId, 'fp-' + tmpId);
             setupFunc(options, true);
         }
 
@@ -371,6 +377,12 @@ function DocGist($) {
                 window.location.assign(event.state);
             }
         };
+    }
+
+    function historyTransition(oldId, newId) {
+        window.history.replaceState('?' + oldId, null, '?' + oldId);
+        window.history.pushState('?' + newId, null, '?' + newId);
+        id = newId;
     }
 
     function Editor($content, preOptions) {
@@ -384,9 +396,17 @@ function DocGist($) {
         var startTime = undefined;
         var cm = undefined;
         var html = undefined;
+        var ghToken = undefined;
+        var ghUsername = undefined;
+        var ghGistFilename = undefined;
+        var userId = undefined;
+        var ghAuthExpires = undefined;
 
         function load(options, doneFunc) {
             $contentWrapper.addClass('editing');
+            if (showcomments) {
+                $contentWrapper.addClass('showcomments');
+            }
             $editorWrapper.addClass('editing');
             $footerWrapper.hide();
             cm = CodeMirror.fromTextArea($editor.get(0), {
@@ -396,44 +416,101 @@ function DocGist($) {
                 'autofocus': true,
                 'lineNumbers': true
             });
-            Firebase.goOnline();
-            firebase = new Firebase('https://sweltering-fire-785.firebaseio.com/' + id.slice(3));
-            firebase.authAnonymously(function (error, authData) {
-                if (error) {
-                    console.log('Login Failed!', error);
-                } else {
-                    firepad = Firepad.fromCodeMirror(firebase, cm, {
-                        'defaultText': '= DocGist collaborative AsciiDoc editor\n\n' +
-                        'TIP: Share the URL with others to collaborate!',
-                        'userId': authData.uid
-                    });
-                    firepad.on('ready', function () {
-                        if ('new-firepad-content' in options && firepad.isHistoryEmpty()) {
-                            firepad.setText(options['new-firepad-content']);
-                        }
-                        $('a.powered-by-firepad').remove();
-                        if (typeof doneFunc === 'function') {
-                            doneFunc();
-                        }
-                    });
-                }
-            });
-            if (showcomments) {
-                $contentWrapper.addClass('showcomments');
+
+            if (typeof firebase === 'undefined') {
+                firebase = new Firebase('https://sweltering-fire-785.firebaseio.com/');
             }
-            var timeout = undefined;
-            var timeDiff = 1;
-            var MAGIC_PERFORMANCE_FACTOR = 2;
-            cm.on('changes', function () {
-                if (typeof timeout === 'undefined') {
-                    var wait = timeDiff * MAGIC_PERFORMANCE_FACTOR;
-                    timeout = setTimeout(function () {
-                        clearTimeout(timeout);
-                        timeout = undefined;
-                        timeDiff = renderEditorContent(showcomments, options);
-                    }, wait);
+            Firebase.goOnline();
+            var scope = options['editor'] === 'gist' ? {'scope': 'gist'} : {};
+            if (userId && Date.now() / 1000 + 3600 < ghAuthExpires) {
+                initializeEditor();
+            } else {
+                performAuth(firebase, options['editor'], scope, successGithub, successFirebase, fail);
+            }
+
+            function successGithub(auth) {
+                ghUsername = auth.github.username;
+                ghToken = auth.github.accessToken;
+                userId = ghUsername;
+                ghAuthExpires = auth.expires;
+                initializeEditor();
+            }
+
+            function successFirebase(auth) {
+                userId = auth.uid;
+                initializeEditor();
+            }
+
+            function fail(message, err) {
+                console.log(message, err);
+            }
+
+            function performAuth(fireb, editor, scope, succGithub, succFireb, fail) {
+                fireb.authWithOAuthPopup('github', function (ghError, ghAuthData) {
+                    if (ghError) {
+                        if (editor === 'gist') {
+                            fail('GitHub login failed!', ghError);
+                        } else {
+                            fireb.authAnonymously(function (error, authData) {
+                                if (error) {
+                                    fail('Anonymous login Failed!', error);
+                                } else {
+                                    succFireb(authData);
+                                }
+                            });
+                        }
+                    } else {
+                        succGithub(ghAuthData);
+                    }
+                }, scope);
+            }
+
+            function initializeEditor() {
+                if (options['editor'] === 'firepad') {
+                    initializeFirepad(userId);
+                } else if (options['editor'] === 'gist') {
+                    cm.setValue(options['gist-content']);
+                    ghGistFilename = options['gist-filename'];
+                    setupRenderingOnChangess();
+                } else {
+                    console.log('Unknown editor: ' + options['editor']);
                 }
-            });
+            }
+
+            function initializeFirepad(userId) {
+                console.log('init firepad');
+                firepad = Firepad.fromCodeMirror(firebase.child(id.slice(3)), cm, {
+                    'defaultText': '= DocGist collaborative AsciiDoc editor\n\n' +
+                    'TIP: Share the URL with others to collaborate!',
+                    'userId': userId
+                });
+                firepad.on('ready', function () {
+                    if ('new-firepad-content' in options && firepad.isHistoryEmpty()) {
+                        firepad.setText(options['new-firepad-content']);
+                    }
+                    $('a.powered-by-firepad').remove();
+                });
+                setupRenderingOnChangess();
+            }
+
+            function setupRenderingOnChangess() {
+                var timeout = undefined;
+                var timeDiff = 1;
+                var MAGIC_PERFORMANCE_FACTOR = 2;
+                cm.on('changes', function () {
+                    if (typeof timeout === 'undefined') {
+                        var wait = timeDiff * MAGIC_PERFORMANCE_FACTOR;
+                        timeout = setTimeout(function () {
+                            clearTimeout(timeout);
+                            timeout = undefined;
+                            timeDiff = renderEditorContent(showcomments, options);
+                        }, wait);
+                    }
+                });
+                if (typeof doneFunc === 'function') {
+                    doneFunc();
+                }
+            }
         }
 
         function renderEditorContent(showcomments, options) {
@@ -463,25 +540,43 @@ function DocGist($) {
             if (showcomments) {
                 renderEditorContent(false, options);
             }
+            if (options['editor'] === 'gist') {
+                options['gist-content'] = content;
+            }
             if (firepad) {
                 firepad.dispose();
                 firepad = undefined;
                 Firebase.goOffline();
-                firebase = undefined;
             }
             $contentWrapper.removeClass('editing');
             $contentWrapper.removeClass('showcomments');
             $editorWrapper.removeClass('editing');
             $editorWrapper.children('.CodeMirror').remove();
+            cm = undefined;
             $footerWrapper.show();
             if (typeof doneFunc === 'function') {
                 doneFunc();
             }
         }
 
+        function save(options) {
+            if (typeof options['save'] === 'function') {
+                options['save'](ghUsername, ghToken, content, function (result) {
+                    console.log(result);
+                    if ('newId' in result) {
+                        historyTransition(id, result['newId']);
+                    }
+                    if ('sourceUrl' in result) {
+                        $('#gist-link').attr('href', result['sourceUrl']);
+                    }
+                });
+            }
+        }
+
         return {
             'load': load,
-            'unload': unload
+            'unload': unload,
+            'save': save
         }
     }
 

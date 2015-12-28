@@ -202,7 +202,7 @@ span.commenter:after, em.commenter:after {
 }
 
 @media screen and (max-width: 82em) {
-    #project-button, #source-button {
+    #source-button {
         display: none;
     }
 }
@@ -220,7 +220,7 @@ span.commenter:after, em.commenter:after {
 }
 
 @media screen and (max-width: 767px) {
-    #project-button, #source-button, #theme-button, #highlighter-button, #attributes-button {
+    #source-button, #theme-button, #highlighter-button, #attributes-button {
         display: block;
     }
     #gist-id {
