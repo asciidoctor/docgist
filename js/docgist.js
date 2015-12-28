@@ -235,7 +235,9 @@ function DocGist($) {
             html = Opal.Asciidoctor.$convert(content, preOptions['asciidoctorOptions']);
         }
         catch (e) {
-            errorMessage(e.name + ':' + '<p>' + e.message + '</p>');
+            errorMessage(e.name + ':' + '<p>' + e.message + '</p>' + '<p>' + e.fileName + ':' + e.lineNumber + ':'
+                + e.columnNumber + '</p>' + '<pre>' + e.stack + '</pre>'
+            );
             return;
         }
         $content.html(html);
