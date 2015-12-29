@@ -243,7 +243,7 @@ function Gist($) {
         }
 
         var url = 'https://api.github.com/gists/' + gist.replace("/", "");
-        $.ajax({
+        var ajaxOpts = {
             'url': url,
             'success': function (data) {
                 var keys = searchForAttribute(data.files, 'language', 'AsciiDoc');
@@ -327,7 +327,33 @@ function Gist($) {
             'error': function (xhr, status, errorMessage) {
                 error(errorMessage);
             }
-        });
+        };
+        setGithubHeaders(ajaxOpts);
+        $.ajax(ajaxOpts);
+    }
+
+    function isLocalStorageReadable() {
+        try {
+            var storage = window.localStorage;
+            return true;
+        }
+        catch (e) {
+            return false;
+        }
+    }
+
+    function setGithubHeaders(opts) {
+        if (isLocalStorageReadable()) {
+            var storage = window.localStorage;
+            if ('ghAuthExpires' in storage && Date.now() / 1000 + 3600 < storage['ghAuthExpires']) {
+                if ('ghToken' in storage) {
+                    opts['headers'] = {
+                        'Authorization': 'token ' + storage['ghToken'],
+                        'Accept': 'application/vnd.github.v3+json'
+                    };
+                }
+            }
+        }
     }
 
     function searchForAttribute(obj, prop, value) {
@@ -376,7 +402,7 @@ function Gist($) {
             pathPartsIndex++;
         }
         var url = 'https://api.github.com/repos/' + parts[0] + '/' + parts[1] + '/contents/' + parts.slice(pathPartsIndex).join('/');
-        $.ajax({
+        var ajaxOpts = {
             'url': url,
             'data': {'ref': branch},
             'success': function (data) {
@@ -403,7 +429,9 @@ function Gist($) {
             'error': function (xhr, status, errorMessage) {
                 error(errorMessage);
             }
-        });
+        };
+        setGithubHeaders(ajaxOpts);
+        $.ajax(ajaxOpts);
     }
 
     function fetchPublicDropboxFile(id, success, error) {

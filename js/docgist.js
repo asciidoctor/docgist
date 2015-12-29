@@ -179,7 +179,6 @@ function DocGist($) {
         preOptions['stylesheet'] = stylesheet;
         preOptions['hasDarkSourceBlocks'] = $.inArray('stylesheet', THEMES_WITH_DARK_SOURCE_BLOCKS) !== -1;
 
-
         if (existsInObjectOrHash('source-highlighter', attributes, urlAttributes)) {
             highlighter = getValueFromObjectOrHash('source-highlighter', attributes, urlAttributes).toLowerCase();
             if ($.inArray(highlighter, UNAVAILABLE_HIGHLIGHTERS) !== -1) {
@@ -384,7 +383,7 @@ function DocGist($) {
         id = newId;
     }
 
-    function isLocalStorageAvailable() {
+    function isLocalStorageWritable() {
         try {
             var storage = window.localStorage;
             var tmp = '__storage_test__';
@@ -411,8 +410,34 @@ function DocGist($) {
         var ghToken = undefined;
         var ghUsername = undefined;
         var ghGistFilename = undefined;
+        var ghScope = undefined;
         var userId = undefined;
         var ghAuthExpires = undefined;
+        var useLocalStorage = isLocalStorageWritable();
+
+        function readGithubAuthData() {
+            if (useLocalStorage) {
+                var storage = window.localStorage;
+                if ('ghAuthExpires' in storage && Date.now() / 1000 + 3600 < storage['ghAuthExpires']) {
+                    userId = storage['userId'];
+                    ghUsername = storage['ghUsername'];
+                    ghToken = storage['ghToken'];
+                    ghScope = storage['ghScope'];
+                    ghAuthExpires = storage['ghAuthExpires'];
+                }
+            }
+        }
+
+        function writeGithubAuthData() {
+            if (useLocalStorage) {
+                var storage = window.localStorage;
+                storage['userId'] = userId;
+                storage['ghUsername'] = ghUsername;
+                storage['ghToken'] = ghToken;
+                storage['ghScope'] = ghScope;
+                storage['ghAuthExpires'] = ghAuthExpires;
+            }
+        }
 
         function load(options, doneFunc) {
             $contentWrapper.addClass('editing');
@@ -434,8 +459,18 @@ function DocGist($) {
             }
             Firebase.goOnline();
 
-            var scope = options['editor'] === 'gist' ? {'scope': 'gist'} : {};
-            if (userId && Date.now() / 1000 + 3600 < ghAuthExpires) {
+            readGithubAuthData();
+
+            var scope = undefined;
+            var scopeDef = undefined;
+            if (options['editor'] === 'gist') {
+                scope = {'scope': 'gist'};
+                scopeDef = 'gist';
+            } else {
+                scope = {};
+                scopeDef = 'default';
+            }
+            if (userId && (ghScope === 'gist' || ghScope === scopeDef)) {
                 initializeEditor();
             } else {
                 performAuth(firebase, options['editor'], scope, successGithub, successFirebase, fail);
@@ -446,6 +481,8 @@ function DocGist($) {
                 ghToken = auth.github.accessToken;
                 userId = ghUsername;
                 ghAuthExpires = auth.expires;
+                ghScope = scopeDef;
+                writeGithubAuthData();
                 initializeEditor();
             }
 
@@ -491,7 +528,6 @@ function DocGist($) {
             }
 
             function initializeFirepad(userId) {
-                console.log('init firepad');
                 firepad = Firepad.fromCodeMirror(firebase.child(id.slice(3)), cm, {
                     'defaultText': '= DocGist collaborative AsciiDoc editor\n\n' +
                     'TIP: Share the URL with others to collaborate!',
