@@ -4,8 +4,7 @@ function DocGist($) {
     var DEFAULT_SOURCE = decodeURIComponent('github-asciidoctor%2Fdocgist%2F%2Fgists%2Fexample.adoc');
     var DOCGIST_LIB_VERSIONS = {
         'prettify': 'r298',
-        'highlightjs': '8.9.1',
-        'mathjax': '2.5.3'
+        'highlightjs': '8.9.1'
     };
     window.DocgistLibVersions = DOCGIST_LIB_VERSIONS;
     var DEFAULT_HIGHLIGHTER = 'codemirror';
@@ -245,10 +244,6 @@ function DocGist($) {
         $gistId.val('');
 
         postProcess($content, options, preOptions);
-
-        if (!existsInObjectOrHash('stem!', attributes, urlAttributes)) {
-            appendMathJax();
-        }
 
         addMetadataToFooter(attributes, urlAttributes);
         share();
@@ -853,27 +848,6 @@ function DocGist($) {
         });
     }
 
-    function appendMathJax() {
-        var mathJaxJsScriptConfig = document.createElement('script');
-        mathJaxJsScriptConfig.type = 'text/x-mathjax-config';
-        mathJaxJsScriptConfig.text =
-            'MathJax.Hub.Config({' +
-            '  tex2jax: {' +
-            '    inlineMath: [["\\\\(", "\\\\)"]],' +
-            '    displayMath: [["\\\\[", "\\\\]"]],' +
-            '    ignoreClass: "nostem|nostem|nolatexmath"' +
-            '  },' +
-            '  asciimath2jax: {' +
-            '    delimiters: [["\\\\$", "\\\\$"]],' +
-            '    ignoreClass: "nostem|nostem|noasciimath"' +
-            '  }' +
-            '});';
-        document.head.appendChild(mathJaxJsScriptConfig);
-
-        var version = DOCGIST_LIB_VERSIONS.mathjax;
-        addScriptElement('https://cdnjs.cloudflare.com/ajax/libs/mathjax/' + version + '/MathJax.js?config=TeX-MML-AM_HTMLorMML');
-    }
-
     function applyHighlighting(highlighter, sourceLanguage, hasDarkSourceBlocks) {
         var AVAILABLE_HIGHLIGHTERS = {
             'highlightjs': highlightUsingHighlightjs,
@@ -1014,7 +988,7 @@ function DocGist($) {
             'no-header-footer': [''],
             'no-highlight': ['', null],
             'numbered': ['', null],
-            'stem': ['asciimath', 'latexmath', '', null],
+            'stem': ['asciimath', 'latexmath', ''],
             'table-caption': ['', null],
             'toc': ['', 'macro', 'preamble', null],
             'toclevels': ['1', '2', '3', '4']
