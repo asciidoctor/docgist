@@ -91,17 +91,18 @@ function DocGist($) {
         $gistId.keydown(gist.readSourceId);
     });
 
-    function getAsciidoctorOptions(overrides, urlOverrides) {
+    function getAsciidoctorOptions(overrides, urlOverrides, extraOptions) {
         var attributes = $.extend({}, ASCIIDOCTOR_DEFAULT_ATTRIBUTES, urlOverrides, overrides);
         var attributeList = [];
         for (var key in attributes) {
             attributeList.push(key + '=' + attributes[key]);
         }
-        return Opal.hash({
+        var opts = $.extend({
             'to_file': false,
             'safe': 'secure',
             'attributes': attributeList
-        });
+        }, extraOptions);
+        return Opal.hash(opts);
     }
 
     function getUrlAttributes() {
@@ -148,7 +149,7 @@ function DocGist($) {
         var preOptions = {};
         var highlighter = undefined;
         var sourceLanguage = undefined;
-        var doc = Opal.Asciidoctor.$load(content, getAsciidoctorOptions({'parse_header_only': 'true'}));
+        var doc = Opal.Asciidoctor.$load(content, getAsciidoctorOptions(undefined, undefined, {'parse_header_only': true}));
         var attributes = doc.attributes;
         var attributeOverrides = {};
         preOptions['attributes'] = attributes;
@@ -387,6 +388,19 @@ function DocGist($) {
         id = newId;
     }
 
+    function isLocalStorageAvailable() {
+        try {
+            var storage = window.localStorage;
+            var tmp = '__storage_test__';
+            storage.setItem(tmp, tmp);
+            storage.removeItem(tmp);
+            return true;
+        }
+        catch (e) {
+            return false;
+        }
+    }
+
     function Editor($content, preOptions) {
         var asciidoctorOptions = preOptions['asciidoctorOptions'];
         var $contentWrapper = $('#content-wrapper');
@@ -423,6 +437,7 @@ function DocGist($) {
                 firebase = new Firebase('https://sweltering-fire-785.firebaseio.com/');
             }
             Firebase.goOnline();
+
             var scope = options['editor'] === 'gist' ? {'scope': 'gist'} : {};
             if (userId && Date.now() / 1000 + 3600 < ghAuthExpires) {
                 initializeEditor();
