@@ -13,7 +13,7 @@
 
 'use strict';
 
-function Gist($, $content) {
+function Gist($) {
 
     var DROPBOX_PUBLIC_BASE_URL = 'https://dl.dropboxusercontent.com/u/';
     var DROPBOX_PRIVATE_BASE_URL = 'https://www.dropbox.com/s/';
@@ -591,6 +591,8 @@ function Gist($, $content) {
             messageText = '<p>' + message + '</p>';
         }
 
-        $content.html('<div class="alert alert-danger"><h4>Error</h4>' + messageText + '</div>');
+        $(document).ready(function () {
+            $('#content').html('<div class="alert alert-danger"><h4>Error</h4>' + messageText + '</div>');
+        });
     }
 }

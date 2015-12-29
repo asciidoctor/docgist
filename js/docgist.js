@@ -65,8 +65,12 @@ function DocGist($) {
     var $editButton = undefined;
     var $saveButton = undefined;
     var $footerWrapper = undefined;
-    var urlAttributes = undefined;
-    var id = undefined;
+
+    var gist = new Gist($);
+    var urlInfo = getUrlAttributes();
+    var urlAttributes = urlInfo.attributes;
+    var id = urlInfo.id;
+    gist.getGistAndRenderPage(renderContent, urlInfo.id, DEFAULT_SOURCE);
 
     $(document).ready(function () {
         if (top.location != self.location) {
@@ -82,11 +86,6 @@ function DocGist($) {
         $footerWrapper = $('#footer');
 
 
-        var gist = new Gist($, $content);
-        var urlInfo = getUrlAttributes();
-        urlAttributes = urlInfo.attributes;
-        id = urlInfo.id;
-        gist.getGistAndRenderPage(renderContent, urlInfo.id, DEFAULT_SOURCE);
         $gistId.keydown(gist.readSourceId);
     });
 
@@ -154,9 +153,14 @@ function DocGist($) {
         preOptions['attributes'] = attributes;
         preOptions['document'] = doc;
 
-        if (existsInObjectOrHash('no-header-footer', attributes, urlAttributes)) {
-            $('body>div.navbar').css('display', 'none');
-        }
+        $(document).ready(function () {
+            if (existsInObjectOrHash('no-header-footer', attributes, urlAttributes)) {
+                $('#main-menu').css('display', 'none');
+            }
+            if ('sourceUrl' in options) {
+                $('#gist-link').attr('href', options['sourceUrl']).removeClass('disabled');
+            }
+        });
 
         var stylesheet = '';
         if (existsInObjectOrHash('stylesheet', attributes, urlAttributes)) {
@@ -205,9 +209,6 @@ function DocGist($) {
                     if ('siteBaseLocation' in options) {
                         attributeOverrides['imagesdir'] = options['siteBaseLocation'] + imagesdir;
                     }
-                } else if ('imageBaseLocation' in options) {
-                    // default to the same location as the document
-                    attributeOverrides['imagesdir'] = options['imageBaseLocation'];
                 } else if ('imageBaseLocation' in options && imagesdir.substr(0, 4) !== 'http') {
                     // relative URL
                     attributeOverrides['imagesdir'] = options['imageBaseLocation'] + '/' + imagesdir;
@@ -223,10 +224,6 @@ function DocGist($) {
     }
 
     function renderContent(content, options) {
-        if ('sourceUrl' in options) {
-            $('#gist-link').attr('href', options['sourceUrl']).removeClass('disabled');
-        }
-        //$content.empty();
         var html = undefined;
         var preOptions, attributes = undefined;
         try {
@@ -240,55 +237,59 @@ function DocGist($) {
             );
             return;
         }
-        $content.html(html);
-        $gistId.val('');
 
-        postProcess($content, options, preOptions);
+        $(document).ready(function () {
 
-        addMetadataToFooter(attributes, urlAttributes);
-        share();
-        loadHighlightMenu(preOptions['highlighter']);
-        loadThemeMenu(preOptions['stylesheet']);
-        loadAttributesMenu();
+            $content.html(html);
+            $gistId.val('');
 
-        var editor = new Editor($content, preOptions);
+            postProcess($content, options, preOptions);
 
-        loadNewMenu(content, options, setupEditMode);
+            addMetadataToFooter(attributes, urlAttributes);
+            share();
+            loadHighlightMenu(preOptions['highlighter']);
+            loadThemeMenu(preOptions['stylesheet']);
+            loadAttributesMenu();
 
-        if ('editor' in options) {
-            setupEditMode(options);
-        }
+            var editor = new Editor($content, preOptions);
 
-        function setupEditMode(optionsToUse, click) {
-            var editorModeInProgress = false;
-            $editButton.removeClass('disabled').click(function () {
-                if (!editorModeInProgress) {
-                    editorModeInProgress = true;
-                    if ($editButton.hasClass('active')) {
-                        $editButton.removeClass('active');
-                        editor.unload(optionsToUse, editorModeDone);
-                    } else {
-                        $editButton.addClass('active');
-                        editor.load(optionsToUse, editorModeDone);
-                    }
-                } else {
-                    // ignore clicks until we're done
-                }
+            loadNewMenu(content, options, setupEditMode);
 
-                function editorModeDone() {
-                    editorModeInProgress = false;
-                }
-            });
-            if (click) {
-                $editButton.click();
+            if ('editor' in options) {
+                setupEditMode(options);
             }
-        }
 
-        if ('save' in options) {
-            $saveButton.removeClass('disabled').click(function () {
-                editor.save(options);
-            });
-        }
+            function setupEditMode(optionsToUse, click) {
+                var editorModeInProgress = false;
+                $editButton.removeClass('disabled').click(function () {
+                    if (!editorModeInProgress) {
+                        editorModeInProgress = true;
+                        if ($editButton.hasClass('active')) {
+                            $editButton.removeClass('active');
+                            editor.unload(optionsToUse, editorModeDone);
+                        } else {
+                            $editButton.addClass('active');
+                            editor.load(optionsToUse, editorModeDone);
+                        }
+                    } else {
+                        // ignore clicks until we're done
+                    }
+
+                    function editorModeDone() {
+                        editorModeInProgress = false;
+                    }
+                });
+                if (click) {
+                    $editButton.click();
+                }
+            }
+
+            if ('save' in options) {
+                $saveButton.removeClass('disabled').click(function () {
+                    editor.save(options);
+                });
+            }
+        });
     }
 
     function postProcess($content, options, preOptions) {
@@ -1110,7 +1111,9 @@ function DocGist($) {
             messageText = '<p>' + message + '</p>';
         }
 
-        $content.html('<div class="alert alert-block alert-error"><h4>Error</h4>' + messageText + '</div>');
+        $(document).ready(function () {
+            $content.html('<div class="alert alert-block alert-error"><h4>Error</h4>' + messageText + '</div>');
+        });
     }
 }
 
