@@ -438,7 +438,6 @@ function DocGist($) {
         var html = undefined;
         var ghToken = undefined;
         var ghUsername = undefined;
-        var ghGistFilename = undefined;
         var ghScope = undefined;
         var userId = undefined;
         var ghAuthExpires = undefined;
@@ -548,9 +547,8 @@ function DocGist($) {
                 if (options['editor'] === 'firepad') {
                     initializeFirepad(userId);
                 } else if (options['editor'] === 'gist') {
+                    setupRenderingOnChangess();
                     cm.setValue(originalContent = options['gist-content']);
-                    ghGistFilename = options['gist-filename'];
-                    setupRenderingOnChangess(true);
                 } else {
                     console.log('Unknown editor: ' + options['editor']);
                 }
@@ -571,7 +569,7 @@ function DocGist($) {
                 setupRenderingOnChangess();
             }
 
-            function setupRenderingOnChangess(performInitialRendering) {
+            function setupRenderingOnChangess() {
                 var timeout = undefined;
                 var timeDiff = 1;
                 var MAGIC_PERFORMANCE_FACTOR = 2;
@@ -587,9 +585,6 @@ function DocGist($) {
                 });
                 if (typeof doneFunc === 'function') {
                     doneFunc();
-                }
-                if (performInitialRendering) {
-                    renderEditorContent(showcomments, options);
                 }
             }
         }
@@ -613,12 +608,12 @@ function DocGist($) {
             }
             try {
                 html = Opal.Asciidoctor.$convert(content, asciidoctorOptions);
+                sanitizeAndInjectHtml(html);
+                postProcess($content, options, preOptions);
             }
             catch (e) {
                 errorMessage(e.name + ':' + '<p>' + e.message + '</p>');
             }
-            sanitizeAndInjectHtml(html);
-            postProcess($content, options, preOptions);
             return performance.now() - startTime;
         }
 
