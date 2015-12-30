@@ -432,6 +432,7 @@ function DocGist($) {
         var firebase = undefined;
         var firepad = undefined;
         var content = undefined;
+        var originalContent = undefined;
         var startTime = undefined;
         var cm = undefined;
         var html = undefined;
@@ -547,9 +548,9 @@ function DocGist($) {
                 if (options['editor'] === 'firepad') {
                     initializeFirepad(userId);
                 } else if (options['editor'] === 'gist') {
-                    cm.setValue(options['gist-content']);
+                    cm.setValue(originalContent = options['gist-content']);
                     ghGistFilename = options['gist-filename'];
-                    setupRenderingOnChangess();
+                    setupRenderingOnChangess(true);
                 } else {
                     console.log('Unknown editor: ' + options['editor']);
                 }
@@ -570,7 +571,7 @@ function DocGist($) {
                 setupRenderingOnChangess();
             }
 
-            function setupRenderingOnChangess() {
+            function setupRenderingOnChangess(performInitialRendering) {
                 var timeout = undefined;
                 var timeDiff = 1;
                 var MAGIC_PERFORMANCE_FACTOR = 2;
@@ -587,16 +588,24 @@ function DocGist($) {
                 if (typeof doneFunc === 'function') {
                     doneFunc();
                 }
+                if (performInitialRendering) {
+                    renderEditorContent(showcomments, options);
+                }
             }
         }
 
         function renderEditorContent(showcomments, options) {
             startTime = performance.now();
-            content = cm.getValue();
+            content = originalContent = cm.getValue();
             if (showcomments) {
-                content = content.replace(/^\/\/\s*?(\w*?):\s*(.*)/gm, function (match, name, comment) {
+                content = content.replace(/^\/\/\s*?(\w*?):\s*?(.*?)$/gm, function (match, name, comment) {
+                    comment = $.trim(comment);
                     if (name) {
-                        return '[.commenter]#' + name + '# [.comment]#[.commenter]_' + name + '_ ' + comment + '#';
+                        if (comment === '') {
+                            return '[.commenter]#' + name + '#';
+                        } else {
+                            return '[.commenter]#' + name + '# [.comment]#[.commenter]_' + name + '_ ' + comment + '#';
+                        }
                     } else {
                         return '[.comment]#' + comment + '#';
                     }
@@ -618,7 +627,7 @@ function DocGist($) {
                 renderEditorContent(false, options);
             }
             if (options['editor'] === 'gist') {
-                options['gist-content'] = content;
+                options['gist-content'] = originalContent;
             }
             if (firepad) {
                 firepad.dispose();
@@ -638,7 +647,7 @@ function DocGist($) {
 
         function save(options) {
             if (typeof options['save'] === 'function') {
-                options['save'](ghUsername, ghToken, content, function (result) {
+                options['save'](ghUsername, ghToken, originalContent, function (result) {
                     console.log(result);
                     if ('newId' in result) {
                         historyTransition(id, result['newId']);
