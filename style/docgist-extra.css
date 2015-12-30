@@ -152,6 +152,7 @@ pre.highlight code.hljs {
 }
 
 .comment {
+    max-width: 33%;
     background: #fff3b8;
     padding-left: 3px;
     padding-right: 3px;
@@ -160,15 +161,16 @@ pre.highlight code.hljs {
     clear: right;
     border: solid 1px #cccccc;
     margin-left: 2px;
-    font-size: 0.945em;
-    max-width: 33%;
+    font-weight: 400;
+    font-size: 15px;
+    font-style: normal;
 }
 
 span.commenter, em.commenter {
     background: #fff3b8;
     font-style: normal;
     font-weight: bold;
-    font-size: 0.76em;
+    font-size: 12px;
 }
 
 span.commenter {
