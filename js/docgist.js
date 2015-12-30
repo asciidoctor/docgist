@@ -222,6 +222,34 @@ function DocGist($) {
         return preOptions;
     }
 
+    var JAVASCRIPT_HREF = /^\s*javascript\s*:/i;
+
+    function sanitizeAndInjectHtml(html) {
+        var items = $.parseHTML(html);
+        for (var i = items.length; i--;) {
+            if (items[i].nodeType === 1) {
+                clean(items[i]);
+                var nestedItems = items[i].getElementsByTagName('*');
+                for (var j = nestedItems.length; j--;) {
+                    clean(nestedItems[j]);
+                }
+            }
+        }
+        $content.empty();
+        $content.append(items);
+
+        function clean(element) {
+            for (var i = element.attributes.length; i--;) {
+                var attrib = element.attributes[i];
+                if (attrib.name.slice(0, 2) === 'on') {
+                    element.removeAttribute(attrib.name);
+                } else if (attrib.name === 'href' && JAVASCRIPT_HREF.test(attrib.value)) {
+                    element.removeAttribute(attrib.name);
+                }
+            }
+        }
+    }
+
     function renderContent(content, options) {
         var html = undefined;
         var preOptions, attributes = undefined;
@@ -239,7 +267,7 @@ function DocGist($) {
 
         $(document).ready(function () {
 
-            $content.html(html);
+            sanitizeAndInjectHtml(html);
             $gistId.val('');
 
             postProcess($content, options, preOptions);
@@ -580,7 +608,7 @@ function DocGist($) {
             catch (e) {
                 errorMessage(e.name + ':' + '<p>' + e.message + '</p>');
             }
-            $content.html(html);
+            sanitizeAndInjectHtml(html);
             postProcess($content, options, preOptions);
             return performance.now() - startTime;
         }
