@@ -2,11 +2,6 @@
 
 function DocGist($) {
     var DEFAULT_SOURCE = decodeURIComponent('github-asciidoctor%2Fdocgist%2F%2Fgists%2Fexample.adoc');
-    var DOCGIST_LIB_VERSIONS = {
-        'prettify': 'r298',
-        'highlightjs': '8.9.1'
-    };
-    window.DocgistLibVersions = DOCGIST_LIB_VERSIONS;
     var DEFAULT_HIGHLIGHTER = 'codemirror';
     var UNAVAILABLE_HIGHLIGHTERS = ['coderay', 'pygments', 'source-highlight', 'highlight'];
     var ASCIIDOCTOR_DEFAULT_ATTRIBUTES = {
@@ -66,6 +61,8 @@ function DocGist($) {
     var $saveButton = undefined;
     var $footerWrapper = undefined;
 
+    var useLocalStorage = isLocalStorageWritable();
+
     var gist = new Gist($);
     var urlInfo = getUrlAttributes();
     var urlAttributes = urlInfo.attributes;
@@ -122,6 +119,9 @@ function DocGist($) {
                 attributes[decode(match[1])] = decode(match[2]);
             }
         }
+        if (!first) {
+            first = '';
+        }
         return {'id': first, 'attributes': attributes};
     }
 
@@ -158,7 +158,7 @@ function DocGist($) {
                 $('#main-menu').css('display', 'none');
             }
             if ('sourceUrl' in options) {
-                $('#gist-link').attr('href', options['sourceUrl']).removeClass('disabled');
+                $('#gist-link').attr('href', options['sourceUrl']).parent().removeClass('disabled');
             }
         });
 
@@ -174,10 +174,15 @@ function DocGist($) {
                     stylesheet = stylesdir + stylesheet;
                 }
             }
-            addLinkElement(stylesheet);
+            $(document).ready(function () {
+                var $themeStylesheet = $('#theme-stylesheet');
+                if ($themeStylesheet.attr('href') !== stylesheet) {
+                    $themeStylesheet.attr('href', stylesheet);
+                }
+            });
         }
         preOptions['stylesheet'] = stylesheet;
-        preOptions['hasDarkSourceBlocks'] = $.inArray('stylesheet', THEMES_WITH_DARK_SOURCE_BLOCKS) !== -1;
+        preOptions['hasDarkSourceBlocks'] = $.inArray(stylesheet, THEMES_WITH_DARK_SOURCE_BLOCKS) !== -1;
 
         if (existsInObjectOrHash('source-highlighter', attributes, urlAttributes)) {
             highlighter = getValueFromObjectOrHash('source-highlighter', attributes, urlAttributes).toLowerCase();
@@ -288,7 +293,7 @@ function DocGist($) {
 
             function setupEditMode(optionsToUse, click) {
                 var editorModeInProgress = false;
-                $editButton.removeClass('disabled').click(function () {
+                $editButton.click(function () {
                     if (!editorModeInProgress) {
                         editorModeInProgress = true;
                         if ($editButton.hasClass('active')) {
@@ -305,16 +310,16 @@ function DocGist($) {
                     function editorModeDone() {
                         editorModeInProgress = false;
                     }
-                });
+                }).removeClass('disabled');
                 if (click) {
                     $editButton.click();
                 }
             }
 
             if ('save' in options) {
-                $saveButton.removeClass('disabled').click(function () {
+                $saveButton.click(function () {
                     editor.save(options);
-                });
+                }).parent().removeClass('disabled');
             }
         });
     }
@@ -441,7 +446,6 @@ function DocGist($) {
         var ghScope = undefined;
         var userId = undefined;
         var ghAuthExpires = undefined;
-        var useLocalStorage = isLocalStorageWritable();
 
         function readGithubAuthData() {
             if (useLocalStorage) {
@@ -819,7 +823,37 @@ function DocGist($) {
     }
 
     function setPageTitle(doc) {
-        document.title = doc.$doctitle(Opal.hash({'sanitize': true, 'use_fallback': true}))
+        document.title = doc.$doctitle(Opal.hash({'sanitize': true, 'use_fallback': true}));
+        if (useLocalStorage) {
+            var $LI = $('<li/>');
+            var $A = $('<a href="javascript:;" target="_blank"/>');
+            var items = undefined;
+            if (window.localStorage.recent) {
+                items = window.localStorage.recent.split('|');
+            } else {
+                items = [];
+            }
+            var newItems = encode(id, document.title);
+            var $menu = $('#file-menu');
+            for (var i = 0; i < items.length; i++) {
+                var item = decode(items[i]);
+                if (item.id !== id) {
+                    newItems += '|' + items[i];
+                }
+                var $a = $A.clone().text(item.title).attr('href', '?' + item.id);
+                $LI.clone().append($a).appendTo($menu);
+            }
+            window.localStorage.recent = newItems;
+        }
+
+        function encode(id, title) {
+            return encodeURIComponent(id) + '#' + encodeURIComponent(title);
+        }
+
+        function decode(item) {
+            var parts = item.split('#');
+            return {'id': decodeURIComponent(parts[0]), 'title': decodeURIComponent(parts[1])};
+        }
     }
 
     function share() {
@@ -962,14 +996,11 @@ function DocGist($) {
     }
 
     function highlightUsingPrettify(hasDarkSourceBlocks) {
+        $('link.dark').attr('disabled', !hasDarkSourceBlocks);
         $('code[class^="language-"],code[class^="src-"]', $content).each(function (i, e) {
             e.className = e.className.replace('src-', 'language-') + ' prettyprint';
         });
-        var version = DOCGIST_LIB_VERSIONS.prettify;
-        addScriptElement('//cdnjs.cloudflare.com/ajax/libs/prettify/' + version + '/run_prettify.min.js');
-        if (hasDarkSourceBlocks) {
-            addLinkElement('//google-code-prettify.googlecode.com/svn/loader/skins/desert.css');
-        }
+        window.PR.prettyPrint();
     }
 
     function highlightUsingCodeMirror(hasDarkSourceBlocks) {
@@ -977,9 +1008,7 @@ function DocGist($) {
     }
 
     function highlightUsingHighlightjs(hasDarkSourceBlocks) {
-        if (hasDarkSourceBlocks) {
-            addLinkElement('//cdnjs.cloudflare.com/ajax/libs/highlight.js/' + DOCGIST_LIB_VERSIONS.highlightjs + '/styles/darkula.min.css');
-        }
+        $('link.dark').attr('disabled', !hasDarkSourceBlocks);
         $('code[class^="language-"],code[class^="src-"]', $content).each(function (i, e) {
             e.className = e.className.replace('src-', 'language-');
             hljs.highlightBlock(e);

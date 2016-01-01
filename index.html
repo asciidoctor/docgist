@@ -52,12 +52,20 @@
 </script>
 
 <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/styles/default.min.css" rel="stylesheet">
+<link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/styles/darkula.min.css" rel="stylesheet" class="dark">
 <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/highlight.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/languages/asciidoc.min.js"></script>
+
+<link href="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css" rel="stylesheet">
+<link href="//google-code-prettify.googlecode.com/svn/loader/skins/desert.css" rel="stylesheet" class="dark">
+<script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
+
 <script src="js/uuid-1.4.7.js"></script>
 
 <link rel="stylesheet"
       href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400">
+
+<link rel="stylesheet" href="style/asciidoctor.css" id="theme-stylesheet">
 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
@@ -71,7 +79,8 @@ MathJax.Hub.Config({
      ignoreClass: "nostem|nostem|noasciimath"
 }});
 </script>
-<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.5.3/MathJax.js?config=TeX-MML-AM_HTMLorMML"></script>
+<script type="text/javascript"
+        src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.5.3/MathJax.js?config=TeX-MML-AM_HTMLorMML"></script>
 
 <link rel="stylesheet" href="style/docgist-extra.css">
 
@@ -92,38 +101,36 @@ MathJax.Hub.Config({
         </div>
         <div class="collapse navbar-collapse" id="main-menu-items">
             <ul class="nav navbar-nav" id="navbar-buttons">
-                <li id="source-button">
-                    <a class="btn btn-default navbar-btn disabled" id="gist-link" href="javascript:;" target="_blank"
-                       style=""
-                       title="See the source document rendered on this page">
-                        <i class="fa fa-file-text-o"></i> Source
-                    </a>
-                </li>
-
-                <li class="dropdown">
+                <li class="dropdown" id="file-button">
                     <a class="btn btn-default navbar-btn dropdown-toggle" data-toggle="dropdown" data-target="#"
-                       title="Share this page">
-                        <i class="fa fa-share-alt"></i> Share
+                       title="Create, edit, save and open documents">
+                        <i class="fa fa-file-text-o"></i> File
                         <span class="caret"></span>
                     </a>
-                    <ul class="dropdown-menu">
-                        <li><a id="twitter-share" href="" target="_blank" data-toggle="tooltip" title="Tweet">
-                            <i class="fa fa-fw fa-twitter-square"></i> Twitter
+                    <ul class="dropdown-menu scrollable-menu" id="file-menu">
+                        <li id="source-button" class="disabled">
+                            <a id="gist-link" href="javascript:;" target="_blank"
+                               title="See the source document rendered on this page">
+                                <i class="fa fa-fw fa-file-text-o"></i> Source
+                            </a>
+                        </li>
+                        <li><a id="new-empty" href="javascript:;">
+                            <i class="fa fa-fw fa-file-o"></i> New empty document
                         </a></li>
-                        <li><a id="facebook-share" href="" target="_blank" data-toggle="tooltip"
-                               title="Share link on Facebook">
-                            <i class="fa fa-fw fa-facebook-square"></i> Facebook
+                        <li><a id="new-copy" href="javascript:;">
+                            <i class="fa fa-fw fa-files-o"></i> New copy of current document
                         </a></li>
-                        <li><a id="google-plus-share" href="" target="_blank" data-toggle="tooltip"
-                               title="Share link on Google+">
-                            <i class="fa fa-fw fa-google-plus-square"></i> Google+
+                        <li class="disabled"><a id="save-button" href="javascript:;">
+                            <i class="fa fa-fw fa-floppy-o"></i> Save
                         </a></li>
-                        <li><a id="google-short-url-share" href="javascript:;" data-toggle="tooltip"
-                               title="Get a short link to this page">
-                            <i class="fa fa-fw fa-link"></i> Short URL
-                        </a></li>
+                        <li role="separator" class="divider"></li>
+                        <li class="dropdown-header">Recent documents</li>
                     </ul>
                 </li>
+
+                <li><a class="btn btn-default navbar-btn disabled" id="edit-button" href="javascript:;">
+                    <i class="fa fa-fw fa-pencil"></i> Edit
+                </a></li>
 
                 <li class="dropdown" id="theme-button">
                     <a class="btn btn-default navbar-btn dropdown-toggle" data-toggle="dropdown" data-target="#"
@@ -157,31 +164,27 @@ MathJax.Hub.Config({
 
                 <li class="dropdown">
                     <a class="btn btn-default navbar-btn dropdown-toggle" data-toggle="dropdown" data-target="#"
-                       id="new-menu"
-                       title="Create a new document">
-                        <i class="fa fa-plus"></i> New
+                       title="Share this page">
+                        <i class="fa fa-share-alt"></i> Share
                         <span class="caret"></span>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a id="new-empty" href="javascript:;" data-toggle="tooltip">
-                            <i class="fa fa-fw fa-file-o"></i> New empty document
+                        <li><a id="twitter-share" href="" target="_blank" data-toggle="tooltip" title="Tweet">
+                            <i class="fa fa-fw fa-twitter-square"></i> Twitter
                         </a></li>
-                        <li><a id="new-copy" href="javascript:;" data-toggle="tooltip">
-                            <i class="fa fa-fw fa-files-o"></i> New copy of current document
+                        <li><a id="facebook-share" href="" target="_blank" data-toggle="tooltip"
+                               title="Share link on Facebook">
+                            <i class="fa fa-fw fa-facebook-square"></i> Facebook
+                        </a></li>
+                        <li><a id="google-plus-share" href="" target="_blank" data-toggle="tooltip"
+                               title="Share link on Google+">
+                            <i class="fa fa-fw fa-google-plus-square"></i> Google+
+                        </a></li>
+                        <li><a id="google-short-url-share" href="javascript:;" data-toggle="tooltip"
+                               title="Get a short link to this page">
+                            <i class="fa fa-fw fa-link"></i> Short URL
                         </a></li>
                     </ul>
-                </li>
-
-                <li>
-                    <a class="btn btn-default navbar-btn disabled" id="edit-button" href="javascript:;">
-                        <i class="fa fa-pencil"></i> Edit
-                    </a>
-                </li>
-
-                <li>
-                    <a class="btn btn-default navbar-btn disabled" id="save-button" href="javascript:;">
-                        <i class="fa fa-floppy-o"></i> Save
-                    </a>
                 </li>
 
                 <li>

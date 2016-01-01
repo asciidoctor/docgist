@@ -36,6 +36,12 @@ div.navbar-header {
     font-family: 'Droid Sans Mono';
 }
 
+.scrollable-menu {
+    height: auto;
+    max-height: 520px;
+    overflow-x: hidden;
+}
+
 div.alert {
     font-size: 1.125rem;
 }
