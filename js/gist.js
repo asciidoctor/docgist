@@ -519,7 +519,7 @@ function Gist($) {
 
     function fetchFirepad(id, success, error) {
         var fetchId = id.slice(3);
-        var headless = new Firepad.Headless('https://sweltering-fire-785.firebaseio.com/' + fetchId);
+        var headless = new Firepad.Headless(window.FIREBASE_URL + fetchId);
         headless.getText(function (text) {
             headless.dispose();
             success(text, {'editor': 'firepad'});

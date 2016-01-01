@@ -20,6 +20,7 @@
             return Date.now();
         }
     });
+    window.FIREBASE_URL = 'https://sweltering-fire-785.firebaseio.com/';
 </script>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
@@ -111,7 +112,7 @@ MathJax.Hub.Config({
                         <li id="source-button" class="disabled">
                             <a id="gist-link" href="javascript:;" target="_blank"
                                title="See the source document rendered on this page">
-                                <i class="fa fa-fw fa-file-text-o"></i> Source
+                                <i class="fa fa-fw fa-file-text-o"></i> View source
                             </a>
                         </li>
                         <li><a id="new-empty" href="javascript:;">
@@ -121,7 +122,7 @@ MathJax.Hub.Config({
                             <i class="fa fa-fw fa-files-o"></i> New copy of current document
                         </a></li>
                         <li class="disabled"><a id="save-button" href="javascript:;">
-                            <i class="fa fa-fw fa-floppy-o"></i> Save
+                            <i class="fa fa-fw fa-floppy-o"></i> <span>Save</span>
                         </a></li>
                         <li role="separator" class="divider"></li>
                         <li class="dropdown-header">Recent documents</li>

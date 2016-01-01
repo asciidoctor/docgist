@@ -82,7 +82,6 @@ function DocGist($) {
         $saveButton = $('#save-button');
         $footerWrapper = $('#footer');
 
-
         $gistId.keydown(gist.readSourceId);
     });
 
@@ -298,9 +297,15 @@ function DocGist($) {
                         editorModeInProgress = true;
                         if ($editButton.hasClass('active')) {
                             $editButton.removeClass('active');
+                            $saveButton.children('span').text('Save');
                             editor.unload(optionsToUse, editorModeDone);
                         } else {
                             $editButton.addClass('active');
+                            if (optionsToUse['editor'] === 'firepad') {
+                                $saveButton.children('span').text('Saved continuously');
+                            } else if (optionsToUse['editor'] === 'gist') {
+                                $saveButton.children('span').text('Save');
+                            }
                             editor.load(optionsToUse, editorModeDone);
                         }
                     } else {
@@ -487,7 +492,7 @@ function DocGist($) {
             });
 
             if (typeof firebase === 'undefined') {
-                firebase = new Firebase('https://sweltering-fire-785.firebaseio.com/');
+                firebase = new Firebase(window.FIREBASE_URL);
             }
             Firebase.goOnline();
 
@@ -975,24 +980,6 @@ function DocGist($) {
             }
             AVAILABLE_HIGHLIGHTERS[DEFAULT_HIGHLIGHTER](hasDarkSourceBlocks);
         }
-    }
-
-    function addScriptElement(url) {
-        var element = document.createElement('script');
-        element.type = 'text/javascript';
-        element.async = true;
-        element.src = url;
-        var first = document.getElementsByTagName('script')[0];
-        first.parentNode.insertBefore(element, first);
-    }
-
-    function addLinkElement(url) {
-        var element = document.createElement('link');
-        element.rel = 'stylesheet';
-        element.href = url;
-        var linkElements = document.getElementsByTagName('link');
-        var last = linkElements[linkElements.length - 1];
-        last.parentNode.insertBefore(element, last);
     }
 
     function highlightUsingPrettify(hasDarkSourceBlocks) {
