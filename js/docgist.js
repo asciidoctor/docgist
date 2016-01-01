@@ -64,14 +64,24 @@ function DocGist($) {
     var useLocalStorage = isLocalStorageWritable();
 
     var gist = new Gist($);
-    var urlInfo = getUrlAttributes();
-    var urlAttributes = urlInfo.attributes;
-    var id = urlInfo.id;
+
+    var urlInfo = undefined;
+    var urlAttributes = undefined;
+    var id = undefined;
+
+    function initFromUrl() {
+        urlInfo = getUrlAttributes();
+        urlAttributes = urlInfo.attributes;
+        id = urlInfo.id;
+    }
+
+    initFromUrl();
+
     gist.getGistAndRenderPage(renderContent, urlInfo.id, DEFAULT_SOURCE);
 
     $(document).ready(function () {
         if (top.location != self.location) {
-            $('body>div.navbar').css('display', 'none');
+            $('#main-menu').css('display', 'none');
         }
         $shortUrlDialog = $('#share-short-url-form').hide();
         $content = $('#content');
@@ -254,9 +264,12 @@ function DocGist($) {
         }
     }
 
-    function renderContent(content, options) {
+    function renderContent(content, options, fromEditor) {
         var html = undefined;
         var preOptions, attributes = undefined;
+        if (fromEditor) {
+            initFromUrl();
+        }
         try {
             preOptions = preProcess(content, options);
             attributes = preOptions['attributes'];
@@ -276,12 +289,15 @@ function DocGist($) {
 
             postProcess($content, options, preOptions);
 
+            if (fromEditor) {
+                return;
+            }
+
             addMetadataToFooter(attributes, urlAttributes);
             share();
             loadHighlightMenu(preOptions['highlighter']);
             loadThemeMenu(preOptions['stylesheet']);
             loadAttributesMenu();
-
             var editor = new Editor($content, preOptions);
 
             loadNewMenu(content, options, setupEditMode);
@@ -589,6 +605,7 @@ function DocGist($) {
                             clearTimeout(timeout);
                             timeout = undefined;
                             timeDiff = renderEditorContent(showcomments, options);
+                            console.log(Math.floor(timeDiff));
                         }, wait);
                     }
                 });
@@ -615,14 +632,7 @@ function DocGist($) {
                     }
                 });
             }
-            try {
-                html = Opal.Asciidoctor.$convert(content, asciidoctorOptions);
-                sanitizeAndInjectHtml(html);
-                postProcess($content, options, preOptions);
-            }
-            catch (e) {
-                errorMessage(e.name + ':' + '<p>' + e.message + '</p>');
-            }
+            renderContent(content, options, true);
             return performance.now() - startTime;
         }
 
