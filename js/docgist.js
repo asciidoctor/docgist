@@ -63,6 +63,7 @@ function DocGist($) {
     var useLocalStorage = isLocalStorageWritable();
 
     var gist = new Gist($);
+    var editor;
 
     var urlInfo = undefined;
     var urlAttributes;
@@ -264,8 +265,8 @@ function DocGist($) {
     }
 
     function renderContent(content, options, fromEditor) {
-        var html;
-        var preOptions, attributes;
+        var html, preOptions, attributes;
+        var mathJaxConfigured = false;
         if (fromEditor) {
             initFromUrl();
         }
@@ -290,10 +291,14 @@ function DocGist($) {
 
             addMetadataToFooter(attributes);
 
-            MathJax.Hub.Configured();
+            if (!mathJaxConfigured) {
+                MathJax.Hub.Configured();
+                mathJaxConfigured = true;
+            }
             MathJax.Hub.Queue(['Typeset', MathJax.Hub, $content.get(0)]);
 
             if (fromEditor) {
+                editor.setPreOptions(preOptions);
                 return;
             }
 
@@ -301,7 +306,11 @@ function DocGist($) {
             loadHighlightMenu(preOptions['highlighter']);
             loadThemeMenu(preOptions['stylesheet']);
             loadAttributesMenu();
-            var editor = new Editor(preOptions);
+
+            if (!editor) {
+                editor = new Editor();
+            }
+            editor.setPreOptions(preOptions);
 
             loadNewMenu(content, options, setupEditMode);
 
@@ -311,7 +320,9 @@ function DocGist($) {
 
             function setupEditMode(optionsToUse, click) {
                 var editorModeInProgress = false;
-                $editButton.click(function () {
+                $editButton.click(function (e) {
+                    e.stopImmediatePropagation();
+                    e.preventDefault();
                     if (!editorModeInProgress) {
                         editorModeInProgress = true;
                         if ($editButton.hasClass('active')) {
@@ -453,11 +464,11 @@ function DocGist($) {
         }
     }
 
-    function Editor(preOptions) {
-        var asciidoctorOptions = preOptions['asciidoctorOptions'];
+    function Editor() {
+        var asciidoctorOptions;
         var $contentWrapper = $('#content-wrapper');
         var $editorWrapper = $('#editor-wrapper');
-        var showcomments = preOptions['attributes']['$has_key?']('showcomments');
+        var showcomments;
         var firebase;
         var firepad;
         var content;
@@ -469,6 +480,15 @@ function DocGist($) {
         var ghScope;
         var userId;
         var ghAuthExpires;
+        var preOptions;
+        var onChangesFunc;
+        var timeout;
+
+        function setPreOptions(preOpts) {
+            preOptions = preOpts;
+            asciidoctorOptions = preOptions['asciidoctorOptions'];
+            showcomments = preOptions['attributes']['$has_key?']('showcomments');
+        }
 
         function readGithubAuthData() {
             if (useLocalStorage) {
@@ -574,7 +594,7 @@ function DocGist($) {
                 if (options['editor'] === 'firepad') {
                     initializeFirepad(userId);
                 } else if (options['editor'] === 'gist') {
-                    setupRenderingOnChangess();
+                    setupRenderingOnChanges();
                     cm.setValue(originalContent = options['gist-content']);
                 } else {
                     console.log('Unknown editor: ' + options['editor']);
@@ -593,14 +613,15 @@ function DocGist($) {
                     }
                     $('a.powered-by-firepad').remove();
                 });
-                setupRenderingOnChangess();
+                setupRenderingOnChanges();
             }
 
-            function setupRenderingOnChangess() {
-                var timeout = undefined;
+            function setupRenderingOnChanges() {
                 var timeDiff = 1;
                 var MAGIC_PERFORMANCE_FACTOR = 2;
-                cm.on('changes', function () {
+                cm.on('changes', renderOnChanges);
+
+                function renderOnChanges () {
                     if (typeof timeout === 'undefined') {
                         var wait = timeDiff * MAGIC_PERFORMANCE_FACTOR;
                         timeout = setTimeout(function () {
@@ -610,7 +631,9 @@ function DocGist($) {
                             console.log(Math.floor(timeDiff));
                         }, wait);
                     }
-                });
+                }
+
+                onChangesFunc = renderOnChanges;
                 if (typeof doneFunc === 'function') {
                     doneFunc();
                 }
@@ -639,6 +662,11 @@ function DocGist($) {
         }
 
         function unload(options, doneFunc) {
+            cm.off('changes', onChangesFunc);
+            if (typeof timeout !== 'undefined') {
+                clearTimeout(timeout);
+                timeout = undefined;
+            }
             if (showcomments) {
                 renderContent(content, options);
             }
@@ -677,7 +705,8 @@ function DocGist($) {
         return {
             'load': load,
             'unload': unload,
-            'save': save
+            'save': save,
+            'setPreOptions': setPreOptions
         }
     }
 
