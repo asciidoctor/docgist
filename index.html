@@ -78,10 +78,27 @@ MathJax.Hub.Config({
    asciimath2jax: {
      delimiters: [["\\$", "\\$"]],
      ignoreClass: "nostem|nostem|noasciimath"
-}});
+    },
+   Safe: {
+     allow: {
+       URLs: "safe",
+       classes: "safe",
+       cssIDs: "safe",
+       styles: "safe",
+       fontsize: "all",
+       require: "safe"
+     },
+     safeProtocols: {
+          http: true,
+          https: true,
+          file: false,
+          javascript: false
+     }
+   }
+});
 </script>
 <script type="text/javascript"
-        src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.5.3/MathJax.js?config=TeX-MML-AM_HTMLorMML"></script>
+        src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.5.3/MathJax.js?config=TeX-MML-AM_HTMLorMML,Safe&delayStartupUntil=configured"></script>
 
 <link rel="stylesheet" href="style/docgist-extra.css">
 

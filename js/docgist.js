@@ -1,6 +1,5 @@
-'use strict';
-
 function DocGist($) {
+    'use strict';
     var DEFAULT_SOURCE = decodeURIComponent('github-asciidoctor%2Fdocgist%2F%2Fgists%2Fexample.adoc');
     var DEFAULT_HIGHLIGHTER = 'codemirror';
     var UNAVAILABLE_HIGHLIGHTERS = ['coderay', 'pygments', 'source-highlight', 'highlight'];
@@ -52,22 +51,22 @@ function DocGist($) {
         'style/rubygems.css'
     ];
 
-    var $content = undefined;
-    var $footer = undefined;
-    var $gistId = undefined;
-    var $shortUrlDialog = undefined;
-    var $editor = undefined;
-    var $editButton = undefined;
-    var $saveButton = undefined;
-    var $footerWrapper = undefined;
+    var $content;
+    var $footer;
+    var $gistId;
+    var $shortUrlDialog;
+    var $editor;
+    var $editButton;
+    var $saveButton;
+    var $footerWrapper;
 
     var useLocalStorage = isLocalStorageWritable();
 
     var gist = new Gist($);
 
     var urlInfo = undefined;
-    var urlAttributes = undefined;
-    var id = undefined;
+    var urlAttributes;
+    var id;
 
     function initFromUrl() {
         urlInfo = getUrlAttributes();
@@ -99,7 +98,9 @@ function DocGist($) {
         var attributes = $.extend({}, ASCIIDOCTOR_DEFAULT_ATTRIBUTES, urlOverrides, overrides);
         var attributeList = [];
         for (var key in attributes) {
-            attributeList.push(key + '=' + attributes[key]);
+            if (attributes.hasOwnProperty(key)) {
+                attributeList.push(key + '=' + attributes[key]);
+            }
         }
         var opts = $.extend({
             'to_file': false,
@@ -134,24 +135,6 @@ function DocGist($) {
         return {'id': first, 'attributes': attributes};
     }
 
-    function existsInObjectOrHash(key, hash, object) {
-        if (key in object) {
-            return true;
-        } else if ((key + '!') in object) {
-            return false;
-        } else {
-            return hash['$has_key?'](key);
-        }
-    }
-
-    function getValueFromObjectOrHash(key, hash, object) {
-        if (key in object) {
-            return object[key];
-        } else {
-            return hash.$fetch(key);
-        }
-    }
-
     function preProcess(content, options) {
         var preOptions = {};
         var highlighter = undefined;
@@ -162,8 +145,24 @@ function DocGist($) {
         preOptions['attributes'] = attributes;
         preOptions['document'] = doc;
 
+        // merge urlAttributes into attributes
+        for (var key in urlAttributes) {
+            if (!urlAttributes.hasOwnProperty(key)) {
+                continue;
+            }
+            if (key.charAt(0) === '!') {
+                attributes.$delete(key.slice(1));
+            } else if (key.slice(-1) === '!') {
+                attributes.$delete(key.slice(0, -1));
+            } else {
+                attributes.$delete('!' + key);
+                attributes.$delete(key + '!');
+            }
+            attributes.$store(key, urlAttributes[key]);
+        }
+
         $(document).ready(function () {
-            if (existsInObjectOrHash('no-header-footer', attributes, urlAttributes)) {
+            if (attributes['$has_key?']('no-header-footer')) {
                 $('#main-menu').css('display', 'none');
             }
             if ('sourceUrl' in options) {
@@ -172,10 +171,10 @@ function DocGist($) {
         });
 
         var stylesheet = '';
-        if (existsInObjectOrHash('stylesheet', attributes, urlAttributes)) {
-            stylesheet = getValueFromObjectOrHash('stylesheet', attributes, urlAttributes);
-            if (existsInObjectOrHash('stylesdir', attributes, urlAttributes)) {
-                var stylesdir = getValueFromObjectOrHash('stylesdir', attributes, urlAttributes);
+        if (attributes['$has_key?']('stylesheet')) {
+            stylesheet = attributes.$fetch('stylesheet');
+            if (attributes['$has_key?']('stylesdir')) {
+                var stylesdir = attributes.$fetch('stylesdir');
                 if (stylesdir) {
                     if (stylesdir.slice(-1) !== '/') {
                         stylesdir += '/';
@@ -193,8 +192,8 @@ function DocGist($) {
         preOptions['stylesheet'] = stylesheet;
         preOptions['hasDarkSourceBlocks'] = $.inArray(stylesheet, THEMES_WITH_DARK_SOURCE_BLOCKS) !== -1;
 
-        if (existsInObjectOrHash('source-highlighter', attributes, urlAttributes)) {
-            highlighter = getValueFromObjectOrHash('source-highlighter', attributes, urlAttributes).toLowerCase();
+        if (attributes['$has_key?']('source-highlighter')) {
+            highlighter = attributes.$fetch('source-highlighter').toLowerCase();
             if ($.inArray(highlighter, UNAVAILABLE_HIGHLIGHTERS) !== -1) {
                 console.log('Syntax highlighter not supported by DocGist: "' + highlighter + '", using "' + DEFAULT_HIGHLIGHTER + '" instead.');
                 attributeOverrides['source-highlighter'] = DEFAULT_HIGHLIGHTER;
@@ -206,17 +205,17 @@ function DocGist($) {
         }
         preOptions['highlighter'] = highlighter;
 
-        if (existsInObjectOrHash('source-language', attributes, urlAttributes)) {
-            sourceLanguage = getValueFromObjectOrHash('source-language', attributes, urlAttributes).toLowerCase();
-        } else if (existsInObjectOrHash('language', attributes, urlAttributes)) {
-            sourceLanguage = getValueFromObjectOrHash('language', attributes, urlAttributes).toLowerCase();
+        if (attributes['$has_key?']('source-language')) {
+            sourceLanguage = attributes.$fetch('source-language').toLowerCase();
+        } else if (attributes['$has_key?']('language')) {
+            sourceLanguage = attributes.$fetch('language').toLowerCase();
         }
         preOptions['sourceLanguage'] = sourceLanguage;
 
         if ('imageBaseLocation' in options || 'siteBaseLocation' in options) {
-            if (existsInObjectOrHash('imagesdir', attributes, urlAttributes)) {
+            if (attributes['$has_key?']('imagesdir')) {
                 // only alter relative values, not URLs
-                var imagesdir = getValueFromObjectOrHash('imagesdir', attributes, urlAttributes);
+                var imagesdir = attributes.$fetch('imagesdir');
                 if (imagesdir.slice(-1) === '/') {
                     // root-relative URL
                     if ('siteBaseLocation' in options) {
@@ -265,8 +264,8 @@ function DocGist($) {
     }
 
     function renderContent(content, options, fromEditor) {
-        var html = undefined;
-        var preOptions, attributes = undefined;
+        var html;
+        var preOptions, attributes;
         if (fromEditor) {
             initFromUrl();
         }
@@ -289,16 +288,20 @@ function DocGist($) {
 
             postProcess($content, options, preOptions);
 
+            addMetadataToFooter(attributes);
+
+            MathJax.Hub.Configured();
+            MathJax.Hub.Queue(['Typeset', MathJax.Hub, $content.get(0)]);
+
             if (fromEditor) {
                 return;
             }
 
-            addMetadataToFooter(attributes, urlAttributes);
             share();
             loadHighlightMenu(preOptions['highlighter']);
             loadThemeMenu(preOptions['stylesheet']);
             loadAttributesMenu();
-            var editor = new Editor($content, preOptions);
+            var editor = new Editor(preOptions);
 
             loadNewMenu(content, options, setupEditMode);
 
@@ -362,11 +365,11 @@ function DocGist($) {
             }
         });
 
-        if (!existsInObjectOrHash('experimental!', attributes, urlAttributes)) {
+        if (!attributes['$has_key?']('experimental!')) {
             transformButtons($content);
         }
 
-        if ('highlighter' in preOptions && !existsInObjectOrHash('no-highlight', attributes, urlAttributes)) {
+        if ('highlighter' in preOptions && !attributes['$has_key?']('no-highlight')) {
             applyHighlighting(preOptions['highlighter'], preOptions['sourceLanguage'], preOptions['hasDarkSourceBlocks']);
         }
 
@@ -450,23 +453,22 @@ function DocGist($) {
         }
     }
 
-    function Editor($content, preOptions) {
+    function Editor(preOptions) {
         var asciidoctorOptions = preOptions['asciidoctorOptions'];
         var $contentWrapper = $('#content-wrapper');
         var $editorWrapper = $('#editor-wrapper');
-        var showcomments = existsInObjectOrHash('showcomments', preOptions['attributes'], urlAttributes);
-        var firebase = undefined;
-        var firepad = undefined;
-        var content = undefined;
-        var originalContent = undefined;
-        var startTime = undefined;
-        var cm = undefined;
-        var html = undefined;
-        var ghToken = undefined;
-        var ghUsername = undefined;
-        var ghScope = undefined;
-        var userId = undefined;
-        var ghAuthExpires = undefined;
+        var showcomments = preOptions['attributes']['$has_key?']('showcomments');
+        var firebase;
+        var firepad;
+        var content;
+        var originalContent;
+        var startTime;
+        var cm;
+        var ghToken;
+        var ghUsername;
+        var ghScope;
+        var userId;
+        var ghAuthExpires;
 
         function readGithubAuthData() {
             if (useLocalStorage) {
@@ -638,7 +640,7 @@ function DocGist($) {
 
         function unload(options, doneFunc) {
             if (showcomments) {
-                renderEditorContent(false, options);
+                renderContent(content, options);
             }
             if (options['editor'] === 'gist') {
                 options['gist-content'] = originalContent;
@@ -662,7 +664,6 @@ function DocGist($) {
         function save(options) {
             if (typeof options['save'] === 'function') {
                 options['save'](ghUsername, ghToken, originalContent, function (result) {
-                    console.log(result);
                     if ('newId' in result) {
                         historyTransition(id, result['newId']);
                     }
@@ -680,8 +681,8 @@ function DocGist($) {
         }
     }
 
-    function addMetadataToFooter(attributes, urlAttributes) {
-        if (existsInObjectOrHash('no-header-footer', attributes, urlAttributes)) {
+    function addMetadataToFooter(attributes) {
+        if (attributes['$has_key?']('no-header-footer')) {
             $footer.css('display', 'none');
             return;
         } else {
@@ -689,13 +690,14 @@ function DocGist($) {
         }
         var $ITEM = $('<i/>');
         var $SPAN = $('<span/>');
+        $footer.empty();
 
         function addMetadataItem(keys, description, icon, valueTransformers) {
             var iconAdded = false;
-            for (var ix in keys) {
+            for (var ix = 0; ix < keys.length; ix++) {
                 var key = keys[ix];
-                if (existsInObjectOrHash(key, attributes, urlAttributes)) {
-                    var value = getValueFromObjectOrHash(key, attributes, urlAttributes);
+                if (attributes['$has_key?'](key)) {
+                    var value = attributes.$fetch(key);
                     if (icon && !iconAdded) {
                         iconAdded = true;
                         $footer.append($ITEM.clone().addClass('fa fa-' + icon).prop('title', description));
@@ -713,8 +715,8 @@ function DocGist($) {
 
         function wrapInEmail(key) {
             return function (value, $element) {
-                if (existsInObjectOrHash(key, attributes, urlAttributes)) {
-                    var address = getValueFromObjectOrHash(key, attributes, urlAttributes);
+                if (attributes['$has_key?'](key)) {
+                    var address = attributes.$fetch(key);
                     $element.wrapInner('<a href="mailto:' + address + '">');
                 }
             };
@@ -736,14 +738,19 @@ function DocGist($) {
             return function (value, $element) {
                 $element.text(str + value);
             };
+
         }
 
-        if (existsInObjectOrHash('authorcount', attributes, urlAttributes)) {
-            var authorCount = getValueFromObjectOrHash('authorcount', attributes, urlAttributes);
-            var first = true;
-            for (var authorIndex = 1; authorIndex <= authorCount; authorIndex++) {
-                addMetadataItem(['author_' + authorIndex], 'Author', (first ? 'user' : false), [wrapInEmail('email_' + authorIndex)]);
-                first = false;
+        if (attributes['$has_key?']('authorcount')) {
+            var authorCount = attributes.$fetch('authorcount');
+            if (authorCount === 1) {
+                addMetadataItem(['author'], 'Author', 'user', [wrapInEmail('email')]);
+            } else {
+                var first = true;
+                for (var authorIndex = 1; authorIndex <= authorCount; authorIndex++) {
+                    addMetadataItem(['author_' + authorIndex], 'Author', (first ? 'user' : false), [wrapInEmail('email_' + authorIndex)]);
+                    first = false;
+                }
             }
         }
 
@@ -801,15 +808,15 @@ function DocGist($) {
             var $ul = $UL.clone();
             for (var i = 0; i < languages.length; i++) {
                 var language = languages[i];
-                var $content = $($languageBlocks[language]);
+                var $langContent = $($languageBlocks[language]);
                 var id;
-                if ($content.attr('id')) {
-                    id = $content.attr('id');
+                if ($langContent.attr('id')) {
+                    id = $langContent.attr('id');
                 } else {
                     id = idBase + '-' + language;
-                    $content.attr('id', id);
+                    $langContent.attr('id', id);
                 }
-                $content.addClass('tab-pane').css('position', 'relative');
+                $langContent.addClass('tab-pane').css('position', 'relative');
                 var $li = $LI.clone();
                 var $a = $A.clone();
                 $a.attr('href', '#' + id).text(language).data('lang', language).on('shown.bs.tab', function (e) {
@@ -824,10 +831,10 @@ function DocGist($) {
                 } else {
                     languageEventElements[language] = [$a];
                 }
-                $wrapper.append($content);
+                $wrapper.append($langContent);
                 if (i === 0) {
                     $li.addClass('active');
-                    $content.addClass('active');
+                    $langContent.addClass('active');
                 }
                 $li.append($a);
                 $ul.append($li);
@@ -920,15 +927,17 @@ function DocGist($) {
         url += id ? id : DEFAULT_SOURCE;
         // add back existing attributes minus ones we want to get rid of
         for (var key in urlAttributes) {
-            if (keyToKeep(key)) {
+            if (urlAttributes.hasOwnProperty(key) && keyToKeep(key)) {
                 url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(urlAttributes[key]);
             }
         }
         // add attributes we want added
         for (var keyToAdd in toAdd) {
-            url += '&' + encodeURIComponent(keyToAdd) + '=' + encodeURIComponent(toAdd[keyToAdd]);
+            if (toAdd.hasOwnProperty(keyToAdd)) {
+                url += '&' + encodeURIComponent(keyToAdd) + '=' + encodeURIComponent(toAdd[keyToAdd]);
+            }
         }
-        // always add bach the hash
+        // always add back the hash
         url += window.location.hash;
         // resolve relative url to absolute
         var a = document.createElement('a');
