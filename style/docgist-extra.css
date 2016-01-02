@@ -203,32 +203,20 @@ span.commenter:after, em.commenter:after {
     }
 }
 
-@media screen and (max-width: 89em) {
-    #gist-id {
-        width: 12em;
-    }
-}
-
-@media screen and (max-width: 82em) {
-    #source-button {
-        display: none;
-    }
-}
-
 @media screen and (max-width: 78em) {
     #gist-id {
         width: 6em;
     }
 }
 
-@media screen and (max-width: 72em) {
+@media screen and (max-width: 68em) {
     #theme-button, #highlighter-button, #attributes-button {
         display: none;
     }
 }
 
 @media screen and (max-width: 767px) {
-    #source-button, #theme-button, #highlighter-button, #attributes-button {
+    #theme-button, #highlighter-button, #attributes-button {
         display: block;
     }
     #gist-id {
