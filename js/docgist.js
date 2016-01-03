@@ -435,6 +435,7 @@ function DocGist($) {
             var bs62 = baseX(base62);
             var tmpId = bs62.encode(buffer);
             historyTransition(myId, 'fp-' + tmpId);
+            options['editor'] = 'firepad';
             setupFunc(options, true);
         }
 
@@ -621,7 +622,7 @@ function DocGist($) {
                 var MAGIC_PERFORMANCE_FACTOR = 2;
                 cm.on('changes', renderOnChanges);
 
-                function renderOnChanges () {
+                function renderOnChanges() {
                     if (typeof timeout === 'undefined') {
                         var wait = timeDiff * MAGIC_PERFORMANCE_FACTOR;
                         timeout = setTimeout(function () {
