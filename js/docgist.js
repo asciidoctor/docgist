@@ -162,15 +162,6 @@ function DocGist($) {
             attributes.$store(key, urlAttributes[key]);
         }
 
-        $(document).ready(function () {
-            if (attributes['$has_key?']('no-header-footer')) {
-                $('#main-menu').css('display', 'none');
-            }
-            if ('sourceUrl' in options) {
-                $('#gist-link').attr('href', options['sourceUrl']).parent().removeClass('disabled');
-            }
-        });
-
         var stylesheet = '';
         if (attributes['$has_key?']('stylesheet')) {
             stylesheet = attributes.$fetch('stylesheet');
@@ -183,12 +174,6 @@ function DocGist($) {
                     stylesheet = stylesdir + stylesheet;
                 }
             }
-            $(document).ready(function () {
-                var $themeStylesheet = $('#theme-stylesheet');
-                if ($themeStylesheet.attr('href') !== stylesheet) {
-                    $themeStylesheet.attr('href', stylesheet);
-                }
-            });
         }
         preOptions['stylesheet'] = stylesheet;
         preOptions['hasDarkSourceBlocks'] = $.inArray(stylesheet, THEMES_WITH_DARK_SOURCE_BLOCKS) !== -1;
@@ -284,6 +269,15 @@ function DocGist($) {
 
         $(document).ready(function () {
 
+            if (attributes['$has_key?']('no-header-footer')) {
+                $('#main-menu').css('display', 'none');
+            }
+            if (preOptions['stylesheet']) {
+                var $themeStylesheet = $('#theme-stylesheet');
+                if ($themeStylesheet.attr('href') !== preOptions['stylesheet']) {
+                    $themeStylesheet.attr('href', preOptions['stylesheet']);
+                }
+            }
             sanitizeAndInjectHtml(html);
             $gistId.val('');
 
@@ -302,6 +296,9 @@ function DocGist($) {
                 return;
             }
 
+            if ('sourceUrl' in options) {
+                $('#gist-link').attr('href', options['sourceUrl']).parent().removeClass('disabled');
+            }
             share();
             loadHighlightMenu(preOptions['highlighter']);
             loadThemeMenu(preOptions['stylesheet']);
