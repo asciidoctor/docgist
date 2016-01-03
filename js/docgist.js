@@ -249,6 +249,8 @@ function DocGist($) {
         }
     }
 
+    var executedOnce = false;
+
     function renderContent(content, options, fromEditor) {
         var html, preOptions, attributes;
         var mathJaxConfigured = false;
@@ -290,16 +292,21 @@ function DocGist($) {
                 mathJaxConfigured = true;
             }
             MathJax.Hub.Queue(['Typeset', MathJax.Hub, $content.get(0)]);
+            if ('sourceUrl' in options) {
+                $('#gist-link').attr('href', options['sourceUrl']).parent().removeClass('disabled');
+            }
+            share();
 
             if (fromEditor) {
                 editor.setPreOptions(preOptions);
                 return;
             }
 
-            if ('sourceUrl' in options) {
-                $('#gist-link').attr('href', options['sourceUrl']).parent().removeClass('disabled');
+            if (executedOnce) {
+                return;
             }
-            share();
+            executedOnce = true;
+
             loadHighlightMenu(preOptions['highlighter']);
             loadThemeMenu(preOptions['stylesheet']);
             loadAttributesMenu();
