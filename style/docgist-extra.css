@@ -30,9 +30,14 @@ div.navbar-header {
 .navbar-brand {
     height: 35px;
     padding: 12px 12px 0 12px;
+    font-family: 'Open Sans';
 }
 
-.dropdown-menu > li > a {
+#main-menu-items {
+    font-family: 'Open Sans';
+}
+
+#attributes-menu > li > a {
     font-family: 'Droid Sans Mono';
 }
 
