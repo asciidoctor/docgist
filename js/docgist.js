@@ -54,7 +54,6 @@ function DocGist($) {
     var $content;
     var $footer;
     var $gistId;
-    var $shortUrlDialog;
     var $editor;
     var $editButton;
     var $saveButton;
@@ -83,7 +82,6 @@ function DocGist($) {
         if (top.location != self.location) {
             $('#main-menu').css('display', 'none');
         }
-        $shortUrlDialog = $('#share-short-url-form').hide();
         $content = $('#content');
         $footer = $('#footer-text');
         $gistId = $('#gist-id');
@@ -919,40 +917,6 @@ function DocGist($) {
             'https://twitter.com/intent/tweet?text=' + encodeURIComponent('Check this out: ' + title) + '&url=' + href);
         $('#facebook-share').attr('href', 'http://www.facebook.com/share.php?u=' + href);
         $('#google-plus-share').attr('href', 'https://plus.google.com/share?url=' + href);
-
-        var $urlField = $('#share-url').click(function () {
-            $(this).select();
-        });
-        $shortUrlDialog.modal({'show': false}).on('shown.bs.modal', function () {
-            $urlField.select();
-        });
-
-        $('#google-short-url-share')
-            .click(function () {
-                getShortUrl(window.location.href, function (data) {
-                    setUrlField(data);
-                });
-                $shortUrlDialog.modal('show');
-            });
-
-        $('#short-url-remove-header-footer').click(function () {
-            if (this.checked) {
-                var url = getUrlWithAttributes({'no-header-footer': ''}, ['no-header-footer']);
-                getShortUrl(url, function (data) {
-                    setUrlField(data);
-                });
-            }
-        });
-
-        function setUrlField(data) {
-            if ('id' in data) {
-                $urlField.val(data.id);
-                $urlField.select();
-                $shortUrlDialog.modal('show');
-            } else {
-                $urlField.val('An error occurred while creating the short URL.');
-            }
-        }
     }
 
     function getUrlWithAttributes(toAdd, toRemove) {
@@ -995,18 +959,6 @@ function DocGist($) {
             }
             return true;
         }
-    }
-
-    function getShortUrl(url, success) {
-        $.ajax({
-            'type': 'POST',
-            'url': 'https://www.googleapis.com/urlshortener/v1/url?key=AIzaSyD6ZzkU7DQiYZgWC1azw_DCRvqyszGHKh4',
-            'data': '{"longUrl": "' + url + '"}',
-            'success': success,
-            'dataType': 'json',
-            'crossDomain': true,
-            'headers': {'Content-Type': 'application/json'}
-        });
     }
 
     function applyHighlighting(highlighter, sourceLanguage, hasDarkSourceBlocks) {
